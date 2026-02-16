@@ -7,7 +7,7 @@
 
         <ScrollView>
             <StackLayout class="list p-3">
-                <GridLayout v-for="(event, index) in events" :key="index" rows="auto, auto" columns="*, auto" class="event-item p-3 mb-2 rounded-lg border border-gray-200">
+                <GridLayout v-for="(event, index) in events" :key="index" rows="auto, auto" columns="*, auto" class="event-item p-3 mb-2 rounded-lg border border-gray-200" @tap="openEvent(event)">
                     <Label row="0" col="0" :text="event.nome" class="text-base font-bold text-gray-900" textWrap="true" />
                     <Label row="0" col="1" :text="event.status" :class="'text-sm font-semibold ' + statusClass(event.status)" horizontalAlignment="right" />
                     <Label row="1" col="0" :text="event.dataInicio + ' - ' + event.dataFim + ' · ' + event.numeroPedidos + ' pedidos'" class="text-sm text-gray-500 mt-1" textWrap="true" />
@@ -21,16 +21,9 @@
 <script setup lang="ts">
 import { ref, getCurrentInstance } from 'vue'
 import Profile from './Profile.vue'
+import DefaultLayout from '../layouts/Default.vue'
 import { clearAuth } from '../utils/auth'
-
-interface Evento {
-    nome: string
-    status: string
-    valor: number
-    dataInicio: string
-    dataFim: string
-    numeroPedidos: number
-}
+import type { Evento } from '../types/evento'
 
 const events = ref<Evento[]>([
     { nome: 'Festa de Aniversário', status: 'Ativo', valor: 1500, dataInicio: '20/02/2025', dataFim: '21/02/2025', numeroPedidos: 45 },
@@ -41,7 +34,7 @@ const events = ref<Evento[]>([
 
 const instance = getCurrentInstance()
 const globals = instance?.appContext.config.globalProperties
-const navigateTo = globals?.$navigateTo as (target: unknown, options?: { clearHistory?: boolean }) => void
+const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void
 
 function formatValor(valor: number): string {
     return valor === 0 ? 'Grátis' : 'R$ ' + valor.toLocaleString('pt-BR')
@@ -60,14 +53,18 @@ function statusClass(status: string): string {
     }
 }
 
+function openEvent(event: Evento) {
+    navigateTo?.(DefaultLayout, { frame: 'root-frame', props: { event }, clearHistory: true })
+}
+
 function openProfileMenu() {
-    navigateTo?.(Profile)
+    navigateTo?.(Profile, { frame: 'root-frame' })
 }
 
 function logout() {
     clearAuth()
     import('./Login.vue').then((m) => {
-        navigateTo?.(m.default, { clearHistory: true })
+        navigateTo?.(m.default, { frame: 'root-frame', clearHistory: true })
     })
 }
 </script>

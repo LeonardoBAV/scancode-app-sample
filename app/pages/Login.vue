@@ -33,7 +33,7 @@ const errorMessage = ref('')
 
 // Capture $navigateTo during setup; getCurrentInstance() is null inside tap handler
 const instance = getCurrentInstance()
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (target: unknown, options?: { clearHistory?: boolean }) => void
+const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void
 
 function onLogin() {
     errorMessage.value = ''
@@ -54,7 +54,7 @@ function onLogin() {
 }
 
 function goToEvents() {
-    navigateTo?.(Events, { clearHistory: true })
+    navigateTo?.(Events, { frame: 'root-frame', clearHistory: true })
 }
 
 onMounted(() => {

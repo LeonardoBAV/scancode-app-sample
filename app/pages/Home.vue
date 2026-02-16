@@ -17,7 +17,7 @@ import { clearAuth } from '../utils/auth'
 
 // Capture $navigateTo during setup; getCurrentInstance() is null inside tap/async callbacks
 const instance = getCurrentInstance()
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (target: unknown, options?: { clearHistory?: boolean }) => void
+const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void
 
 function logMessage() {
     console.log('You have tapped the message!')
@@ -26,7 +26,7 @@ function logMessage() {
 function logout() {
     clearAuth()
     import('./Login.vue').then((m) => {
-        navigateTo?.(m.default, { clearHistory: true })
+        navigateTo?.(m.default, { frame: 'root-frame', clearHistory: true })
     })
 }
 </script>

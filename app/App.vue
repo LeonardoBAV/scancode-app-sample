@@ -1,5 +1,5 @@
 <template>
-    <Frame>
+    <Frame id="root-frame">
         <Login />
     </Frame>
 </template>

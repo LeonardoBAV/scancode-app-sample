@@ -19,9 +19,10 @@
 <script setup lang="ts">
 import { ref, onMounted, getCurrentInstance } from 'vue'
 import { ApplicationSettings } from '@nativescript/core'
-import Home from './Home.vue'
+import Events from './Events.vue'
 
 const SESSION_KEY = 'user_session'
+const USER_NAME_KEY = 'user_name'
 const HARDCODED_USER = 'leo'
 const HARDCODED_PASS = '123'
 
@@ -39,20 +40,22 @@ function onLogin() {
     const pass = password.value
     if (user === HARDCODED_USER && pass === HARDCODED_PASS) {
         ApplicationSettings.setString(SESSION_KEY, 'logged_in')
-        goToHome()
+        const displayName = user.charAt(0).toUpperCase() + user.slice(1)
+        ApplicationSettings.setString(USER_NAME_KEY, displayName)
+        goToEvents()
     } else {
         errorMessage.value = 'Usuário ou senha inválidos.'
     }
 }
 
-function goToHome() {
-    navigateTo?.(Home, { clearHistory: true })
+function goToEvents() {
+    navigateTo?.(Events, { clearHistory: true })
 }
 
 onMounted(() => {
     if (ApplicationSettings.getString(SESSION_KEY)) {
         // Defer so setRootApp() has run (nativescript-vue needs rootApp._context for $navigateTo)
-        setTimeout(() => goToHome(), 0)
+        setTimeout(() => goToEvents(), 0)
     }
 })
 </script>

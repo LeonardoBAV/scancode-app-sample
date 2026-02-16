@@ -23,8 +23,10 @@ import Events from './Events.vue'
 
 const SESSION_KEY = 'user_session'
 const USER_NAME_KEY = 'user_name'
+
 const HARDCODED_USER = 'leo'
 const HARDCODED_PASS = '123'
+const HARDCODED_USERNAME = 'Leonardo Vasconcelos'
 
 const username = ref('')
 const password = ref('')
@@ -40,7 +42,7 @@ function onLogin() {
     const pass = password.value
     if (user === HARDCODED_USER && pass === HARDCODED_PASS) {
         ApplicationSettings.setString(SESSION_KEY, 'logged_in')
-        const displayName = user.charAt(0).toUpperCase() + user.slice(1)
+        const displayName = HARDCODED_USERNAME; //user.charAt(0).toUpperCase() + user.slice(1)
         ApplicationSettings.setString(USER_NAME_KEY, displayName)
         goToEvents()
     } else {

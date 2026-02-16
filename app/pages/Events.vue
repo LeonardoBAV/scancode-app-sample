@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { ref, getCurrentInstance } from 'vue'
 import { ApplicationSettings } from '@nativescript/core'
-import ProfileMenu from '../components/ProfileMenu.vue'
+import Profile from './Profile.vue'
 
 const USER_NAME_KEY = 'user_name'
 const SESSION_KEY = 'user_session'
@@ -42,12 +42,9 @@ const events = ref<Evento[]>([
     { nome: 'Meetup Dev', status: 'Ativo', valor: 0, dataInicio: '15/02/2025', dataFim: '15/02/2025', numeroPedidos: 28 },
 ])
 
-const userName = ref(ApplicationSettings.getString(USER_NAME_KEY) || 'Usuário')
-
 const instance = getCurrentInstance()
 const globals = instance?.appContext.config.globalProperties
 const navigateTo = globals?.$navigateTo as (target: unknown, options?: { clearHistory?: boolean }) => void
-const showModal = globals?.$showModal as (component: unknown, options?: { props?: Record<string, unknown>; closeCallback?: (result: string) => void }) => Promise<unknown>
 
 function formatValor(valor: number): string {
     return valor === 0 ? 'Grátis' : 'R$ ' + valor.toLocaleString('pt-BR')
@@ -67,12 +64,7 @@ function statusClass(status: string): string {
 }
 
 function openProfileMenu() {
-    showModal?.(ProfileMenu, {
-        props: { userName: userName.value },
-        closeCallback: (result: string) => {
-            if (result === 'logout') logout()
-        },
-    })
+    navigateTo?.(Profile)
 }
 
 function logout() {

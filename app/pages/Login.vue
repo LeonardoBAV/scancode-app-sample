@@ -18,15 +18,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, getCurrentInstance } from 'vue'
-import { ApplicationSettings } from '@nativescript/core'
 import Events from './Events.vue'
-
-const SESSION_KEY = 'user_session'
-const USER_NAME_KEY = 'user_name'
+import { getAuth, setAuth } from '../utils/auth'
 
 const HARDCODED_USER = 'leo'
 const HARDCODED_PASS = '123'
-const HARDCODED_USERNAME = 'Leonardo Vasconcelos'
+const HARDCODED_NAME = 'Leonardo Vasconcelos'
+const HARDCODED_CPF = '12345678901'
+const HARDCODED_EMAIL = 'leo@example.com'
 
 const username = ref('')
 const password = ref('')
@@ -41,9 +40,13 @@ function onLogin() {
     const user = username.value.trim()
     const pass = password.value
     if (user === HARDCODED_USER && pass === HARDCODED_PASS) {
-        ApplicationSettings.setString(SESSION_KEY, 'logged_in')
-        const displayName = HARDCODED_USERNAME; //user.charAt(0).toUpperCase() + user.slice(1)
-        ApplicationSettings.setString(USER_NAME_KEY, displayName)
+        setAuth({
+            nick: user,
+            name: HARDCODED_NAME,
+            cpf: HARDCODED_CPF,
+            email: HARDCODED_EMAIL,
+            senha: pass,
+        })
         goToEvents()
     } else {
         errorMessage.value = 'Usuário ou senha inválidos.'
@@ -55,56 +58,9 @@ function goToEvents() {
 }
 
 onMounted(() => {
-    if (ApplicationSettings.getString(SESSION_KEY)) {
+    if (getAuth()) {
         // Defer so setRootApp() has run (nativescript-vue needs rootApp._context for $navigateTo)
         setTimeout(() => goToEvents(), 0)
     }
 })
 </script>
-
-<!--
-<script lang="ts">
-import { ApplicationSettings } from '@nativescript/core'
-import Home from './Home.vue'
-
-const SESSION_KEY = 'user_session'
-const HARDCODED_USER = 'leo'
-const HARDCODED_PASS = '123'
-
-export default {
-    data() {
-        return {
-            username: '',
-            password: '',
-            errorMessage: '' as string,
-        }
-    },
-
-    mounted() {
-        const session = ApplicationSettings.getString(SESSION_KEY)
-        if (session) {
-            this.goToHome()
-        }
-    },
-
-    methods: {
-        onLogin() {
-            this.errorMessage = ''
-            const user = (this as any).username.trim()
-            const pass = (this as any).password
-
-            if (user === HARDCODED_USER && pass === HARDCODED_PASS) {
-                ApplicationSettings.setString(SESSION_KEY, 'logged_in')
-                this.goToHome()
-            } else {
-                this.errorMessage = 'Usuário ou senha inválidos.'
-            }
-        },
-
-        goToHome() {
-            ;(this as any).$navigateTo(Home, { clearHistory: true })
-        },
-    },
-}
-</script>
--->

@@ -20,11 +20,8 @@
 
 <script setup lang="ts">
 import { ref, getCurrentInstance } from 'vue'
-import { ApplicationSettings } from '@nativescript/core'
 import Profile from './Profile.vue'
-
-const USER_NAME_KEY = 'user_name'
-const SESSION_KEY = 'user_session'
+import { clearAuth } from '../utils/auth'
 
 interface Evento {
     nome: string
@@ -68,8 +65,7 @@ function openProfileMenu() {
 }
 
 function logout() {
-    ApplicationSettings.remove(SESSION_KEY)
-    ApplicationSettings.remove(USER_NAME_KEY)
+    clearAuth()
     import('./Login.vue').then((m) => {
         navigateTo?.(m.default, { clearHistory: true })
     })

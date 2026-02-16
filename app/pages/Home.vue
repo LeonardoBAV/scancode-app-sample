@@ -13,9 +13,7 @@
 
 <script setup lang="ts">
 import { getCurrentInstance } from 'vue'
-import { ApplicationSettings } from '@nativescript/core'
-
-const SESSION_KEY = 'user_session'
+import { clearAuth } from '../utils/auth'
 
 // Capture $navigateTo during setup; getCurrentInstance() is null inside tap/async callbacks
 const instance = getCurrentInstance()
@@ -26,7 +24,7 @@ function logMessage() {
 }
 
 function logout() {
-    ApplicationSettings.remove(SESSION_KEY)
+    clearAuth()
     import('./Login.vue').then((m) => {
         navigateTo?.(m.default, { clearHistory: true })
     })

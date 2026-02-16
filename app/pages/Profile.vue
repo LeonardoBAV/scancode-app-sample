@@ -15,12 +15,9 @@
 
 <script setup lang="ts">
 import { ref, getCurrentInstance } from 'vue'
-import { ApplicationSettings } from '@nativescript/core'
+import { getAuth, clearAuth } from '../utils/auth'
 
-const USER_NAME_KEY = 'user_name'
-const SESSION_KEY = 'user_session'
-
-const userName = ref(ApplicationSettings.getString(USER_NAME_KEY) || 'Usuário')
+const userName = ref(getAuth()?.name ?? 'Usuário')
 
 const instance = getCurrentInstance()
 const globals = instance?.appContext.config.globalProperties
@@ -32,8 +29,7 @@ function goBack() {
 }
 
 function logout() {
-    ApplicationSettings.remove(SESSION_KEY)
-    ApplicationSettings.remove(USER_NAME_KEY)
+    clearAuth()
     import('./Login.vue').then((m) => {
         navigateTo?.(m.default, { clearHistory: true })
     })

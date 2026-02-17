@@ -25,3 +25,14 @@ When implementing:
 3. Implement complete solution.
 4. Ensure type safety.
 5. Follow mobile UX best practices.
+
+Code Style Enforcement:
+
+- Every statement MUST end with a semicolon (;).
+- Do not mix naming conventions.
+- If existing code uses a different style, refactor it to match this standard.
+
+Naming and Internationalization Rules:
+
+- All variable names, class names, interfaces, functions, and identifiers MUST be written in English.
+- Do not use Portuguese or mixed-language identifiers.

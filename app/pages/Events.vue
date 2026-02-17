@@ -58,7 +58,7 @@ function openEvent(event: Evento) {
 }
 
 function openProfileMenu() {
-    navigateTo?.(Profile, { frame: 'root-frame' })
+    navigateTo?.(Profile, { frame: 'root-frame', props: { isNotVisibleEvents: true } })
 }
 
 function logout() {

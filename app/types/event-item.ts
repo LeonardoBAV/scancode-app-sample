@@ -1,7 +1,7 @@
 /**
  * Event entity (named EventItem to avoid conflict with DOM Event).
  */
-export interface Event {
+export interface EventItem {
     name: string
     status: string
     totalValue: number

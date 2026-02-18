@@ -21,6 +21,11 @@
                     <ClientsList :event="event" />
                 </Frame>
             </TabViewItem>
+            <TabViewItem title="Pedidos">
+                <Frame>
+                    <OrderList />
+                </Frame>
+            </TabViewItem>
         </TabView>
     </Page>
 </template>
@@ -31,6 +36,7 @@ import type { EventItem } from '../types/event-item'
 import Event from '../pages/Event.vue'
 import ProductsList from '../pages/ProductsList.vue'
 import ClientsList from '../pages/ClientsList.vue'
+import OrderList from '../pages/event/orders/OrderList.vue'
 import Profile from '../pages/Profile.vue'
 
 const props = defineProps<{ event: EventItem }>()

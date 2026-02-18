@@ -1,16 +1,27 @@
 <template>
     <Page actionBarHidden="true">
-        <ListView :items="orders" separatorColor="transparent" class="list">
-            <template #default="{ item }">
-                <GridLayout rows="auto, auto, auto" columns="*, auto" class="order-item p-3 m-2 rounded-lg border border-gray-200" @tap="onOrderTap(item)">
-                    <Label row="0" col="0" :text="item.clientCompanyName" class="text-base font-bold text-gray-900" textWrap="true" />
-                    <Label row="0" col="1" :text="item.id" class="text-xs text-gray-500" horizontalAlignment="right" />
-                    <Label row="1" col="0" :text="item.itemCount + ' itens · ' + formatValor(item.totalValue)" class="text-sm text-gray-600 mt-1" />
-                    <Label row="1" col="1" :text="statusLabel(item.status)" :class="'text-sm font-semibold ' + statusClass(item.status)" horizontalAlignment="right" />
-                    <Label row="2" col="0" :text="item.synced ? 'Sync' : 'Not Sync'" :class="'text-sm mt-1 font-medium ' + (item.synced ? 'text-green-600' : 'text-amber-600')" />
-                </GridLayout>
-            </template>
-        </ListView>
+        <GridLayout rows="*" columns="*">
+            <ListView row="0" col="0" :items="orders" separatorColor="transparent" class="list">
+                <template #default="{ item }">
+                    <GridLayout rows="auto, auto, auto" columns="*, auto" class="order-item p-3 m-2 rounded-lg border border-gray-200" @tap="onOrderTap(item)">
+                        <Label row="0" col="0" :text="item.clientCompanyName" class="text-base font-bold text-gray-900" textWrap="true" />
+                        <Label row="0" col="1" :text="item.id" class="text-xs text-gray-500" horizontalAlignment="right" />
+                        <Label row="1" col="0" :text="item.itemCount + ' itens · ' + formatValor(item.totalValue)" class="text-sm text-gray-600 mt-1" />
+                        <Label row="1" col="1" :text="statusLabel(item.status)" :class="'text-sm font-semibold ' + statusClass(item.status)" horizontalAlignment="right" />
+                        <Label row="2" col="0" :text="item.synced ? 'Sync' : 'Not Sync'" :class="'text-sm mt-1 font-medium ' + (item.synced ? 'text-green-600' : 'text-amber-600')" />
+                    </GridLayout>
+                </template>
+            </ListView>
+            <Button
+                row="0"
+                col="0"
+                text="+"
+                class="fab-add-order"
+                horizontalAlignment="right"
+                verticalAlignment="bottom"
+                @tap="onAddNewOrder"
+            />
+        </GridLayout>
     </Page>
 </template>
 
@@ -56,10 +67,26 @@ function statusClass(status: OrderStatus): string {
 function onOrderTap(order: Order): void {
     // Placeholder for navigation to order detail
 }
+
+function onAddNewOrder(): void {
+    // Placeholder for starting a new order (add order flow)
+    console.log('Add new order tapped');
+}
 </script>
 
 <style scoped>
 .order-item {
     background-color: #fafafa;
+}
+
+.fab-add-order {
+    width: 56;
+    height: 56;
+    border-radius: 28;
+    margin: 16;
+    font-size: 28;
+    font-weight: bold;
+    background-color: #22c55e;
+    color: white;
 }
 </style>

@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Evento } from '../types/evento'
+import type { EventItem } from '../types/event-item'
 
-defineProps<{ event: Evento }>()
+defineProps<{ event: EventItem }>()
 </script>

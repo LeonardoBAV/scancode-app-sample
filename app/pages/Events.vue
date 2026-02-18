@@ -8,10 +8,10 @@
         <ScrollView>
             <StackLayout class="list p-3">
                 <GridLayout v-for="(event, index) in events" :key="index" rows="auto, auto" columns="*, auto" class="event-item p-3 mb-2 rounded-lg border border-gray-200" @tap="openEvent(event)">
-                    <Label row="0" col="0" :text="event.nome" class="text-base font-bold text-gray-900" textWrap="true" />
+                    <Label row="0" col="0" :text="event.name" class="text-base font-bold text-gray-900" textWrap="true" />
                     <Label row="0" col="1" :text="event.status" :class="'text-sm font-semibold ' + statusClass(event.status)" horizontalAlignment="right" />
-                    <Label row="1" col="0" :text="event.dataInicio + ' - ' + event.dataFim + ' · ' + event.numeroPedidos + ' pedidos'" class="text-sm text-gray-500 mt-1" textWrap="true" />
-                    <Label row="1" col="1" :text="formatValor(event.valor)" class="text-sm font-semibold text-blue-600 mt-1" horizontalAlignment="right" />
+                    <Label row="1" col="0" :text="event.startDate + ' - ' + event.endDate + ' · ' + event.orderCount + ' orders'" class="text-sm text-gray-500 mt-1" textWrap="true" />
+                    <Label row="1" col="1" :text="formatValor(event.totalValue)" class="text-sm font-semibold text-blue-600 mt-1" horizontalAlignment="right" />
                 </GridLayout>
             </StackLayout>
         </ScrollView>
@@ -23,13 +23,13 @@ import { ref, getCurrentInstance } from 'vue'
 import Profile from './Profile.vue'
 import DefaultLayout from '../layouts/Default.vue'
 import { clearAuth } from '../utils/auth'
-import type { Evento } from '../types/evento'
+import type { EventItem } from '../types/event-item'
 
-const events = ref<Evento[]>([
-    { nome: 'Festa de Aniversário', status: 'Ativo', valor: 1500, dataInicio: '20/02/2025', dataFim: '21/02/2025', numeroPedidos: 45 },
-    { nome: 'Workshop Tech', status: 'Agendado', valor: 320, dataInicio: '01/03/2025', dataFim: '01/03/2025', numeroPedidos: 12 },
-    { nome: 'Conferência 2025', status: 'Encerrado', valor: 5000, dataInicio: '10/01/2025', dataFim: '12/01/2025', numeroPedidos: 120 },
-    { nome: 'Meetup Dev', status: 'Ativo', valor: 0, dataInicio: '15/02/2025', dataFim: '15/02/2025', numeroPedidos: 28 },
+const events = ref<EventItem[]>([
+    { name: 'Birthday Party', status: 'Active', totalValue: 1500, startDate: '20/02/2025', endDate: '21/02/2025', orderCount: 45, ordersSynced: 42, ordersUnsynced: 3 },
+    { name: 'Tech Workshop', status: 'Scheduled', totalValue: 320, startDate: '01/03/2025', endDate: '01/03/2025', orderCount: 12, ordersSynced: 12, ordersUnsynced: 0 },
+    { name: 'Conference 2025', status: 'Ended', totalValue: 5000, startDate: '10/01/2025', endDate: '12/01/2025', orderCount: 120, ordersSynced: 120, ordersUnsynced: 0 },
+    { name: 'Dev Meetup', status: 'Active', totalValue: 0, startDate: '15/02/2025', endDate: '15/02/2025', orderCount: 28, ordersSynced: 25, ordersUnsynced: 3 },
 ])
 
 const instance = getCurrentInstance()
@@ -42,18 +42,18 @@ function formatValor(valor: number): string {
 
 function statusClass(status: string): string {
     switch (status) {
-        case 'Ativo':
+        case 'Active':
             return 'text-green-600'
-        case 'Agendado':
+        case 'Scheduled':
             return 'text-blue-600'
-        case 'Encerrado':
+        case 'Ended':
             return 'text-gray-500'
         default:
             return 'text-gray-600'
     }
 }
 
-function openEvent(event: Evento) {
+function openEvent(event: EventItem) {
     navigateTo?.(DefaultLayout, { frame: 'root-frame', props: { event }, clearHistory: true })
 }
 

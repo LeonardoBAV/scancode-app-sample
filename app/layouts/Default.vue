@@ -1,7 +1,7 @@
 <template>
     <Page>
         <ActionBar class="action-bar">
-            <Label :text="event.nome" class="font-bold text-lg" />
+            <Label :text="event.name" class="font-bold text-lg" />
             <ActionItem text="👤 Perfil" @tap="openProfile" />
         </ActionBar>
 
@@ -27,13 +27,13 @@
 
 <script setup lang="ts">
 import { getCurrentInstance } from 'vue'
-import type { Evento } from '../types/evento'
+import type { EventItem } from '../types/event-item'
 import Event from '../pages/Event.vue'
 import ProductsList from '../pages/ProductsList.vue'
 import ClientsList from '../pages/ClientsList.vue'
 import Profile from '../pages/Profile.vue'
 
-const props = defineProps<{ event: Evento }>()
+const props = defineProps<{ event: EventItem }>()
 const event = props.event
 
 const instance = getCurrentInstance()

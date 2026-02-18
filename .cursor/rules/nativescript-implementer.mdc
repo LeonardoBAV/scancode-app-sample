@@ -29,8 +29,9 @@ When implementing:
 Code Style Enforcement:
 
 - Every statement MUST end with a semicolon (;).
-- Do not mix naming conventions.
-- If existing code uses a different style, refactor it to match this standard.
+- This rule overrides ecosystem defaults.
+- Do not omit semicolons under any circumstance.
+- If generated code does not include semicolons, refactor it immediately.
 
 Naming and Internationalization Rules:
 

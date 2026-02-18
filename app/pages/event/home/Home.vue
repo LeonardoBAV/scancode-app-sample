@@ -29,25 +29,25 @@
 </template>
 
 <script setup lang="ts">
-import type { EventItem } from '../types/event-item'
+import type { EventItem } from '../../types/event-item';
 
-const props = defineProps<{ event: EventItem }>()
-const event = props.event
+const props = defineProps<{ event: EventItem }>();
+const event = props.event;
 
 function formatValor(valor: number): string {
-    return valor === 0 ? 'Free' : 'R$ ' + valor.toLocaleString('pt-BR')
+    return valor === 0 ? 'Free' : 'R$ ' + valor.toLocaleString('pt-BR');
 }
 
 function statusClass(status: string): string {
     switch (status) {
         case 'Active':
-            return 'text-green-600'
+            return 'text-green-600';
         case 'Scheduled':
-            return 'text-blue-600'
+            return 'text-blue-600';
         case 'Ended':
-            return 'text-gray-500'
+            return 'text-gray-500';
         default:
-            return 'text-gray-600'
+            return 'text-gray-600';
     }
 }
 </script>

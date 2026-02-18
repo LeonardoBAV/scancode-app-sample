@@ -26,6 +26,7 @@ const HARDCODED_PASS = '123'
 const HARDCODED_NAME = 'Leonardo Vasconcelos'
 const HARDCODED_CPF = '12345678901'
 const HARDCODED_EMAIL = 'leo@example.com'
+const HARDCODED_DISTRIBUIDORA = 'Distribuidora Exemplo'
 
 const username = ref('')
 const password = ref('')
@@ -46,6 +47,7 @@ function onLogin() {
             cpf: HARDCODED_CPF,
             email: HARDCODED_EMAIL,
             senha: pass,
+            distribuidora: HARDCODED_DISTRIBUIDORA,
         })
         goToEvents()
     } else {

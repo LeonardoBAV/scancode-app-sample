@@ -8,6 +8,8 @@ export interface AuthProfile {
     cpf: string
     email: string
     senha: string
+    /** Nome da distribuidora atrelada ao usuário */
+    distribuidora?: string
 }
 
 export function getAuth(): AuthProfile | null {

@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { ref, getCurrentInstance } from 'vue'
-import Profile from './Profile.vue'
+import Profile from './Profile/Profile.vue'
 import DefaultLayout from '../layouts/Default.vue'
 import { clearAuth } from '../utils/auth'
 import type { EventItem } from '../types/event-item'

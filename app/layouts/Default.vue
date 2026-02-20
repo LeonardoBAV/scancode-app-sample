@@ -32,7 +32,7 @@ import type { EventItem } from '../types/event-item';
 import Home from '../pages/event/home/Home.vue';
 import Cart from '../pages/event/Cart/Cart.vue';
 import OrderList from '../pages/event/orders/OrderList.vue';
-import Profile from '../pages/Profile.vue';
+import Profile from '../pages/Profile/Profile.vue';
 
 const props = defineProps<{ event: EventItem }>();
 const event = props.event;

@@ -3,20 +3,34 @@
         <ActionBar title="Client list">
             <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
         </ActionBar>
-        <ListView :items="clients" separatorColor="transparent" class="list">
-            <template #default="{ item }">
-                <GridLayout rows="auto, auto" columns="*" class="client-item p-3 m-2 rounded-lg border border-gray-200">
-                    <Label row="0" col="0" :text="item.fantasy_name" class="text-base font-bold text-gray-900" textWrap="true" />
-                    <Label row="1" col="0" :text="item.cpf_cnpj" class="text-sm text-gray-600 mt-1" textWrap="true" />
-                </GridLayout>
-            </template>
-        </ListView>
+        <StackLayout>
+            <TextField
+                v-model="searchQuery"
+                hint="Search by name or CPF/CNPJ..."
+                class="search-field p-3 m-3 rounded-lg border border-gray-300 text-base"
+            />
+            <ListView :items="filteredClients" separatorColor="transparent" class="list">
+                <template #default="{ item }">
+                    <GridLayout rows="auto, auto" columns="*" class="client-item p-3 m-2 rounded-lg border border-gray-200">
+                        <Label row="0" col="0" :text="item.fantasy_name" class="text-base font-bold text-gray-900" textWrap="true" />
+                        <Label row="1" col="0" :text="item.cpf_cnpj" class="text-sm text-gray-600 mt-1" textWrap="true" />
+                    </GridLayout>
+                </template>
+            </ListView>
+        </StackLayout>
     </Page>
 </template>
 
 <script setup lang="ts">
-import { ref, getCurrentInstance } from 'vue';
+import { ref, computed, getCurrentInstance } from 'vue';
 import type { Client } from '../../types/client';
+
+function likeMatch(value: string, term: string): boolean {
+    if (!term) return true;
+    return value.toLowerCase().includes(term.toLowerCase());
+}
+
+const searchQuery = ref('');
 
 const clients = ref<Client[]>([
     { id: 1, cpf_cnpj: '12.345.678/0001-90', corporate_name: 'Alpha Comércio Ltda', fantasy_name: 'Alpha Store', email: 'contato@alpha.com', phone: '(11) 99999-0001', carrier: 'Vivo' },
@@ -41,16 +55,27 @@ const clients = ref<Client[]>([
     { id: 20, cpf_cnpj: '98.999.000/0001-77', corporate_name: 'Upsilon Serviços Ltda', fantasy_name: 'Upsilon Serv', email: 'contato@upsilon.com', phone: '(41) 80000-0020', carrier: 'Oi' },
 ]);
 
+const filteredClients = computed(() => {
+    const term = searchQuery.value.trim();
+    if (!term) return clients.value;
+    return clients.value.filter(
+        (c: Client) => likeMatch(c.fantasy_name, term) || likeMatch(c.cpf_cnpj, term)
+    );
+});
+
 const instance = getCurrentInstance();
 const globals = instance?.appContext.config.globalProperties;
 const navigateBack = globals?.$navigateBack as () => Promise<void> | void;
 
 function goBack(): void {
-    return navigateBack?.();
+    navigateBack?.();
 }
 </script>
 
 <style scoped>
+.search-field {
+    background-color: #f8fafc;
+}
 .client-item {
     background-color: #fafafa;
 }

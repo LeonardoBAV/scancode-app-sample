@@ -3,19 +3,33 @@
         <ActionBar title="Payment method list">
             <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
         </ActionBar>
-        <ListView :items="paymentMethods" separatorColor="transparent" class="list">
-            <template #default="{ item }">
-                <GridLayout rows="auto" columns="*" class="payment-method-item p-3 m-2 rounded-lg border border-gray-200">
-                    <Label row="0" col="0" :text="item.name" class="text-base font-bold text-gray-900" textWrap="true" />
-                </GridLayout>
-            </template>
-        </ListView>
+        <StackLayout>
+            <TextField
+                v-model="searchQuery"
+                hint="Search by name..."
+                class="search-field p-3 m-3 rounded-lg border border-gray-300 text-base"
+            />
+            <ListView :items="filteredPaymentMethods" separatorColor="transparent" class="list">
+                <template #default="{ item }">
+                    <GridLayout rows="auto" columns="*" class="payment-method-item p-3 m-2 rounded-lg border border-gray-200">
+                        <Label row="0" col="0" :text="item.name" class="text-base font-bold text-gray-900" textWrap="true" />
+                    </GridLayout>
+                </template>
+            </ListView>
+        </StackLayout>
     </Page>
 </template>
 
 <script setup lang="ts">
-import { ref, getCurrentInstance } from 'vue';
+import { ref, computed, getCurrentInstance } from 'vue';
 import type { PaymentMethod } from '../../types/payment-method';
+
+function likeMatch(value: string, term: string): boolean {
+    if (!term) return true;
+    return value.toLowerCase().includes(term.toLowerCase());
+}
+
+const searchQuery = ref('');
 
 const paymentMethods = ref<PaymentMethod[]>([
     { id: 1, name: 'Credit card' },
@@ -40,16 +54,25 @@ const paymentMethods = ref<PaymentMethod[]>([
     { id: 20, name: 'Trade-in' },
 ]);
 
+const filteredPaymentMethods = computed(() => {
+    const term = searchQuery.value.trim();
+    if (!term) return paymentMethods.value;
+    return paymentMethods.value.filter((p: PaymentMethod) => likeMatch(p.name, term));
+});
+
 const instance = getCurrentInstance();
 const globals = instance?.appContext.config.globalProperties;
 const navigateBack = globals?.$navigateBack as () => Promise<void> | void;
 
 function goBack(): void {
-    return navigateBack?.();
+    navigateBack?.();
 }
 </script>
 
 <style scoped>
+.search-field {
+    background-color: #f8fafc;
+}
 .payment-method-item {
     background-color: #fafafa;
 }

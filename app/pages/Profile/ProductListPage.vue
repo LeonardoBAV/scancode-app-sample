@@ -3,23 +3,37 @@
         <ActionBar title="Product list">
             <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
         </ActionBar>
-        <ListView :items="products" separatorColor="transparent" class="list">
-            <template #default="{ item }">
-                <GridLayout rows="auto, auto, auto" columns="*, auto" class="product-item p-3 m-2 rounded-lg border border-gray-200">
-                    <Label row="0" col="0" colSpan="2" :text="item.name" class="text-base font-bold text-gray-900" textWrap="true" />
-                    <Label row="1" col="0" :text="'SKU: ' + item.sku" class="text-sm text-gray-600 mt-1" textWrap="true" />
-                    <Label row="1" col="1" :text="formatPrice(item.price)" class="text-sm font-semibold text-gray-900 mt-1" horizontalAlignment="right" />
-                    <Label row="2" col="0" colSpan="2" :text="item.product_category.name" class="text-xs text-gray-500 mt-1" textWrap="true" />
-                </GridLayout>
-            </template>
-        </ListView>
+        <StackLayout>
+            <TextField
+                v-model="searchQuery"
+                hint="Search by SKU, name or category..."
+                class="search-field p-3 m-3 rounded-lg border border-gray-300 text-base"
+            />
+            <ListView :items="filteredProducts" separatorColor="transparent" class="list">
+                <template #default="{ item }">
+                    <GridLayout rows="auto, auto, auto" columns="*, auto" class="product-item p-3 m-2 rounded-lg border border-gray-200">
+                        <Label row="0" col="0" colSpan="2" :text="item.name" class="text-base font-bold text-gray-900" textWrap="true" />
+                        <Label row="1" col="0" :text="'SKU: ' + item.sku" class="text-sm text-gray-600 mt-1" textWrap="true" />
+                        <Label row="1" col="1" :text="formatPrice(item.price)" class="text-sm font-semibold text-gray-900 mt-1" horizontalAlignment="right" />
+                        <Label row="2" col="0" colSpan="2" :text="item.product_category.name" class="text-xs text-gray-500 mt-1" textWrap="true" />
+                    </GridLayout>
+                </template>
+            </ListView>
+        </StackLayout>
     </Page>
 </template>
 
 <script setup lang="ts">
-import { ref, getCurrentInstance } from 'vue';
+import { ref, computed, getCurrentInstance } from 'vue';
 import type { Product } from '../../types/product';
 import type { ProductCategory } from '../../types/product-category';
+
+function likeMatch(value: string, term: string): boolean {
+    if (!term) return true;
+    return value.toLowerCase().includes(term.toLowerCase());
+}
+
+const searchQuery = ref('');
 
 const beverages: ProductCategory = { id: 1, name: 'Beverages' };
 const snacks: ProductCategory = { id: 2, name: 'Snacks' };
@@ -48,6 +62,17 @@ const products = ref<Product[]>([
     { id: 20, sku: 'SNK-007', barcode: '7891000012364', name: 'Nuts mix 100g', price: 11.0, product_category_id: 2, product_category: snacks },
 ]);
 
+const filteredProducts = computed(() => {
+    const term = searchQuery.value.trim();
+    if (!term) return products.value;
+    return products.value.filter(
+        (p: Product) =>
+            likeMatch(p.sku, term) ||
+            likeMatch(p.name, term) ||
+            likeMatch(p.product_category.name, term)
+    );
+});
+
 const instance = getCurrentInstance();
 const globals = instance?.appContext.config.globalProperties;
 const navigateBack = globals?.$navigateBack as () => Promise<void> | void;
@@ -62,6 +87,9 @@ function goBack(): void {
 </script>
 
 <style scoped>
+.search-field {
+    background-color: #f8fafc;
+}
 .product-item {
     background-color: #fafafa;
 }

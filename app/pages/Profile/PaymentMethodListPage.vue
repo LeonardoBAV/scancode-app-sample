@@ -23,6 +23,21 @@ const paymentMethods = ref<PaymentMethod[]>([
     { id: 3, name: 'PIX' },
     { id: 4, name: 'Cash' },
     { id: 5, name: 'Bank transfer' },
+    { id: 6, name: 'Check' },
+    { id: 7, name: 'Voucher' },
+    { id: 8, name: 'Mobile payment' },
+    { id: 9, name: 'PayPal' },
+    { id: 10, name: 'Installment' },
+    { id: 11, name: 'Boleto' },
+    { id: 12, name: 'Wire transfer' },
+    { id: 13, name: 'Gift card' },
+    { id: 14, name: 'Cryptocurrency' },
+    { id: 15, name: 'Open tab' },
+    { id: 16, name: 'Corporate card' },
+    { id: 17, name: 'Prepaid card' },
+    { id: 18, name: 'Digital wallet' },
+    { id: 19, name: 'Split payment' },
+    { id: 20, name: 'Trade-in' },
 ]);
 
 const instance = getCurrentInstance();

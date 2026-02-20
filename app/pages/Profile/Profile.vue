@@ -19,7 +19,7 @@
                 <Label text="Registrations" class="text-sm font-semibold text-gray-600 mb-2" />
                 <Button text="Client list" class="bg-gray-600 text-white p-3 rounded-lg mb-3" @tap="onClientList" />
                 <Button text="Product list" class="bg-gray-600 text-white p-3 rounded-lg mb-3" @tap="onProductList" />
-                <Button text="Payment list" class="bg-gray-600 text-white p-3 rounded-lg mb-4" @tap="onPaymentList" />
+                <Button text="Payment method list" class="bg-gray-600 text-white p-3 rounded-lg mb-4" @tap="onPaymentMethodList" />
                 <Button text="Sync" class="bg-green-600 text-white p-3 rounded-lg mb-3" @tap="onSync" />
 
                 <!-- Log out -->
@@ -39,7 +39,7 @@ import Events from '../Events.vue';
 import ProfileDetails from './ProfileDetails.vue';
 import ClientListPage from './ClientListPage.vue';
 import ProductListPage from './ProductListPage.vue';
-import PaymentListPage from './PaymentListPage.vue';
+import PaymentMethodListPage from './PaymentMethodListPage.vue';
 
 withDefaults(defineProps<{ isNotVisibleEvents?: boolean }>(), { isNotVisibleEvents: false });
 
@@ -80,8 +80,8 @@ function onProductList(): void {
     navigateTo?.(ProductListPage);
 }
 
-function onPaymentList(): void {
-    navigateTo?.(PaymentListPage);
+function onPaymentMethodList(): void {
+    navigateTo?.(PaymentMethodListPage);
 }
 
 function logout(): void {

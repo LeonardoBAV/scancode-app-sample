@@ -24,7 +24,6 @@
 
                 <!-- Log out -->
                 <Label text="Log out" class="text-sm font-semibold text-gray-600 mb-2" />
-                <Button v-if="!isNotVisibleEvents" text="Events" class="bg-blue-500 text-white p-3 rounded-lg mb-4" @tap="goToEvents" />
                 <Button text="Log out" class="bg-red-500 text-white p-3 rounded-lg" @tap="logout" />
             </StackLayout>
         </ScrollView>
@@ -35,13 +34,10 @@
 import { ref, computed, onMounted, getCurrentInstance } from 'vue';
 import { Dialogs } from '@nativescript/core';
 import { getAuth, clearAuth } from '../../utils/auth';
-import Events from '../Events.vue';
 import ProfileDetails from './ProfileDetails.vue';
 import ClientListPage from './ClientListPage.vue';
 import ProductListPage from './ProductListPage.vue';
 import PaymentMethodListPage from './PaymentMethodListPage.vue';
-
-withDefaults(defineProps<{ isNotVisibleEvents?: boolean }>(), { isNotVisibleEvents: false });
 
 const profile = ref<ReturnType<typeof getAuth>>(null);
 const userName = computed(() => profile.value?.name ?? profile.value?.nick ?? 'User');
@@ -57,11 +53,7 @@ const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<st
 const navigateBack = globals?.$navigateBack as () => Promise<void> | void;
 
 function goBack(): void {
-    return navigateBack?.();
-}
-
-function goToEvents(): void {
-    navigateTo?.(Events, { frame: 'root-frame', clearHistory: true });
+    navigateBack?.();
 }
 
 function goToProfileDetails(): void {

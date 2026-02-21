@@ -5,7 +5,13 @@
             <ActionItem text="👤 Perfil" @tap="openProfile" />
         </ActionBar>
 
-        <TabView androidTabsPosition="bottom">
+        <TabView
+            ref="tabViewRef"
+            :selectedIndex="selectedIndex"
+            androidTabsPosition="bottom"
+            class="tab-view-custom"
+            @selectedIndexChange="onSelectedIndexChange"
+        >
             <TabViewItem title="Evento">
                 <Frame>
                     <Home :event="event" />
@@ -21,13 +27,12 @@
                     <Cart />
                 </Frame>
             </TabViewItem>
-
         </TabView>
     </Page>
 </template>
 
 <script setup lang="ts">
-import { getCurrentInstance } from 'vue';
+import { ref, getCurrentInstance } from 'vue';
 import type { EventItem } from '../types/event-item';
 import Home from '../pages/event/home/Home.vue';
 import Cart from '../pages/event/Cart/Cart.vue';
@@ -37,11 +42,27 @@ import Profile from '../pages/Profile/Profile.vue';
 const props = defineProps<{ event: EventItem }>();
 const event = props.event;
 
+/** Currently selected tab index: 0 = Evento, 1 = Pedidos, 2 = Sacola */
+const selectedIndex = ref(0);
+const tabViewRef = ref(null);
+
 const instance = getCurrentInstance();
 const globals = instance?.appContext.config.globalProperties;
 const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void;
+
+function onSelectedIndexChange(args: { newIndex: number }): void {
+    selectedIndex.value = args.newIndex;
+}
 
 function openProfile(): void {
     navigateTo?.(Profile, { frame: 'root-frame' });
 }
 </script>
+
+<style scoped>
+.tab-view-custom {
+    selected-tab-text-color: #2563eb;
+    tab-text-color: #64748b;
+    android-selected-tab-highlight-color: #2563eb;
+}
+</style>

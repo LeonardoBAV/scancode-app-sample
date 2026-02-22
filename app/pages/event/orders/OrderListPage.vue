@@ -26,8 +26,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, getCurrentInstance } from 'vue';
 import type { Order, OrderStatus } from '../../../types/order';
+import OrderCreatePage from './OrderCreatePage.vue';
 
 const orders = ref<Order[]>([
     { id: 'ORD-001', clientCompanyName: 'Empresa Alpha Ltda', status: 'Open', itemCount: 5, totalValue: 1250, synced: false },
@@ -42,6 +43,10 @@ const orders = ref<Order[]>([
     { id: 'ORD-010', clientCompanyName: 'Kappa Construção', status: 'Open', itemCount: 6, totalValue: 2800, synced: false },
     { id: 'ORD-011', clientCompanyName: 'Lambda Consultoria', status: 'Closed', itemCount: 2, totalValue: 650, synced: true },
 ]);
+
+const instance = getCurrentInstance();
+const globals = instance?.appContext.config.globalProperties;
+const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void;
 
 function formatValor(value: number): string {
     return value === 0 ? 'Grátis' : 'R$ ' + value.toLocaleString('pt-BR');
@@ -69,8 +74,7 @@ function onOrderTap(order: Order): void {
 }
 
 function onAddNewOrder(): void {
-    // Placeholder for starting a new order (add order flow)
-    console.log('Add new order tapped');
+    navigateTo?.(OrderCreatePage);
 }
 </script>
 

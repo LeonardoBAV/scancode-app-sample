@@ -1,7 +1,7 @@
 /**
  * Order status.
  */
-export type OrderStatus = 'Open' | 'Closed' | 'Canceled';
+export type OrderStatus = 'Open' | 'Closed' | 'Canceled'; //obs: tavles isto é um ENUM
 
 /**
  * Order entity.

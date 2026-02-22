@@ -1,8 +1,5 @@
 <template>
-    <Page>
-        <ActionBar title="Observação">
-            <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
-        </ActionBar>
+    <Page actionBarHidden="true">
         <StackLayout class="p-4">
             <Label text="Notes (placeholder)" class="text-gray-600" />
         </StackLayout>

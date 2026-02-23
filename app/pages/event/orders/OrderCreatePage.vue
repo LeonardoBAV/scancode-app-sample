@@ -3,20 +3,21 @@
         <GridLayout rows="*" columns="*">
             <ScrollView row="0" col="0" class="scroll-wrap">
                 <StackLayout class="order-create-page bottom-pad">
-                    <!-- Custom header: ID, client, status badge -->
+                    <!-- Custom header: ID, status badge; client block with edit button floating on the right -->
                     <StackLayout class="header">
-                        <GridLayout rows="auto" columns="auto, *, auto" class="header-row">
-                            <Label row="0" col="0" text="←" class="header-back" @tap="goBack" />
-                            <Label row="0" col="1" :text="orderId" class="header-order-id" />
-                            <StackLayout row="0" col="2" :class="'badge badge-' + orderStatus.toLowerCase()">
+                        <GridLayout rows="auto" columns="*, auto" class="header-row">
+                            <Label row="0" col="0" :text="orderId" class="header-order-id" />
+                            <StackLayout row="0" col="1" :class="'badge badge-' + orderStatus.toLowerCase()">
                                 <Label :text="orderStatus === 'Open' ? 'Aberto' : 'Finalizado'" class="badge-text" />
                             </StackLayout>
                         </GridLayout>
-                        <StackLayout class="header-client">
-                            <Label :text="clientFantasyName || '—'" class="header-client-name" />
-                            <Label :text="clientCpfCnpj || '—'" class="header-client-doc" />
-                            <Label text="Alterar cliente ›" class="header-change-client" @tap="goToBuyer" />
-                        </StackLayout>
+                        <GridLayout rows="auto" columns="*, auto" class="header-client">
+                            <StackLayout row="0" col="0">
+                                <Label :text="clientFantasyName || '—'" class="header-client-name" />
+                                <Label :text="clientCpfCnpj || '—'" class="header-client-doc" />
+                            </StackLayout>
+                            <Button row="0" col="1" text="✎" class="btn-change-client" @tap="goToBuyer" />
+                        </GridLayout>
                     </StackLayout>
 
                     <!-- Destaque: Valor do pedido + Total de itens (labels, hardcoded) -->
@@ -127,12 +128,6 @@ function onFinish(): void {
     margin-bottom: 12;
 }
 
-.header-back {
-    font-size: 24;
-    padding: 8;
-    vertical-align: center;
-}
-
 .header-order-id {
     font-size: 20;
     font-weight: bold;
@@ -165,6 +160,19 @@ function onFinish(): void {
     background-color: rgba(255, 255, 255, 0.12);
     border-radius: 10;
     padding: 12;
+    column-spacing: 12;
+}
+
+.btn-change-client {
+    width: 40;
+    height: 40;
+    font-size: 18;
+    color: #93c5fd;
+    background-color: transparent;
+    border-width: 1;
+    border-color: rgba(255, 255, 255, 0.4);
+    border-radius: 20;
+    vertical-align: center;
 }
 
 .header-client-name {
@@ -177,13 +185,6 @@ function onFinish(): void {
     font-size: 13;
     color: rgba(255, 255, 255, 0.85);
     margin-top: 2;
-}
-
-.header-change-client {
-    font-size: 13;
-    color: #93c5fd;
-    margin-top: 10;
-    padding: 4;
 }
 
 .section-values {
@@ -230,10 +231,11 @@ function onFinish(): void {
 
 .footer-wrap {
     padding: 16;
+    margin: 12;
 }
 
 .footer-buttons {
-    column-spacing: 12;
+    column-spacing: 16;
 }
 
 .btn-finalizar {
@@ -243,6 +245,7 @@ function onFinish(): void {
     padding: 14;
     font-size: 16;
     font-weight: 600;
+    margin-right: 8;
 }
 
 .btn-print-float {
@@ -251,6 +254,7 @@ function onFinish(): void {
     border-radius: 10;
     padding: 14;
     font-size: 16;
+    margin-left: 8;
 }
 
 .btn-print-extended {

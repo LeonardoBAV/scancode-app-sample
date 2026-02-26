@@ -16,7 +16,7 @@
                                 <Label :text="clientFantasyName || '—'" class="header-client-name" />
                                 <Label :text="clientCpfCnpj || '—'" class="header-client-doc" />
                             </StackLayout>
-                            <Button row="0" col="1" text="✎" class="btn-change-client" @tap="goToBuyer" />
+                            <Button row="0" col="1" text="👁" class="btn-show-client" @tap="goToClientShow" />
                         </GridLayout>
                     </StackLayout>
 
@@ -68,7 +68,7 @@
 <script setup lang="ts">
 import { ref, computed, getCurrentInstance } from 'vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
-import OrderBuyerPage from './OrderBuyerPage.vue';
+import OrderClientShowPage from './OrderClientShowPage.vue';
 import {
     orderCreatePaymentMethodName,
     orderCreateClientFantasyName,
@@ -99,8 +99,8 @@ function goToPayment(): void {
     navigateTo?.(OrderPaymentPage);
 }
 
-function goToBuyer(): void {
-    navigateTo?.(OrderBuyerPage);
+function goToClientShow(): void {
+    navigateTo?.(OrderClientShowPage);
 }
 
 function onPrint(): void {
@@ -163,7 +163,7 @@ function onFinish(): void {
     column-spacing: 12;
 }
 
-.btn-change-client {
+.btn-show-client {
     width: 40;
     height: 40;
     font-size: 18;

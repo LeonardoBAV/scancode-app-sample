@@ -1,11 +1,6 @@
 <template>
     <Page actionBarHidden="true">
-        <StackLayout>
-            <GridLayout rows="auto" columns="auto, *" class="header">
-                <Label row="0" col="1" text="Escolher cliente" class="header-title" />
-            </GridLayout>
-            <ClientListComponent @confirm="onClientConfirmed" />
-        </StackLayout>
+        <ClientListComponent title="Escolher cliente" @confirm="onClientConfirmed" />
     </Page>
 </template>
 
@@ -30,17 +25,3 @@ function onClientConfirmed(client: Client): void {
     navigateBack?.();
 }
 </script>
-
-<style scoped>
-.header {
-    background-color: #1e293b;
-    color: white;
-    padding: 16;
-}
-
-.header-title {
-    font-size: 18;
-    font-weight: bold;
-    vertical-align: center;
-}
-</style>

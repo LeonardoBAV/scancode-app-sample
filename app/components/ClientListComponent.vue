@@ -1,6 +1,9 @@
 <template>
-    <GridLayout rows="*, auto" columns="*">
-        <StackLayout row="0" col="0">
+    <GridLayout rows="auto, *, auto" columns="*">
+        <GridLayout row="0" col="0" rows="auto" columns="auto, *" class="header">
+            <Label row="0" col="1" :text="title" class="header-title" />
+        </GridLayout>
+        <StackLayout row="1" col="0">
             <TextField v-model="searchQuery" hint="Search by name or CPF/CNPJ..." class="search-field p-3 m-3 rounded-lg border border-gray-300 text-base" />
             <ListView :items="filteredClients" separatorColor="transparent" class="list">
                 <template #default="{ item }">
@@ -16,7 +19,7 @@
                 </template>
             </ListView>
         </StackLayout>
-        <StackLayout row="1" col="0" class="footer-float" verticalAlignment="bottom">
+        <StackLayout row="2" col="0" class="footer-float" verticalAlignment="bottom">
             <Button
                 text="Confirmar"
                 :isEnabled="!!selectedClient"
@@ -30,6 +33,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import type { Client } from '../types/client';
+
+const props = withDefaults(defineProps<{
+    title?: string;
+}>(), {
+    title: 'Escolher cliente',
+});
 
 const emit = defineEmits<{
     (e: 'confirm', client: Client): void;
@@ -85,6 +94,18 @@ function onConfirm(): void {
 </script>
 
 <style scoped>
+.header {
+    background-color: #1e293b;
+    color: white;
+    padding: 16;
+}
+
+.header-title {
+    font-size: 18;
+    font-weight: bold;
+    vertical-align: center;
+}
+
 .search-field {
     background-color: #f8fafc;
 }

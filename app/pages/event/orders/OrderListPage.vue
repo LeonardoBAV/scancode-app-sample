@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { ref, getCurrentInstance } from 'vue';
 import type { Order, OrderStatus } from '../../../types/order';
-import OrderCreatePage from './OrderCreatePage.vue';
+import OrderSelectClientPage from './OrderSelectClientPage.vue';
 
 const orders = ref<Order[]>([
     { id: 'ORD-001', clientCompanyName: 'Empresa Alpha Ltda', status: 'Open', itemCount: 5, totalValue: 1250, synced: false },
@@ -74,7 +74,7 @@ function onOrderTap(order: Order): void {
 }
 
 function onAddNewOrder(): void {
-    navigateTo?.(OrderCreatePage);
+    navigateTo?.(OrderSelectClientPage);
 }
 </script>
 

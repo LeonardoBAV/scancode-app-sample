@@ -70,7 +70,6 @@ import { ref, computed, getCurrentInstance } from 'vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
 import OrderClientShowPage from './OrderClientShowPage.vue';
 import {
-    orderCreatePaymentMethodName,
     orderCreateClientFantasyName,
     orderCreateClientCpfCnpj,
 } from './order-create-state';
@@ -82,7 +81,8 @@ const orderStatus = ref<'Open' | 'Completed'>('Open');
 const displayOrderValue = 'R$ 1.250,00';
 const displayTotalItems = '5 itens';
 
-const paymentMethodName = computed(() => orderCreatePaymentMethodName.value);
+/** Exemplo hardcoded para exibição na página. */
+const paymentMethodName = ref('PIX');
 const clientFantasyName = computed(() => orderCreateClientFantasyName.value);
 const clientCpfCnpj = computed(() => orderCreateClientCpfCnpj.value);
 

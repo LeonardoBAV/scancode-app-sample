@@ -1,30 +1,52 @@
 <template>
     <Page actionBarHidden="true">
-        <StackLayout>
-            <GridLayout rows="auto" columns="auto, *" class="header">
-                <Label row="0" col="0" text="←" class="header-back" @tap="goBack" />
-                <Label row="0" col="1" text="Pagamento" class="header-title" />
+        <GridLayout rows="auto, *, auto" columns="*">
+            <GridLayout row="0" col="0" rows="auto" columns="*" class="header">
+                <Label row="0" col="0" text="Pagamento" class="header-title" />
             </GridLayout>
-            <ListView :items="paymentMethods" separatorColor="transparent" class="list p-3">
-                <template #default="{ item }">
-                    <GridLayout
-                        rows="auto"
-                        columns="*"
-                        class="payment-item p-3 m-2 rounded-lg"
-                        @tap="selectPayment(item)"
-                    >
-                        <Label :text="item.name" class="text-base font-semibold text-gray-900" textWrap="true" />
-                    </GridLayout>
-                </template>
-            </ListView>
-        </StackLayout>
+            <StackLayout row="1" col="0">
+                <TextField
+                    v-model="searchQuery"
+                    hint="Buscar por nome..."
+                    class="search-field p-3 m-3 rounded-lg border border-gray-300 text-base"
+                />
+                <ListView :items="filteredMethods" separatorColor="transparent" class="list">
+                    <template #default="{ item }">
+                        <GridLayout
+                            rows="auto"
+                            columns="*"
+                            :class="['payment-item', 'p-3', 'm-2', 'rounded-lg', selectedPayment?.id === item.id ? 'payment-item-selected' : '']"
+                            @tap="onSelectItem(item)"
+                        >
+                            <Label :text="item.name" class="text-base font-semibold text-gray-900" textWrap="true" />
+                        </GridLayout>
+                    </template>
+                </ListView>
+            </StackLayout>
+            <StackLayout row="2" col="0" class="footer-float" verticalAlignment="bottom">
+                <Button
+                    text="Confirmar"
+                    :isEnabled="!!selectedPayment"
+                    :class="selectedPayment ? 'btn-confirm' : 'btn-confirm-disabled'"
+                    @tap="onConfirm"
+                />
+            </StackLayout>
+        </GridLayout>
     </Page>
 </template>
 
 <script setup lang="ts">
-import { ref, getCurrentInstance } from 'vue';
+import { ref, computed, getCurrentInstance } from 'vue';
 import type { PaymentMethod } from '../../../types/payment-method';
 import { orderCreatePaymentMethodName } from './order-create-state';
+
+function likeMatch(value: string, term: string): boolean {
+    if (!term) return true;
+    return value.toLowerCase().includes(term.toLowerCase());
+}
+
+const searchQuery = ref('');
+const selectedPayment = ref<PaymentMethod | null>(null);
 
 const paymentMethods = ref<PaymentMethod[]>([
     { id: 1, name: 'Credit card' },
@@ -37,16 +59,23 @@ const paymentMethods = ref<PaymentMethod[]>([
     { id: 8, name: 'Mobile payment' },
 ]);
 
+const filteredMethods = computed(() => {
+    const term = searchQuery.value.trim();
+    if (!term) return paymentMethods.value;
+    return paymentMethods.value.filter((m: PaymentMethod) => likeMatch(m.name, term));
+});
+
 const instance = getCurrentInstance();
 const globals = instance?.appContext.config.globalProperties;
 const navigateBack = globals?.$navigateBack as () => void;
 
-function goBack(): void {
-    navigateBack?.();
+function onSelectItem(payment: PaymentMethod): void {
+    selectedPayment.value = selectedPayment.value?.id === payment.id ? null : payment;
 }
 
-function selectPayment(payment: PaymentMethod): void {
-    orderCreatePaymentMethodName.value = payment.name;
+function onConfirm(): void {
+    if (!selectedPayment.value) return;
+    orderCreatePaymentMethodName.value = selectedPayment.value.name;
     navigateBack?.();
 }
 </script>
@@ -58,21 +87,50 @@ function selectPayment(payment: PaymentMethod): void {
     padding: 16;
 }
 
-.header-back {
-    font-size: 24;
-    padding: 8;
-    vertical-align: center;
-}
-
 .header-title {
     font-size: 18;
     font-weight: bold;
     vertical-align: center;
 }
 
-.payment-item {
+.search-field {
     background-color: #f8fafc;
+}
+
+.payment-item {
+    background-color: #fafafa;
     border-width: 1;
     border-color: #e2e8f0;
+}
+
+.payment-item-selected {
+    background-color: #dbeafe;
+    border-color: #3b82f6;
+    border-width: 2;
+}
+
+.footer-float {
+    padding: 16;
+    background-color: white;
+    border-top-width: 1;
+    border-top-color: #e2e8f0;
+}
+
+.btn-confirm {
+    background-color: #3b82f6;
+    color: white;
+    border-radius: 10;
+    padding: 14;
+    font-size: 16;
+    font-weight: 600;
+}
+
+.btn-confirm-disabled {
+    background-color: #94a3b8;
+    color: white;
+    border-radius: 10;
+    padding: 14;
+    font-size: 16;
+    opacity: 0.7;
 }
 </style>

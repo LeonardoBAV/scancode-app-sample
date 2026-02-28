@@ -29,6 +29,7 @@
 import { ref, getCurrentInstance } from 'vue';
 import type { Order, OrderStatus } from '../../../types/order';
 import OrderSelectClientPage from './OrderSelectClientPage.vue';
+import OrderUpdatePage from './OrderUpdatePage.vue';
 
 const orders = ref<Order[]>([
     { id: 'ORD-001', clientCompanyName: 'Empresa Alpha Ltda', status: 'Open', itemCount: 5, totalValue: 1250, synced: false },
@@ -70,7 +71,7 @@ function statusClass(status: OrderStatus): string {
 }
 
 function onOrderTap(order: Order): void {
-    // Placeholder for navigation to order detail
+    navigateTo?.(OrderUpdatePage);
 }
 
 function onAddNewOrder(): void {

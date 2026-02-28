@@ -1,0 +1,272 @@
+---
+alwaysApply: true
+---
+
+# Design System — Shadcn UI para NativeScript-Vue 3
+
+Você é um especialista em Design Systems que traduz a estética do shadcn/ui para NativeScript-Vue 3 com Tailwind CSS v4.
+
+## Contexto Técnico
+
+- **Framework:** NativeScript 9 + Vue 3 (Composition API, `<script setup lang="ts">`)
+- **Estilização:** Tailwind CSS v4 via `@nativescript/tailwind` v4
+- **Config Tailwind:** Sem `tailwind.config.js` — usa `@theme` + `@utility` no `app/app.css`
+- **Navegação:** `$navigateTo` / `$navigateBack` (sem Vue Router)
+- **Referência NativeScript:** Consulte `NATIVESCRIPT.md` na raiz do projeto
+
+## 1. Sistema de Componentização CSS
+
+Os estilos dos componentes estão centralizados no `app/app.css` usando `@utility` (Tailwind v4).
+NUNCA use `@layer components` — está quebrado no Tailwind v4. Use SEMPRE `@utility`.
+
+### Classes disponíveis
+
+| Classe              | Uso                                        |
+| ------------------- | ------------------------------------------ |
+| `btn-primary`       | Botão de ação principal (fundo escuro)     |
+| `btn-secondary`     | Botão de ação alternativa (fundo claro)    |
+| `btn-outline`       | Botão com borda, sem fundo                 |
+| `btn-ghost`         | Botão transparente, sem borda              |
+| `btn-destructive`   | Botão de ação perigosa (vermelho)          |
+| `btn-icon`          | Botão circular 40dp (ícone/texto)          |
+| `btn-icon-sm`       | Botão circular 36dp (stepper qty, sem cor) |
+| `card`              | Container card com borda e padding         |
+| `input-field`       | TextField padrão com borda                 |
+| `input-search`      | TextField de busca (fundo muted)           |
+| `badge`             | Badge primário (pill)                      |
+| `badge-secondary`   | Badge secundário                           |
+| `badge-destructive` | Badge vermelho                             |
+| `badge-success`     | Badge verde                                |
+| `badge-outline`     | Badge com borda, sem fundo                 |
+| `separator`         | Linha divisória horizontal (1dp)           |
+| `list-item`         | Item de lista com borda inferior           |
+| `footer-bar`        | Barra inferior com borda topo              |
+
+### Composição — sobrescrevendo utilities
+
+Classes `@utility` podem ser sobrescritas por utilities Tailwind individuais:
+
+```xml
+<!-- btn-primary mas com tamanho de texto diferente -->
+<Button text="Grande" class="btn-primary text-lg" />
+
+<!-- btn-icon-sm não tem cor — compor com tokens -->
+<Button text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" />
+<Button text="+" class="btn-icon-sm bg-primary text-primary-foreground" />
+
+<!-- card com margem custom -->
+<GridLayout class="card mx-3 mb-2">
+```
+
+### Regra de ouro
+
+Use as classes `@utility` como base. Se precisar de variação, **componha** com utilities Tailwind individuais. NUNCA crie `<style scoped>` para estilos que já existem como utility.
+
+## 2. Paleta de Cores (Design Tokens)
+
+Definidas como `@theme` no `app/app.css`. Mapeiam para classes Tailwind automaticamente.
+Use SEMPRE classes semânticas — NUNCA hex hardcoded.
+
+| Token                    | Classe Tailwind                 | Uso                                    |
+| ------------------------ | ------------------------------- | -------------------------------------- |
+| `background`             | `bg-background`                 | Fundo da página/tela                   |
+| `foreground`             | `text-foreground`               | Texto principal                        |
+| `primary`                | `bg-primary`                    | Botões primários, ações principais     |
+| `primary-foreground`     | `text-primary-foreground`       | Texto sobre bg primary                 |
+| `secondary`              | `bg-secondary`                  | Botões secundários, ações alternativas |
+| `secondary-foreground`   | `text-secondary-foreground`     | Texto sobre bg secondary               |
+| `muted`                  | `bg-muted`                      | Fundos sutis, seções desabilitadas     |
+| `muted-foreground`       | `text-muted-foreground`         | Texto secundário, hints, captions      |
+| `accent`                 | `bg-accent`                     | Destaques press                        |
+| `accent-foreground`      | `text-accent-foreground`        | Texto sobre accent                     |
+| `destructive`            | `bg-destructive`                | Ações de remoção/perigo                |
+| `destructive-foreground` | `text-destructive-foreground`   | Texto sobre destructive                |
+| `success`                | `text-success` / `bg-success`   | Valores monetários, confirmações       |
+| `success-foreground`     | `text-success-foreground`       | Texto sobre bg success                 |
+| `warning`                | `text-warning` / `bg-warning`   | Alertas, atenção                       |
+| `warning-foreground`     | `text-warning-foreground`       | Texto sobre bg warning                 |
+| `border`                 | `border-border`                 | Bordas de cards, separadores           |
+| `input`                  | `border-input`                  | Bordas de inputs                       |
+| `ring`                   | `ring-ring`                     | Focus ring (não usado no NS)           |
+| `card`                   | `bg-card`                       | Fundo de cards                         |
+| `card-foreground`        | `text-card-foreground`          | Texto dentro de cards                  |
+
+## 3. Tipografia
+
+| Uso                  | Classes Tailwind                        |
+| -------------------- | --------------------------------------- |
+| Título de página     | `text-xl font-bold text-foreground`     |
+| Título de card/seção | `text-lg font-semibold text-foreground` |
+| Corpo do texto       | `text-base text-foreground`             |
+| Texto secundário     | `text-sm text-muted-foreground`         |
+| Caption / hint       | `text-xs text-muted-foreground`         |
+| Valor monetário      | `text-base font-bold text-success`      |
+| Label de formulário  | `text-sm font-medium text-foreground`   |
+
+## 4. Espaçamento e Layout
+
+| Elemento           | Classes Tailwind |
+| ------------------ | ---------------- |
+| Padding de página  | `p-4`            |
+| Margem entre cards | `m-2` ou `mb-3`  |
+| Padding de card    | `p-4` (via card) |
+| Gap entre itens    | `mb-2` ou `mb-3` |
+| Padding de input   | `p-3` (via input-field) |
+| Padding de botão   | `p-3` (via btn-*)|
+
+## 5. Bordas e Cantos
+
+| Propriedade     | Classes / Valores                            |
+| --------------- | -------------------------------------------- |
+| Borda padrão    | `border border-border` (já incluso no `card`, `input-field`) |
+| Radius padrão   | `rounded-lg` (8dp) — incluso nos `@utility`  |
+| Radius pequeno  | `rounded-md` (6dp)                           |
+| Radius mínimo   | `rounded-sm` (4dp)                           |
+| Radius circular | `rounded-full` — incluso nos `btn-icon*`, `badge*` |
+
+## 6. Elevação (Sombras)
+
+NativeScript NÃO suporta `box-shadow` CSS. Use atributos XML nativos:
+
+```xml
+<StackLayout androidElevation="2" iosElevation="2" class="card">
+```
+
+| Nível  | androidElevation | iosElevation | Uso                   |
+| ------ | ---------------- | ------------ | --------------------- |
+| Nenhum | 0                | 0            | Padrão shadcn (flat)  |
+| Sutil  | 1                | 1            | Cards com destaque    |
+| Médio  | 2                | 2            | Modals, dropdowns     |
+| Alto   | 4                | 4            | FAB, ações flutuantes |
+
+**Regra:** Shadcn é flat. Prefira `androidElevation="0"` e use bordas (`border border-border`) para separação visual.
+
+## 7. CSS que NÃO funciona no NativeScript → Alternativas
+
+### Propriedades CSS sem suporte
+
+| CSS Web                  | Suporte NS | Alternativa NativeScript                          | Como aplicar                                |
+| ------------------------ | ---------- | ------------------------------------------------- | ------------------------------------------- |
+| `box-shadow`             | Não        | `androidElevation` / `iosElevation`               | Atributo XML: `androidElevation="2"`        |
+| `overflow: hidden`       | Parcial    | `clipToBounds` (iOS only)                         | Atributo XML: `clipToBounds="true"`         |
+| `display: flex`          | Não        | `<FlexboxLayout>`                                 | Componente de layout                        |
+| `display: grid`          | Não        | `<GridLayout rows="..." columns="...">`           | Componente de layout                        |
+| `position: absolute`     | Não        | `<AbsoluteLayout>` com `left`/`top`               | Componente de layout                        |
+| `position: relative`     | Não        | Implícito em todos os layouts                     | N/A                                         |
+| `z-index`                | Não        | Ordem dos elementos no template                   | Último filho = topo visual                  |
+| `transition`             | Não        | `@keyframes` CSS ou API `View.animate()`          | Ver seção Animações abaixo                  |
+| `gap`                    | Não        | `margin` nos filhos                               | Classes `mb-*`, `mr-*`, `m-*`              |
+| `cursor`                 | Não        | N/A (mobile não tem cursor)                       | Não aplicável                               |
+| `outline`                | Não        | `border` como alternativa visual                  | Classes `border border-ring`                |
+| `::before` / `::after`   | Não        | Elemento `<Label>` separado no template           | Adicionar Label como filho                  |
+| `::placeholder`          | Não        | `placeholderColor` atributo                       | Atributo XML: `placeholderColor="#71717a"`   |
+| `background-image`       | Não        | `<Image>` empilhado com `AbsoluteLayout`          | Componente Image                            |
+| `linear-gradient`        | Não        | `LinearGradient` via API nativa                   | Código JS/TS nativo                         |
+| `backdrop-filter`        | Não        | Não suportado                                     | N/A                                         |
+| `filter` (blur, etc.)    | Não        | Não suportado                                     | N/A                                         |
+| `text-overflow: ellipsis`| Parcial    | Truncamento automático sem `textWrap`             | Atributo XML: `textWrap="false"`            |
+| `white-space`            | Não        | `textWrap`                                        | Atributo XML: `textWrap="false"`            |
+| `line-height`            | Parcial    | `lineHeight` (pode não funcionar em todos os casos) | CSS: `line-height: 1.5` ou atributo        |
+| `letter-spacing`         | Sim        | Funciona via CSS                                  | CSS: `letter-spacing: 0.5`                  |
+
+### Pseudo-classes CSS
+
+| Pseudo-classe Web | Suporte NS | Alternativa NativeScript                        |
+| ----------------- | ---------- | ----------------------------------------------- |
+| `:hover`          | Não        | N/A (mobile não tem hover)                      |
+| `:active`         | Não        | `:pressed` (único suportado)                    |
+| `:focus`          | Não        | Não suportado via CSS                           |
+| `:disabled`       | Não        | `isEnabled="false"` + `opacity-50` no class     |
+| `:first-child`    | Não        | Lógica no template (v-if no index)              |
+| `:last-child`     | Não        | Lógica no template                              |
+| `:nth-child`      | Não        | Lógica no template                              |
+| `:pressed`        | **Sim**    | Única pseudo-classe suportada pelo NativeScript  |
+
+### Atributos que DEVEM ser XML (não CSS)
+
+Estes são controlados via atributos no template, não via classes CSS:
+
+| Atributo                | Componente(s)          | Propósito                         | Exemplo                          |
+| ----------------------- | ---------------------- | --------------------------------- | -------------------------------- |
+| `textWrap`              | Label, TextView        | Quebra de linha                   | `textWrap="true"`                |
+| `hint`                  | TextField, TextView    | Placeholder text                  | `hint="Digite aqui..."`         |
+| `placeholderColor`      | TextField, TextView    | Cor do placeholder                | `placeholderColor="#71717a"`     |
+| `keyboardType`          | TextField              | Tipo de teclado                   | `keyboardType="email"`          |
+| `secure`                | TextField              | Campo de senha                    | `:secure="true"`                |
+| `isEnabled`             | Todos                  | Habilitar/desabilitar             | `:isEnabled="false"`            |
+| `rows` / `columns`      | GridLayout             | Definição do grid                 | `rows="auto, *, auto"`          |
+| `orientation`           | StackLayout            | Direção do stack                  | `orientation="horizontal"`      |
+| `row` / `col`           | Filhos de GridLayout   | Posição no grid                   | `row="0" col="1"`              |
+| `rowSpan` / `colSpan`   | Filhos de GridLayout   | Span no grid                      | `rowSpan="2"`                   |
+| `horizontalAlignment`   | View                   | Alinhamento horizontal            | `horizontalAlignment="center"`  |
+| `verticalAlignment`     | View                   | Alinhamento vertical              | `verticalAlignment="center"`    |
+| `androidElevation`      | View                   | Sombra Android                    | `androidElevation="2"`          |
+| `iosElevation`          | View                   | Sombra iOS                        | `iosElevation="2"`              |
+| `separatorColor`        | ListView               | Cor do separador de lista         | `separatorColor="transparent"`  |
+| `clipToBounds`          | View                   | Overflow clipping (iOS)           | `clipToBounds="true"`           |
+| `maxLines`              | Label                  | Limitar número de linhas          | `maxLines="2"`                  |
+| `iosOverflowSafeArea`   | View                   | Safe area iOS                     | `iosOverflowSafeArea="false"`   |
+| `actionBarHidden`       | Page                   | Esconder ActionBar                | `actionBarHidden="true"`        |
+
+## 8. Animações no NativeScript
+
+Como `transition` CSS não funciona, use uma destas alternativas:
+
+### CSS @keyframes (simples)
+```css
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation-name: fadeIn;
+  animation-duration: 300ms;
+  animation-fill-mode: forwards;
+}
+```
+
+Propriedades animáveis via CSS: `opacity`, `background-color`, `transform` (translate, scale, rotate).
+
+### API JavaScript (complexo)
+```typescript
+import { View } from '@nativescript/core';
+
+viewRef.nativeView.animate({
+  opacity: 1,
+  translate: { x: 0, y: 0 },
+  duration: 300,
+  curve: CoreTypes.AnimationCurve.easeInOut,
+});
+```
+
+## 9. Tradução de Componentes Web → NativeScript
+
+| Web (HTML/React)       | NativeScript-Vue                          |
+| ---------------------- | ----------------------------------------- |
+| `<div>`                | `<StackLayout>` ou `<GridLayout>`         |
+| `<span>`, `<p>`        | `<Label textWrap="true">`                 |
+| `<button>`             | `<Button>` ou `<StackLayout @tap="...">`  |
+| `<input type="text">`  | `<TextField>`                             |
+| `<textarea>`           | `<TextView>`                              |
+| `<img>`                | `<Image>`                                 |
+| `<ul>/<li>` (lista)    | `<ListView>` com `<template #default>`    |
+| `<ScrollView>`         | `<ScrollView>`                            |
+| `<select>`             | `<ListPicker>` ou modal customizado       |
+| `<Switch>`             | `<Switch>`                                |
+| Flexbox container      | `<FlexboxLayout>`                         |
+| CSS Grid               | `<GridLayout rows="..." columns="...">`   |
+| Modal / Dialog         | `$showModal()` com componente Vue         |
+| Separator / Divider    | `<StackLayout class="separator">`         |
+
+## 10. Regras de Comportamento
+
+1. **NUNCA** use tags HTML (`<div>`, `<span>`, `<p>`, `<h1>`)
+2. **NUNCA** importe de `@/components/ui` do React/shadcn
+3. **NUNCA** use `@layer components` — use `@utility` (Tailwind v4)
+4. **NUNCA** use hex hardcoded no template — use tokens semânticos
+5. **SEMPRE** use `class` (não `className`) em templates Vue
+6. **SEMPRE** prefira classes `@utility` do `app.css` (ex: `btn-primary`, `card`, `input-field`)
+7. **SEMPRE** use `textWrap="true"` em Labels com texto longo
+8. **SEMPRE** consulte esta tabela antes de usar qualquer CSS que envolva shadow, position, pseudo-classes, display, ou overflow
+9. **PREFIRA** `GridLayout` para layouts complexos — mais performático
+10. **SEMICOLONS** obrigatórios em todo TypeScript (`;`)

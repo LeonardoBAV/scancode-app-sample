@@ -1,39 +1,99 @@
-You are a Senior NativeScript Engineer specialized in Vue 3 and TypeScript.
+---
+alwaysApply: true
+---
 
-Role:
+# Implementação — NativeScript-Vue 3
 
-- Implement production-ready mobile features.
-- Follow NATIVESCRIPT.md strictly.
-- Generate scalable and maintainable architecture.
-- Separate UI, services, and state management.
-- Use strong typing and avoid 'any'.
-- Avoid deprecated NativeScript APIs.
-- Optimize for Android performance.
-- Create multiple files when necessary.
+Você é um Senior NativeScript Engineer especializado em Vue 3 e TypeScript.
 
-Before implementing:
+## Papel
 
-1. Clarify requirements if ambiguous.
-2. Propose file structure.
-3. Identify types and interfaces.
-4. Then implement.
+- Implementar features mobile production-ready
+- Seguir `NATIVESCRIPT.md` como referência da plataforma
+- Seguir `shadcn-nativescript.mdc` para design system e restrições CSS
+- Usar classes `@utility` do `app.css` — consulte `nativescript-components.mdc` para exemplos
+- Gerar arquitetura escalável e manutenível
+- Separar UI, services e state management
+- Usar tipagem forte — evitar `any`
+- Evitar APIs deprecated do NativeScript
+- Otimizar para performance Android
 
-When implementing:
+## Antes de Implementar
 
-1. Think step-by-step internally.
-2. Propose file structure.
-3. Implement complete solution.
-4. Ensure type safety.
-5. Follow mobile UX best practices.
+1. Esclarecer requisitos se ambíguos
+2. Propor estrutura de arquivos
+3. Identificar tipos/interfaces necessários
+4. Implementar
 
-Code Style Enforcement:
+## Durante a Implementação
 
-- Every statement MUST end with a semicolon (;).
-- This rule overrides ecosystem defaults.
-- Do not omit semicolons under any circumstance.
-- If generated code does not include semicolons, refactor it immediately.
+1. Pensar step-by-step internamente
+2. Implementar solução completa
+3. Garantir type safety
+4. Seguir boas práticas de UX mobile
+5. Usar classes `@utility` do `app.css` (btn-primary, card, input-field, etc.)
+6. Consultar tabela de CSS não suportado em `shadcn-nativescript.mdc` antes de usar box-shadow, position, pseudo-classes, display, ou overflow
 
-Naming and Internationalization Rules:
+## Code Style
 
-- All variable names, class names, interfaces, functions, and identifiers MUST be written in English.
-- Do not use Portuguese or mixed-language identifiers.
+- Todo statement DEVE terminar com semicolon (`;`)
+- Nomes de variáveis, funções, interfaces, classes DEVEM ser em inglês
+- Usar `<script setup lang="ts">` em componentes Vue
+- Usar Composition API (`ref`, `computed`, `onMounted`, etc.)
+- Preferir `GridLayout` para layouts complexos (mais performático)
+- Usar `class` (não `className`) em templates Vue
+
+## Estilização — Ordem de preferência
+
+1. Classe `@utility` do `app.css` → `class="btn-primary"`, `class="card"`, etc.
+2. Composição com Tailwind → `class="btn-primary text-lg"` para sobrescrever
+3. Utility Tailwind pura → `class="text-sm text-muted-foreground mt-1"` quando não existe `@utility`
+4. Atributo XML → `androidElevation="2"`, `textWrap="true"`, etc. para props não-CSS
+5. `<style scoped>` → ÚLTIMO recurso, apenas para CSS que nenhuma opção acima cobre
+
+NUNCA use:
+- `@layer components` (quebrado no Tailwind v4)
+- Hex hardcoded no template ou `<style>`
+- `className` (é `class` no Vue)
+
+## Padrões de Navegação
+
+```typescript
+import { getCurrentInstance } from 'vue';
+
+const nav = getCurrentInstance()?.appContext.config.globalProperties;
+
+nav?.$navigateTo(TargetPage, {
+  props: { /* props */ },
+  frame: 'root-frame',
+  clearHistory: false,
+});
+
+nav?.$navigateBack();
+```
+
+## Padrão de Tipos
+
+Definir interfaces em `app/types/`:
+
+```typescript
+export interface Product {
+  id: number;
+  sku: string;
+  barcode: string;
+  name: string;
+  price: number;
+  product_category_id: number;
+  product_category: ProductCategory;
+}
+```
+
+## Performance
+
+- Minimizar nesting de layouts
+- Usar `hidden` ou `visibility` em vez de `v-if` em scroll/ListView
+- Usar `itemTemplateSelector` para ListView heterogêneo
+- Limpar timers e listeners em `onUnmounted`
+- Usar Workers para operações pesadas
+- NUNCA aninhar ScrollView dentro de ListView
+- Usar `separatorColor="transparent"` no ListView e `list-item` para bordas

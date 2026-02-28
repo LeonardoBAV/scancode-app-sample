@@ -1,6 +1,162 @@
 @import "tailwindcss";
 
-ActionBar {
-    background-color: #65adf1;
-    color: white;
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   Fonte de verdade para todas as cores, raios e espaçamentos.
+   Geram automaticamente classes Tailwind (ex: bg-primary).
+   ═══════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ─── Base ─── */
+  --color-background: #ffffff;
+  --color-foreground: #09090b;
+
+  /* ─── Card ─── */
+  --color-card: #ffffff;
+  --color-card-foreground: #09090b;
+
+  /* ─── Primary ─── */
+  --color-primary: #18181b;
+  --color-primary-foreground: #fafafa;
+
+  /* ─── Secondary ─── */
+  --color-secondary: #f4f4f5;
+  --color-secondary-foreground: #18181b;
+
+  /* ─── Muted ─── */
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+
+  /* ─── Accent ─── */
+  --color-accent: #f4f4f5;
+  --color-accent-foreground: #18181b;
+
+  /* ─── Destructive ─── */
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #fafafa;
+
+  /* ─── Success ─── */
+  --color-success: #16a34a;
+  --color-success-foreground: #fafafa;
+
+  /* ─── Warning ─── */
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #18181b;
+
+  /* ─── Borders & Inputs ─── */
+  --color-border: #e4e4e7;
+  --color-input: #e4e4e7;
+  --color-ring: #18181b;
+
+  /* ─── Radius ─── */
+  --radius-lg: 8px;
+  --radius-md: 6px;
+  --radius-sm: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMPONENT UTILITIES
+   Classes reutilizáveis via @utility (Tailwind v4).
+   Uso: class="btn-primary" em vez de repetir 6 classes.
+   Podem ser sobrescritas por utilities individuais:
+     class="btn-primary text-lg" → text-lg prevalece.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Buttons ─── */
+
+@utility btn-primary {
+  @apply bg-primary text-primary-foreground text-base font-semibold p-3 rounded-lg;
+}
+
+@utility btn-secondary {
+  @apply bg-secondary text-secondary-foreground text-base font-medium p-3 rounded-lg;
+}
+
+@utility btn-outline {
+  @apply bg-background text-foreground text-base font-medium p-3 rounded-lg border border-border;
+}
+
+@utility btn-ghost {
+  @apply bg-transparent text-foreground text-base font-medium p-3;
+}
+
+@utility btn-destructive {
+  @apply bg-destructive text-destructive-foreground text-base font-semibold p-3 rounded-lg;
+}
+
+@utility btn-icon {
+  @apply bg-primary text-primary-foreground text-lg font-bold w-10 h-10 rounded-full p-0;
+}
+
+@utility btn-icon-sm {
+  @apply text-lg font-bold w-9 h-9 rounded-full p-0;
+}
+
+/* ─── Card ─── */
+
+@utility card {
+  @apply bg-card border border-border rounded-lg p-4;
+}
+
+/* ─── Input ─── */
+
+@utility input-field {
+  @apply bg-background text-foreground text-base border border-input rounded-lg p-3;
+}
+
+@utility input-search {
+  @apply bg-muted text-foreground text-base border border-input rounded-lg p-3;
+}
+
+/* ─── Badge ─── */
+
+@utility badge {
+  @apply bg-primary text-primary-foreground text-xs font-medium rounded-full px-2 py-1;
+}
+
+@utility badge-secondary {
+  @apply bg-secondary text-secondary-foreground text-xs font-medium rounded-full px-2 py-1;
+}
+
+@utility badge-destructive {
+  @apply bg-destructive text-destructive-foreground text-xs font-medium rounded-full px-2 py-1;
+}
+
+@utility badge-success {
+  @apply bg-success text-success-foreground text-xs font-medium rounded-full px-2 py-1;
+}
+
+@utility badge-outline {
+  @apply bg-transparent text-foreground text-xs font-medium rounded-full border border-border px-2 py-1;
+}
+
+/* ─── Layout Helpers ─── */
+
+@utility separator {
+  @apply bg-border my-3;
+  height: 1;
+}
+
+@utility list-item {
+  @apply p-4 border-b border-border;
+}
+
+@utility footer-bar {
+  @apply bg-card p-4 border-t border-border;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRESSED STATES
+   NativeScript não suporta :active/:hover/:focus.
+   A única pseudo-classe suportada é :pressed.
+   ═══════════════════════════════════════════════════════════════ */
+
+.btn-primary:pressed,
+.btn-secondary:pressed,
+.btn-outline:pressed,
+.btn-ghost:pressed,
+.btn-destructive:pressed,
+.btn-icon:pressed,
+.btn-icon-sm:pressed {
+  opacity: 0.7;
 }

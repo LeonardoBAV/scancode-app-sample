@@ -1,0 +1,293 @@
+---
+alwaysApply: true
+---
+
+# Catálogo de Componentes — NativeScript-Vue 3
+
+Referência para criar componentes de UI. Usa as classes `@utility` definidas no `app/app.css`.
+Para detalhes sobre tokens e CSS do NativeScript, consulte `shadcn-nativescript.mdc`.
+
+## Button
+
+Todas as variantes usam a classe correspondente. Sobrescreva com utilities individuais se precisar.
+
+```xml
+<!-- Primary -->
+<Button text="Confirmar" class="btn-primary" @tap="onConfirm" />
+
+<!-- Secondary -->
+<Button text="Cancelar" class="btn-secondary" @tap="onCancel" />
+
+<!-- Outline -->
+<Button text="Detalhes" class="btn-outline" @tap="onDetails" />
+
+<!-- Ghost -->
+<Button text="Voltar" class="btn-ghost" @tap="onBack" />
+
+<!-- Destructive -->
+<Button text="Excluir" class="btn-destructive" @tap="onDelete" />
+
+<!-- Icon (circular 40dp) -->
+<Button text="+" class="btn-icon" @tap="onAdd" />
+
+<!-- Disabled — isEnabled + opacity -->
+<Button text="Indisponível" class="btn-primary opacity-50" :isEnabled="false" />
+```
+
+### Sobrescrevendo variantes
+
+```xml
+<!-- Primary com texto maior -->
+<Button text="Continuar" class="btn-primary text-lg p-4" @tap="onContinue" />
+
+<!-- Outline com fundo accent ao ser usado como seleção -->
+<Button text="Selecionado" class="btn-outline bg-accent" @tap="onSelect" />
+```
+
+## Card
+
+```xml
+<!-- Card básico -->
+<GridLayout rows="auto, auto" class="card m-2">
+  <Label row="0" text="Título" class="text-lg font-semibold text-card-foreground" />
+  <Label row="1" text="Descrição" class="text-sm text-muted-foreground mt-1" textWrap="true" />
+</GridLayout>
+
+<!-- Card com ação -->
+<GridLayout rows="auto, auto, auto" class="card m-2">
+  <Label row="0" text="Pedido #1234" class="text-lg font-semibold text-card-foreground" />
+  <Label row="1" text="3 itens · R$ 45,00" class="text-sm text-muted-foreground mt-1" />
+  <Button row="2" text="Ver Detalhes" class="btn-primary mt-3" @tap="onViewOrder" />
+</GridLayout>
+
+<!-- Card de produto com preço -->
+<GridLayout rows="auto, auto" columns="*, auto" class="card m-2">
+  <Label row="0" col="0" :text="product.name" class="text-base font-semibold text-card-foreground" textWrap="true" />
+  <Label row="0" col="1" :text="formatCurrency(product.price)" class="text-base font-bold text-success" />
+  <Label row="1" col="0" :text="product.sku + ' · ' + product.product_category.name" class="text-xs text-muted-foreground mt-1" />
+</GridLayout>
+
+<!-- Card com elevação (exceção ao flat) -->
+<GridLayout rows="auto" class="card m-2" androidElevation="2" iosElevation="2">
+  <Label text="Card com sombra" class="text-base text-card-foreground" />
+</GridLayout>
+```
+
+## Input / TextField
+
+```xml
+<!-- Input padrão -->
+<TextField v-model="name" hint="Nome completo" class="input-field" />
+
+<!-- Input com label -->
+<StackLayout class="mb-3">
+  <Label text="E-mail" class="text-sm font-medium text-foreground mb-1" />
+  <TextField v-model="email" hint="seu@email.com" keyboardType="email" class="input-field" />
+</StackLayout>
+
+<!-- Input de busca -->
+<TextField v-model="searchQuery" hint="Buscar..." class="input-search" @textChange="onSearch" />
+
+<!-- Input senha -->
+<TextField v-model="password" hint="Senha" :secure="true" class="input-field" />
+
+<!-- Input com placeholder colorido -->
+<TextField v-model="value" hint="Valor" class="input-field" placeholderColor="#71717a" />
+
+<!-- TextView (multiline) -->
+<TextView v-model="notes" hint="Observações..." class="input-field" height="100" />
+```
+
+## Badge
+
+```xml
+<!-- Default -->
+<Label text="Novo" class="badge" />
+
+<!-- Secondary -->
+<Label text="Pendente" class="badge-secondary" />
+
+<!-- Destructive -->
+<Label text="Cancelado" class="badge-destructive" />
+
+<!-- Success -->
+<Label text="Pago" class="badge-success" />
+
+<!-- Outline -->
+<Label text="Rascunho" class="badge-outline" />
+```
+
+## Separator
+
+```xml
+<StackLayout class="separator" />
+```
+
+## List Item (para ListView)
+
+```xml
+<!-- Item simples com chevron -->
+<GridLayout columns="*, auto" class="list-item">
+  <Label col="0" text="Configurações" class="text-base text-foreground" />
+  <Label col="1" text="›" class="text-lg text-muted-foreground" />
+</GridLayout>
+
+<!-- Item com subtítulo -->
+<GridLayout rows="auto, auto" columns="*, auto" class="list-item">
+  <Label row="0" col="0" text="João Silva" class="text-base font-medium text-foreground" />
+  <Label row="1" col="0" text="joao@email.com" class="text-sm text-muted-foreground mt-1" />
+  <Label row="0" col="1" rowSpan="2" text="›" class="text-lg text-muted-foreground" verticalAlignment="center" />
+</GridLayout>
+
+<!-- Item com avatar (iniciais) -->
+<GridLayout rows="auto, auto" columns="auto, *, auto" class="list-item">
+  <Label row="0" col="0" rowSpan="2" text="JS"
+    class="text-sm font-bold text-primary-foreground bg-primary w-10 h-10 rounded-full text-center"
+    verticalAlignment="center" />
+  <Label row="0" col="1" text="João Silva" class="text-base font-medium text-foreground ml-3" />
+  <Label row="1" col="1" text="Cliente VIP" class="text-sm text-muted-foreground ml-3" />
+  <Label row="0" col="2" rowSpan="2" text="›" class="text-lg text-muted-foreground" verticalAlignment="center" />
+</GridLayout>
+
+<!-- Item com badge -->
+<GridLayout columns="*, auto" class="list-item">
+  <Label col="0" text="Pedido #1234" class="text-base font-medium text-foreground" />
+  <Label col="1" text="Pago" class="badge-success" />
+</GridLayout>
+
+<!-- Item com preço -->
+<GridLayout rows="auto, auto" columns="*, auto" class="list-item">
+  <Label row="0" col="0" :text="item.name" class="text-base font-medium text-foreground" textWrap="true" />
+  <Label row="0" col="1" :text="formatCurrency(item.price)" class="text-base font-bold text-success" />
+  <Label row="1" col="0" :text="item.category" class="text-xs text-muted-foreground mt-1" />
+</GridLayout>
+```
+
+## Quantity Stepper
+
+```xml
+<GridLayout columns="auto, auto, auto" class="mt-2">
+  <Button col="0" text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" @tap="decrease(item)" />
+  <Label col="1" :text="String(item.quantity)" class="text-base font-semibold text-foreground text-center min-w-8 mx-2" verticalAlignment="center" />
+  <Button col="2" text="+" class="btn-icon-sm bg-primary text-primary-foreground" @tap="increase(item)" />
+</GridLayout>
+```
+
+## Footer Bar
+
+```xml
+<!-- Totais (cart/checkout) -->
+<GridLayout rows="auto" columns="*, *" class="footer-bar">
+  <Label col="0" :text="totalItemsLabel" class="text-base font-semibold text-foreground" verticalAlignment="center" />
+  <Label col="1" :text="formatCurrency(total)" class="text-xl font-bold text-success text-right" verticalAlignment="center" />
+</GridLayout>
+
+<!-- Footer com botão -->
+<GridLayout rows="auto" columns="*, auto" class="footer-bar">
+  <Label col="0" :text="formatCurrency(total)" class="text-xl font-bold text-success" verticalAlignment="center" />
+  <Button col="1" text="Finalizar" class="btn-primary" @tap="onCheckout" />
+</GridLayout>
+```
+
+## ActionBar
+
+```xml
+<!-- Padrão -->
+<ActionBar class="bg-background">
+  <Label text="Título" class="text-lg font-bold text-foreground" />
+</ActionBar>
+
+<!-- Com ação à direita -->
+<ActionBar class="bg-background">
+  <Label text="Pedidos" class="text-lg font-bold text-foreground" />
+  <ActionItem text="+ Novo" class="text-primary" @tap="onCreate" ios.position="right" />
+</ActionBar>
+```
+
+## Empty State
+
+```xml
+<StackLayout v-if="items.length === 0" class="p-8" verticalAlignment="center" horizontalAlignment="center">
+  <Label text="Nenhum item encontrado" class="text-lg font-semibold text-foreground text-center mb-2" />
+  <Label text="Tente adicionar novos itens" class="text-sm text-muted-foreground text-center" textWrap="true" />
+  <Button text="Adicionar" class="btn-primary mt-4" @tap="onAdd" />
+</StackLayout>
+```
+
+## Switch / Toggle
+
+```xml
+<GridLayout columns="*, auto" class="list-item">
+  <Label col="0" text="Notificações" class="text-base text-foreground" />
+  <Switch col="1" v-model="notifications" class="text-primary" />
+</GridLayout>
+```
+
+## Page Scaffold
+
+Estrutura base para qualquer página nova:
+
+```xml
+<template>
+  <Page actionBarHidden="true">
+    <GridLayout rows="auto, *" class="bg-background">
+      <StackLayout row="0" class="p-4 border-b border-border">
+        <Label text="Título" class="text-xl font-bold text-foreground" />
+      </StackLayout>
+
+      <ScrollView row="1">
+        <StackLayout class="p-4">
+          <!-- conteúdo -->
+        </StackLayout>
+      </ScrollView>
+    </GridLayout>
+  </Page>
+</template>
+
+<script setup lang="ts">
+// lógica aqui
+</script>
+```
+
+## Page com ListView
+
+```xml
+<template>
+  <Page actionBarHidden="true">
+    <GridLayout rows="auto, *, auto" class="bg-background">
+      <StackLayout row="0" class="p-4 border-b border-border">
+        <Label text="Lista" class="text-xl font-bold text-foreground" />
+      </StackLayout>
+
+      <ListView row="1" :items="items" separatorColor="transparent">
+        <template #default="{ item }">
+          <GridLayout columns="*, auto" class="list-item">
+            <Label col="0" :text="item.name" class="text-base text-foreground" />
+            <Label col="1" text="›" class="text-lg text-muted-foreground" />
+          </GridLayout>
+        </template>
+      </ListView>
+
+      <StackLayout row="2" class="footer-bar">
+        <Button text="Adicionar" class="btn-primary" @tap="onAdd" />
+      </StackLayout>
+    </GridLayout>
+  </Page>
+</template>
+```
+
+## Regras para ListView
+
+1. SEMPRE use `separatorColor="transparent"` — controle bordas via `list-item`
+2. Evite `v-if` dentro de itens — use `visibility` ou `hidden` para performance
+3. Para listas heterogêneas, use `itemTemplateSelector`
+4. NUNCA aninhe `ScrollView` dentro de `ListView`
+
+## Regras para disabled
+
+NativeScript não tem `:disabled` CSS. Aplique manualmente:
+
+```xml
+<Button text="Salvar" class="btn-primary opacity-50" :isEnabled="false" />
+<TextField hint="..." class="input-field opacity-50" :isEnabled="false" />
+```

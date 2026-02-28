@@ -1,0 +1,62 @@
+# myCoolApp — NativeScript-Vue 3 Mobile App
+
+## Stack Técnica
+
+- **Runtime:** NativeScript 9
+- **Framework:** Vue 3 (Composition API, `<script setup lang="ts">`)
+- **Estilização:** Tailwind CSS v4 (`@nativescript/tailwind` v4)
+- **Design System:** Shadcn UI adaptado — classes `@utility` em `app/app.css`
+- **Linguagem:** TypeScript (strict mode)
+
+## Regras Fundamentais
+
+1. **NativeScript-only** — NUNCA use HTML. Use `<StackLayout>`, `<GridLayout>`, `<Label>`, etc.
+2. **@utility-first** — Use as classes do design system (`btn-primary`, `card`, `input-field`, `badge`, etc.). Componha com utilities Tailwind para variações.
+3. **NUNCA @layer components** — Quebrado no Tailwind v4. Use `@utility` para novas classes.
+4. **NUNCA hex hardcoded** — Use tokens semânticos (`bg-primary`, `text-muted-foreground`).
+5. **Semicolons obrigatórios** — Todo statement TypeScript termina com `;`
+6. **Nomes em inglês** — Variáveis, funções, interfaces e classes em inglês.
+7. **Consulte NATIVESCRIPT.md** — Referência de APIs e padrões na raiz do projeto.
+
+## Arquitetura
+
+```
+app/
+├── app.css              # @theme (tokens) + @utility (componentes) + :pressed states
+├── app.ts               # Entry point
+├── App.vue              # Root component
+├── components/          # Componentes reutilizáveis
+├── layouts/             # Layouts (Default com TabView)
+├── pages/               # Páginas por domínio
+│   ├── event/           # Eventos (cart, home, orders)
+│   ├── Profile/         # Perfil e configurações
+│   ├── Login.vue        # Autenticação
+│   └── Events.vue       # Lista de eventos
+├── types/               # Interfaces TypeScript
+└── utils/               # Utilitários (auth, helpers)
+```
+
+## Navegação
+
+- `$navigateTo(Component, { props, frame })` para navegar
+- `$navigateBack()` para voltar
+- Sem Vue Router — navegação nativa via Frames
+- `frame: 'root-frame'` para navegação global
+- `clearHistory: true` para substituir a stack
+
+## Workflow de Rules (Ordem de consulta)
+
+1. **Este arquivo** (`.cursorrules`) — Identidade e regras do projeto
+2. **`shadcn-nativescript.mdc`** — Design System: tokens, CSS suportado/não suportado, alternativas NS
+3. **`nativescript-components.mdc`** — Catálogo: exemplos de todos os componentes usando `@utility`
+4. **`nativescript-implementer.mdc`** — Implementação: arquitetura, navegação, code style
+5. **`NATIVESCRIPT.md`** — Referência completa da plataforma NativeScript
+
+## Estrutura do app.css
+
+```
+@import "tailwindcss"
+  → @theme { tokens de cor, radius }
+  → @utility { btn-*, card, input-*, badge-*, separator, list-item, footer-bar }
+  → :pressed states para botões
+```

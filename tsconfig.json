@@ -11,7 +11,8 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["app/*"],
-      "@/*": ["app/*"]
+      "@/*": ["app/*"],
+      "vue": ["node_modules/nativescript-vue/dist/index.d.ts"]
     },
     "typeRoots": ["types"],
     "types": ["node"],

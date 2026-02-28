@@ -1,6 +1,12 @@
 // this configurations is loaded before building plugins, as well as before building
 // the app - this is where you can apply global settings and overrides
 
+allprojects {
+  repositories {
+    maven { url 'https://jitpack.io' }
+  }
+}
+
 project.ext {
   // androidXAppCompat = "1.4.1"
   // androidXExifInterface = "1.3.3"

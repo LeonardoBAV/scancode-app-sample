@@ -69,6 +69,7 @@
 import { ref, computed, getCurrentInstance } from 'vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
 import OrderClientShowPage from './OrderClientShowPage.vue';
+import OrderSignPage from './OrderSignPage.vue';
 import {
     orderCreateClientFantasyName,
     orderCreateClientCpfCnpj,
@@ -108,7 +109,7 @@ function onPrint(): void {
 }
 
 function onFinish(): void {
-    orderStatus.value = 'Completed';
+    navigateTo?.(OrderSignPage);
 }
 </script>
 

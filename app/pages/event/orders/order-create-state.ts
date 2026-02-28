@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import type { Client } from '../../types/client';
+import type { Client } from '../../../types/client';
 
 /** Default client for initial state. */
 const defaultClient: Client = {

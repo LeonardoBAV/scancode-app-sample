@@ -5,13 +5,7 @@
             <ActionItem text="👤 Perfil" @tap="openProfile" />
         </ActionBar>
 
-        <TabView
-            ref="tabViewRef"
-            :selectedIndex="selectedIndex"
-            androidTabsPosition="bottom"
-            class="tab-view-custom"
-            @selectedIndexChange="onSelectedIndexChange"
-        >
+        <TabView ref="tabViewRef" :selectedIndex="selectedIndex" androidTabsPosition="bottom" class="tab-view-custom" @selectedIndexChange="onSelectedIndexChange">
             <TabViewItem title="Evento">
                 <Frame>
                     <Home :event="event" />
@@ -35,7 +29,7 @@
 import { ref, getCurrentInstance } from 'vue';
 import type { EventItem } from '../types/event-item';
 import Home from '../pages/event/home/Home.vue';
-import Cart from '../pages/event/Cart/Cart.vue';
+import Cart from '../pages/event/cart/Cart.vue';
 import OrderListPage from '../pages/event/orders/OrderListPage.vue';
 import Profile from '../pages/Profile/Profile.vue';
 

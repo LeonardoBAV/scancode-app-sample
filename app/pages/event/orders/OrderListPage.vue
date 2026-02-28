@@ -74,7 +74,7 @@ function onOrderTap(order: Order): void {
 }
 
 function onAddNewOrder(): void {
-    navigateTo?.(OrderSelectClientPage);
+    navigateTo?.(OrderSelectClientPage, { backstackVisible: false });
 }
 </script>
 

@@ -1,45 +1,76 @@
 <template>
-    <Page>
-        <ActionBar>
-            <Label text="Login" class="font-bold text-lg" />
-        </ActionBar>
+    <Page actionBarHidden="true">
+        <GridLayout rows="2*, auto, 3*" class="bg-background p-8">
 
-        <GridLayout rows="*, auto, auto, auto, *" columns="*" class="p-8">
-            <StackLayout row="1" verticalAlignment="middle">
-                <TextField v-model="username" hint="Usuário" class="p-4 mb-4 rounded-lg border border-gray-300 text-lg" :secure="false" />
-                <TextField v-model="password" hint="Senha" class="p-4 mb-4 rounded-lg border border-gray-300 text-lg" :secure="true" />
-                <Label v-if="errorMessage" :text="errorMessage" class="text-red-500 text-center mb-2" textWrap="true" />
-                <Button text="Entrar" class="text-lg text-white bg-blue-500 p-4 rounded-lg" @tap="onLogin" />
+            <!-- Branding -->
+            <StackLayout row="0" verticalAlignment="bottom" class="mb-10">
+                <Label text="MC" class="text-xl font-bold text-primary-foreground bg-primary w-16 h-16 rounded-full text-center" horizontalAlignment="center" verticalAlignment="center" />
+                <Label :text="$t('login.title')" class="text-2xl font-bold text-foreground text-center mt-4" />
+                <Label :text="$t('login.subtitle')" class="text-sm text-muted-foreground text-center mt-1" />
             </StackLayout>
+
+            <!-- Form -->
+            <StackLayout row="1">
+                <StackLayout class="mb-4">
+                    <Label :text="$t('login.username')" class="text-sm font-medium text-foreground mb-1" />
+                    <TextField v-model="username" :hint="$t('login.usernamePlaceholder')" :class="inputClass('username')" placeholderColor="#a1a1aa" autocorrect="false" autocapitalizationType="none" @focus="focusedField = 'username'" @blur="focusedField = ''" />
+                </StackLayout>
+
+                <StackLayout class="mb-5">
+                    <Label :text="$t('login.password')" class="text-sm font-medium text-foreground mb-1" />
+                    <TextField v-model="password" :hint="$t('login.passwordPlaceholder')" :secure="true" :class="inputClass('password')" placeholderColor="#a1a1aa" @focus="focusedField = 'password'" @blur="focusedField = ''" />
+                </StackLayout>
+
+                <Label v-if="errorMessage" :text="errorMessage" class="text-sm text-destructive text-center mb-3" textWrap="true" />
+
+                <Button :text="$t('login.submit')" class="btn-primary text-lg p-4" @tap="onLogin" />
+            </StackLayout>
+
+            <!-- Footer -->
+            <StackLayout row="2" verticalAlignment="bottom" class="pb-4">
+                <StackLayout class="separator" />
+                <Label :text="$t('common.version')" class="text-xs text-muted-foreground text-center mt-2" />
+            </StackLayout>
+
         </GridLayout>
     </Page>
 </template>
 
-
 <script setup lang="ts">
-import { ref, onMounted, getCurrentInstance } from 'vue'
-import Events from './Events.vue'
-import { getAuth, setAuth } from '../utils/auth'
+import { ref, onMounted, getCurrentInstance } from 'vue';
+import { useI18n } from 'vue-i18n';
+import Events from './Events.vue';
+import { getAuth, setAuth } from '../utils/auth';
 
-const HARDCODED_USER = 'leo'
-const HARDCODED_PASS = '123'
-const HARDCODED_NAME = 'Leonardo Vasconcelos'
-const HARDCODED_CPF = '12345678901'
-const HARDCODED_EMAIL = 'leo@example.com'
-const HARDCODED_DISTRIBUIDORA = 'Distribuidora Exemplo'
+const { t } = useI18n();
 
-const username = ref('')
-const password = ref('')
-const errorMessage = ref('')
+const HARDCODED_USER = 'leo';
+const HARDCODED_PASS = '123';
+const HARDCODED_NAME = 'Leonardo Vasconcelos';
+const HARDCODED_CPF = '12345678901';
+const HARDCODED_EMAIL = 'leo@example.com';
+const HARDCODED_DISTRIBUIDORA = 'Distribuidora Exemplo';
 
-// Capture $navigateTo during setup; getCurrentInstance() is null inside tap handler
-const instance = getCurrentInstance()
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void
+const username = ref('');
+const password = ref('');
+const errorMessage = ref('');
+const focusedField = ref('');
 
-function onLogin() {
-    errorMessage.value = ''
-    const user = username.value.trim()
-    const pass = password.value
+function inputClass(field: string): string {
+    return focusedField.value === field ? 'input-focused' : 'input-field';
+}
+
+const instance = getCurrentInstance();
+const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
+    target: unknown,
+    options?: Record<string, unknown>
+) => void;
+
+function onLogin(): void {
+    errorMessage.value = '';
+    const user = username.value.trim();
+    const pass = password.value;
+
     if (user === HARDCODED_USER && pass === HARDCODED_PASS) {
         setAuth({
             nick: user,
@@ -48,21 +79,20 @@ function onLogin() {
             email: HARDCODED_EMAIL,
             senha: pass,
             distribuidora: HARDCODED_DISTRIBUIDORA,
-        })
-        goToEvents()
+        });
+        goToEvents();
     } else {
-        errorMessage.value = 'Usuário ou senha inválidos.'
+        errorMessage.value = t('login.errorInvalid');
     }
 }
 
-function goToEvents() {
-    navigateTo?.(Events, { frame: 'root-frame', clearHistory: true })
+function goToEvents(): void {
+    navigateTo?.(Events, { frame: 'root-frame', clearHistory: true });
 }
 
 onMounted(() => {
     if (getAuth()) {
-        // Defer so setRootApp() has run (nativescript-vue needs rootApp._context for $navigateTo)
-        setTimeout(() => goToEvents(), 0)
+        setTimeout(() => goToEvents(), 0);
     }
-})
+});
 </script>

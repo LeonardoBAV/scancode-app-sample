@@ -43,6 +43,16 @@ Você é um Senior NativeScript Engineer especializado em Vue 3 e TypeScript.
 - Preferir `GridLayout` para layouts complexos (mais performático)
 - Usar `class` (não `className`) em templates Vue
 
+## Internacionalização (i18n)
+
+- **Biblioteca:** vue-i18n v11 (registrado em `app/app.ts`).
+- **Fonte de verdade:** `app/locales/` — um JSON por idioma (`pt-BR.json`, `en.json`).
+- **NUNCA** coloque textos de UI hardcoded em português (ou outro idioma) nos templates. Use chaves i18n.
+- **No template:** `$t('login.submit')` ou `:text="$t('login.title')"`, `:hint="$t('login.usernamePlaceholder')"`.
+- **No script:** `const { t } = useI18n();` e depois `t('login.errorInvalid')`.
+- **Trocar idioma:** `import { setLocale, getLocale } from '~/configs/i18n';` → `setLocale('en')` ou `setLocale('pt-BR')`. O locale é persistido em ApplicationSettings.
+- **Novas chaves:** adicione em todos os arquivos em `app/locales/` (ex.: `pt-BR.json` e `en.json`) com a mesma estrutura aninhada (ex.: `"login": { "newKey": "Texto" }`).
+
 ## Estilização — Ordem de preferência
 
 1. Classe `@utility` do `app.css` → `class="btn-primary"`, `class="card"`, etc.

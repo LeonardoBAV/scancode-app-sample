@@ -31,7 +31,8 @@ NUNCA use `@layer components` — está quebrado no Tailwind v4. Use SEMPRE `@ut
 | `btn-icon`          | Botão circular 40dp (ícone/texto)          |
 | `btn-icon-sm`       | Botão circular 36dp (stepper qty, sem cor) |
 | `card`              | Container card com borda e padding         |
-| `input-field`       | TextField padrão com borda                 |
+| `input-field`       | TextField padrão (borda 1px, rounded-xl)   |
+| `input-focused`     | TextField focado (borda 2px primary)       |
 | `input-search`      | TextField de busca (fundo muted)           |
 | `badge`             | Badge primário (pill)                      |
 | `badge-secondary`   | Badge secundário                           |

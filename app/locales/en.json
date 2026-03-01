@@ -1,0 +1,24 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "version": "v1.0.0"
+  },
+  "login": {
+    "title": "myCoolApp",
+    "subtitle": "Sign in to continue",
+    "username": "Username",
+    "usernamePlaceholder": "your username",
+    "password": "Password",
+    "passwordPlaceholder": "your password",
+    "submit": "Sign in",
+    "forgotPassword": "Forgot password?",
+    "errorInvalid": "Invalid username or password."
+  }
+}

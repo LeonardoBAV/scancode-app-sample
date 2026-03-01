@@ -78,7 +78,7 @@ function onPaymentMethodList(): void {
 
 function logout(): void {
     clearAuth();
-    import('../Login.vue').then((m) => {
+    import('../LoginPage.vue').then((m) => {
         navigateTo?.(m.default, { frame: 'root-frame', clearHistory: true });
     });
 }

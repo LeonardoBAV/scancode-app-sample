@@ -11,7 +11,7 @@ Você é um Senior NativeScript Engineer especializado em Vue 3 e TypeScript.
 - Implementar features mobile production-ready
 - Seguir `NATIVESCRIPT.md` como referência da plataforma
 - Seguir `shadcn-nativescript.mdc` para design system e restrições CSS
-- Usar classes `@utility` do `app.css` — consulte `nativescript-components.mdc` para exemplos
+- Usar classes `@utility` do `app/bootstrap/app.css` — consulte `nativescript-components.mdc` para exemplos
 - Gerar arquitetura escalável e manutenível
 - Separar UI, services e state management
 - Usar tipagem forte — evitar `any`
@@ -31,7 +31,7 @@ Você é um Senior NativeScript Engineer especializado em Vue 3 e TypeScript.
 2. Implementar solução completa
 3. Garantir type safety
 4. Seguir boas práticas de UX mobile
-5. Usar classes `@utility` do `app.css` (btn-primary, card, input-field, etc.)
+5. Usar classes `@utility` do `app/bootstrap/app.css` (btn-primary, card, input-field, etc.)
 6. Consultar tabela de CSS não suportado em `shadcn-nativescript.mdc` antes de usar box-shadow, position, pseudo-classes, display, ou overflow
 
 ## Code Style
@@ -45,7 +45,7 @@ Você é um Senior NativeScript Engineer especializado em Vue 3 e TypeScript.
 
 ## Internacionalização (i18n)
 
-- **Biblioteca:** vue-i18n v11 (registrado em `app/app.ts`).
+- **Biblioteca:** vue-i18n v11 (registrado em `app/bootstrap/app.ts`).
 - **Fonte de verdade:** `app/locales/` — um JSON por idioma (`pt-BR.json`, `en.json`).
 - **NUNCA** coloque textos de UI hardcoded em português (ou outro idioma) nos templates. Use chaves i18n.
 - **No template:** `$t('login.submit')` ou `:text="$t('login.title')"`, `:hint="$t('login.usernamePlaceholder')"`.
@@ -55,7 +55,7 @@ Você é um Senior NativeScript Engineer especializado em Vue 3 e TypeScript.
 
 ## Estilização — Ordem de preferência
 
-1. Classe `@utility` do `app.css` → `class="btn-primary"`, `class="card"`, etc.
+1. Classe `@utility` do `app/bootstrap/app.css` → `class="btn-primary"`, `class="card"`, etc.
 2. Composição com Tailwind → `class="btn-primary text-lg"` para sobrescrever
 3. Utility Tailwind pura → `class="text-sm text-muted-foreground mt-1"` quando não existe `@utility`
 4. Atributo XML → `androidElevation="2"`, `textWrap="true"`, etc. para props não-CSS

@@ -5,7 +5,7 @@
 - **Runtime:** NativeScript 9
 - **Framework:** Vue 3 (Composition API, `<script setup lang="ts">`)
 - **Estilização:** Tailwind CSS v4 (`@nativescript/tailwind` v4)
-- **Design System:** Shadcn UI adaptado — classes `@utility` em `app/app.css`
+- **Design System:** Shadcn UI adaptado — classes `@utility` em `app/bootstrap/app.css`
 - **i18n:** vue-i18n v11 — textos em `app/locales/pt-BR.json` e `app/locales/en.json`; uso via `$t('key')` ou `useI18n().t`
 - **Linguagem:** TypeScript (strict mode)
 
@@ -23,15 +23,16 @@
 
 ```
 app/
-├── app.css              # @theme (tokens) + @utility (componentes) + :pressed states
-├── app.ts               # Entry point
-├── App.vue              # Root component
+├── bootstrap/           # Entry point e raiz da app
+│   ├── app.css          # @theme (tokens) + @utility (componentes) + :pressed states
+│   ├── app.ts           # Entry point
+│   └── App.vue          # Root component
 ├── components/          # Componentes reutilizáveis
 ├── layouts/             # Layouts (Default com TabView)
 ├── pages/               # Páginas por domínio
 │   ├── event/           # Eventos (cart, home, orders)
 │   ├── Profile/         # Perfil e configurações
-│   ├── Login.vue        # Autenticação
+│   ├── LoginPage.vue    # Autenticação
 │   └── Events.vue       # Lista de eventos
 ├── types/               # Interfaces TypeScript
 └── utils/               # Utilitários (auth, helpers)
@@ -53,7 +54,7 @@ app/
 4. **`nativescript-implementer.mdc`** — Implementação: arquitetura, navegação, code style
 5. **`NATIVESCRIPT.md`** — Referência completa da plataforma NativeScript
 
-## Estrutura do app.css
+## Estrutura do bootstrap/app.css
 
 ```
 @import "tailwindcss"

@@ -4,7 +4,7 @@ alwaysApply: true
 
 # Catálogo de Componentes — NativeScript-Vue 3
 
-Referência para criar componentes de UI. Usa as classes `@utility` definidas no `app/app.css`.
+Referência para criar componentes de UI. Usa as classes `@utility` definidas no `app/bootstrap/app.css`.
 Para detalhes sobre tokens e CSS do NativeScript, consulte `shadcn-nativescript.mdc`.
 
 ## Button

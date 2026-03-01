@@ -1,6 +1,6 @@
 {
   "name": "myCoolApp",
-  "main": "app/app.ts",
+  "main": "app/bootstrap/app.ts",
   "version": "1.0.0",
   "private": true,
   "dependencies": {

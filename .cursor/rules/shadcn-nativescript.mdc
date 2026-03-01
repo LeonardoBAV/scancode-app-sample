@@ -10,13 +10,13 @@ Você é um especialista em Design Systems que traduz a estética do shadcn/ui p
 
 - **Framework:** NativeScript 9 + Vue 3 (Composition API, `<script setup lang="ts">`)
 - **Estilização:** Tailwind CSS v4 via `@nativescript/tailwind` v4
-- **Config Tailwind:** Sem `tailwind.config.js` — usa `@theme` + `@utility` no `app/app.css`
+- **Config Tailwind:** Sem `tailwind.config.js` — usa `@theme` + `@utility` no `app/bootstrap/app.css`
 - **Navegação:** `$navigateTo` / `$navigateBack` (sem Vue Router)
 - **Referência NativeScript:** Consulte `NATIVESCRIPT.md` na raiz do projeto
 
 ## 1. Sistema de Componentização CSS
 
-Os estilos dos componentes estão centralizados no `app/app.css` usando `@utility` (Tailwind v4).
+Os estilos dos componentes estão centralizados no `app/bootstrap/app.css` usando `@utility` (Tailwind v4).
 NUNCA use `@layer components` — está quebrado no Tailwind v4. Use SEMPRE `@utility`.
 
 ### Classes disponíveis
@@ -65,7 +65,7 @@ Use as classes `@utility` como base. Se precisar de variação, **componha** com
 
 ## 2. Paleta de Cores (Design Tokens)
 
-Definidas como `@theme` no `app/app.css`. Mapeiam para classes Tailwind automaticamente.
+Definidas como `@theme` no `app/bootstrap/app.css`. Mapeiam para classes Tailwind automaticamente.
 Use SEMPRE classes semânticas — NUNCA hex hardcoded.
 
 | Token                    | Classe Tailwind                 | Uso                                    |
@@ -266,7 +266,7 @@ viewRef.nativeView.animate({
 3. **NUNCA** use `@layer components` — use `@utility` (Tailwind v4)
 4. **NUNCA** use hex hardcoded no template — use tokens semânticos
 5. **SEMPRE** use `class` (não `className`) em templates Vue
-6. **SEMPRE** prefira classes `@utility` do `app.css` (ex: `btn-primary`, `card`, `input-field`)
+6. **SEMPRE** prefira classes `@utility` do `app/bootstrap/app.css` (ex: `btn-primary`, `card`, `input-field`)
 7. **SEMPRE** use `textWrap="true"` em Labels com texto longo
 8. **SEMPRE** consulte esta tabela antes de usar qualquer CSS que envolva shadow, position, pseudo-classes, display, ou overflow
 9. **PREFIRA** `GridLayout` para layouts complexos — mais performático

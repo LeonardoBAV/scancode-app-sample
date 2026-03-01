@@ -11,14 +11,13 @@
     "version": "v1.0.0"
   },
   "login": {
-    "title": "myCoolApp",
+    "title": "Ordy",
     "subtitle": "Faça login para continuar",
     "username": "Usuário",
     "usernamePlaceholder": "seu usuário",
     "password": "Senha",
     "passwordPlaceholder": "sua senha",
     "submit": "Entrar",
-    "forgotPassword": "Esqueceu a senha?",
     "errorInvalid": "Usuário ou senha inválidos."
   }
 }

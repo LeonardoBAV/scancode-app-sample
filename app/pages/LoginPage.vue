@@ -4,7 +4,7 @@
 
             <!-- Branding -->
             <StackLayout row="0" verticalAlignment="bottom" class="mb-10">
-                <Label text="MC" class="text-xl font-bold text-primary-foreground bg-primary w-16 h-16 rounded-full text-center" horizontalAlignment="center" verticalAlignment="center" />
+                <Label text="OY" class="text-xl font-bold text-primary-foreground bg-primary w-16 h-16 rounded-full text-center" horizontalAlignment="center" verticalAlignment="center" />
                 <Label :text="$t('login.title')" class="text-2xl font-bold text-foreground text-center mt-4" />
                 <Label :text="$t('login.subtitle')" class="text-sm text-muted-foreground text-center mt-1" />
             </StackLayout>

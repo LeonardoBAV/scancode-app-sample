@@ -75,53 +75,28 @@ Todas as variantes usam a classe correspondente. Sobrescreva com utilities indiv
 
 ## Input / TextField
 
-NativeScript não suporta `:focus` CSS. Para highlight de foco, use `@focus`/`@blur` com classe dinâmica.
+Use **sempre classe estática** (`input-field` ou `input-search`). Não altere a classe do TextField no foco: o feedback de foco (cursor, teclado) fica a cargo do sistema; trocar estilo no `@focus` pode exigir dois toques para abrir o teclado.
 
 ### Classes disponíveis
 
-- `input-field` — Estado normal (borda `border-input`, 1px)
-- `input-focused` — Estado focado (borda `border-primary`, 2px)
-- `input-search` — Busca com fundo muted
+- `input-field` — TextField padrão (borda, rounded-xl, padding)
+- `input-search` — TextField de busca (fundo muted)
 
-### Padrão de foco (recomendado)
-
-```typescript
-const focusedField = ref('');
-
-function inputClass(field: string): string {
-  return focusedField.value === field ? 'input-focused' : 'input-field';
-}
-```
+### Exemplos
 
 ```xml
-<!-- Input com highlight de foco -->
+<!-- Input com label -->
 <StackLayout class="mb-4">
   <Label text="E-mail" class="text-sm font-medium text-foreground mb-1" />
-  <TextField
-    v-model="email"
-    hint="seu@email.com"
-    keyboardType="email"
-    :class="inputClass('email')"
-    placeholderColor="#a1a1aa"
-    @focus="focusedField = 'email'"
-    @blur="focusedField = ''"
-  />
+  <TextField v-model="email" hint="seu@email.com" keyboardType="email" class="input-field" placeholderColor="#a1a1aa" />
 </StackLayout>
-```
 
-### Outros inputs
-
-```xml
-<!-- Input sem foco dinâmico (quando não precisa) -->
 <TextField v-model="name" hint="Nome completo" class="input-field" placeholderColor="#a1a1aa" />
 
-<!-- Input de busca -->
 <TextField v-model="searchQuery" hint="Buscar..." class="input-search" placeholderColor="#a1a1aa" @textChange="onSearch" />
 
-<!-- Input senha -->
 <TextField v-model="password" hint="Senha" :secure="true" class="input-field" placeholderColor="#a1a1aa" />
 
-<!-- TextView (multiline) -->
 <TextView v-model="notes" hint="Observações..." class="input-field" height="100" />
 ```
 

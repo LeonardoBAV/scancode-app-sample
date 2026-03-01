@@ -101,7 +101,7 @@
 /* ─── Input ─── */
 
 @utility input-field {
-  @apply bg-background text-foreground text-base border border-input rounded-xl p-4;
+  @apply bg-background text-foreground text-base border-3 border-primary rounded-xl p-4;
 }
 
 @utility input-focused {

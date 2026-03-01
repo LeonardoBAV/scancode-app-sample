@@ -13,12 +13,12 @@
             <StackLayout row="1">
                 <StackLayout class="mb-4">
                     <Label :text="$t('login.username')" class="text-sm font-medium text-foreground mb-1" />
-                    <TextField v-model="username" :hint="$t('login.usernamePlaceholder')" :class="inputClass('username')" placeholderColor="#a1a1aa" autocorrect="false" autocapitalizationType="none" @focus="focusedField = 'username'" @blur="focusedField = ''" />
+                    <TextField v-model="username" :hint="$t('login.usernamePlaceholder')" class="input-field" placeholderColor="#a1a1aa" autocorrect="false" autocapitalizationType="none" />
                 </StackLayout>
 
                 <StackLayout class="mb-5">
                     <Label :text="$t('login.password')" class="text-sm font-medium text-foreground mb-1" />
-                    <TextField v-model="password" :hint="$t('login.passwordPlaceholder')" :secure="true" :class="inputClass('password')" placeholderColor="#a1a1aa" @focus="focusedField = 'password'" @blur="focusedField = ''" />
+                    <TextField v-model="password" :hint="$t('login.passwordPlaceholder')" :secure="true" class="input-field" placeholderColor="#a1a1aa" />
                 </StackLayout>
 
                 <Label v-if="errorMessage" :text="errorMessage" class="text-sm text-destructive text-center mb-3" textWrap="true" />
@@ -44,21 +44,10 @@ import { getAuth, setAuth } from '../utils/auth';
 
 const { t } = useI18n();
 
-const HARDCODED_USER = 'leo';
-const HARDCODED_PASS = '123';
-const HARDCODED_NAME = 'Leonardo Vasconcelos';
-const HARDCODED_CPF = '12345678901';
-const HARDCODED_EMAIL = 'leo@example.com';
-const HARDCODED_DISTRIBUIDORA = 'Distribuidora Exemplo';
-
 const username = ref('');
 const password = ref('');
 const errorMessage = ref('');
-const focusedField = ref('');
 
-function inputClass(field: string): string {
-    return focusedField.value === field ? 'input-focused' : 'input-field';
-}
 
 const instance = getCurrentInstance();
 const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
@@ -95,4 +84,11 @@ onMounted(() => {
         setTimeout(() => goToEvents(), 0);
     }
 });
+
+const HARDCODED_USER = 'leo';
+const HARDCODED_PASS = '123';
+const HARDCODED_NAME = 'Leonardo Vasconcelos';
+const HARDCODED_CPF = '12345678901';
+const HARDCODED_EMAIL = 'leo@example.com';
+const HARDCODED_DISTRIBUIDORA = 'Distribuidora Exemplo';
 </script>

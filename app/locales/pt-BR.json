@@ -8,7 +8,8 @@
     "search": "Buscar",
     "loading": "Carregando...",
     "error": "Erro",
-    "version": "v1.0.0"
+    "free": "Grátis",
+    "orders": "pedidos"
   },
   "login": {
     "title": "Ordy",
@@ -19,5 +20,14 @@
     "passwordPlaceholder": "sua senha",
     "submit": "Entrar",
     "errorInvalid": "Usuário ou senha inválidos."
+  },
+  "events": {
+    "title": "Eventos",
+    "profile": "Perfil",
+    "empty": "Nenhum evento encontrado",
+    "emptyHint": "Seus eventos aparecerão aqui",
+    "statusInProgress": "Em andamento",
+    "statusScheduled": "Agendado",
+    "statusEnded": "Finalizado"
   }
 }

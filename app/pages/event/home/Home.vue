@@ -42,7 +42,7 @@
 <script setup lang="ts">
 import { getCurrentInstance } from 'vue';
 import type { EventItem } from '../../types/event-item';
-import Events from '../../Events.vue';
+import EventsPage from '../../EventsPage.vue';
 
 const props = defineProps<{ event: EventItem }>();
 const event = props.event;
@@ -52,7 +52,7 @@ const globals = instance?.appContext.config.globalProperties;
 const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void;
 
 function goToEvents(): void {
-    navigateTo?.(Events, { frame: 'root-frame', clearHistory: true });
+    navigateTo?.(EventsPage, { frame: 'root-frame', clearHistory: true });
 }
 
 function formatValor(valor: number): string {

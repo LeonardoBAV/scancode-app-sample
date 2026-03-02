@@ -8,7 +8,8 @@
     "search": "Search",
     "loading": "Loading...",
     "error": "Error",
-    "version": "v1.0.0"
+    "free": "Free",
+    "orders": "orders"
   },
   "login": {
     "title": "myCoolApp",
@@ -20,5 +21,14 @@
     "submit": "Sign in",
     "forgotPassword": "Forgot password?",
     "errorInvalid": "Invalid username or password."
+  },
+  "events": {
+    "title": "Events",
+    "profile": "Profile",
+    "empty": "No events found",
+    "emptyHint": "Your events will appear here",
+    "statusInProgress": "In Progress",
+    "statusScheduled": "Scheduled",
+    "statusEnded": "Ended"
   }
 }

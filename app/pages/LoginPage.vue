@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, getCurrentInstance } from 'vue';
-import Events from './Events.vue';
+import EventsPage from './EventsPage.vue';
 import { getAuth, setAuth } from '../utils/auth';
 import { useTranslation } from '../composables/useTranslation';
 import { useAppVersion } from '../composables/useAppVersion';
@@ -78,7 +78,7 @@ function onLogin(): void {
 }
 
 function goToEvents(): void {
-    navigateTo?.(Events, { frame: 'root-frame', clearHistory: true });
+    navigateTo?.(EventsPage, { frame: 'root-frame', clearHistory: true });
 }
 
 onMounted(() => {

@@ -38,6 +38,7 @@ import ProfileDetails from './ProfileDetails.vue';
 import ClientListPage from './ClientListPage.vue';
 import ProductListPage from './ProductListPage.vue';
 import PaymentMethodListPage from './PaymentMethodListPage.vue';
+import LoginPage from '../LoginPage.vue';
 
 const profile = ref<ReturnType<typeof getAuth>>(null);
 const userName = computed(() => profile.value?.name ?? profile.value?.nick ?? 'User');
@@ -78,8 +79,6 @@ function onPaymentMethodList(): void {
 
 function logout(): void {
     clearAuth();
-    import('../LoginPage.vue').then((m) => {
-        navigateTo?.(m.default, { frame: 'root-frame', clearHistory: true });
-    });
+    navigateTo?.(LoginPage, { frame: 'root-frame', clearHistory: true });
 }
 </script>

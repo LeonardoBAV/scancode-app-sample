@@ -48,8 +48,9 @@ Você é um Senior NativeScript Engineer especializado em Vue 3 e TypeScript.
 - **Biblioteca:** vue-i18n v11 (registrado em `app/bootstrap/app.ts`).
 - **Fonte de verdade:** `app/locales/` — um JSON por idioma (`pt-BR.json`, `en.json`).
 - **NUNCA** coloque textos de UI hardcoded em português (ou outro idioma) nos templates. Use chaves i18n.
-- **No template:** `$t('login.submit')` ou `:text="$t('login.title')"`, `:hint="$t('login.usernamePlaceholder')"`.
-- **No script:** `const { t } = useI18n();` e depois `t('login.errorInvalid')`.
+- **No template:** `$t('login.submit')` ou `:text="$t('login.title')"`, `:hint="$t('login.usernamePlaceholder')"`. Funciona em páginas navegadas porque `config.globalProperties` é copiado.
+- **No script:** `import { useTranslation } from '~/composables/useTranslation';` → `const { t } = useTranslation();` e depois `t('login.errorInvalid')`.
+- **NUNCA** use `useI18n()` de `vue-i18n` diretamente. O `$navigateTo` do nativescript-vue cria uma nova instância de Vue app para cada página navegada. A nova app não possui `__VUE_I18N_SYMBOL__` do app raiz, causando erro "Need to install with app.use function". O composable `useTranslation` acessa `i18n.global` diretamente, sem depender de `inject()`.
 - **Trocar idioma:** `import { setLocale, getLocale } from '~/configs/i18n';` → `setLocale('en')` ou `setLocale('pt-BR')`. O locale é persistido em ApplicationSettings.
 - **Novas chaves:** adicione em todos os arquivos em `app/locales/` (ex.: `pt-BR.json` e `en.json`) com a mesma estrutura aninhada (ex.: `"login": { "newKey": "Texto" }`).
 

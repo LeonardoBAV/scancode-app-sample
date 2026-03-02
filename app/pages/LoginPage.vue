@@ -29,7 +29,7 @@
             <!-- Footer -->
             <StackLayout row="2" verticalAlignment="bottom" class="pb-4">
                 <StackLayout class="separator" />
-                <Label :text="$t('common.version')" class="text-xs text-muted-foreground text-center mt-2" />
+                <Label :text="`v${appVersion}`" class="text-xs text-muted-foreground text-center mt-2" />
             </StackLayout>
 
         </GridLayout>
@@ -38,11 +38,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, getCurrentInstance } from 'vue';
-import { useI18n } from 'vue-i18n';
 import Events from './Events.vue';
 import { getAuth, setAuth } from '../utils/auth';
+import { useTranslation } from '../composables/useTranslation';
+import { useAppVersion } from '../composables/useAppVersion';
 
-const { t } = useI18n();
+const { t } = useTranslation();
+const appVersion = useAppVersion();
 
 const username = ref('');
 const password = ref('');

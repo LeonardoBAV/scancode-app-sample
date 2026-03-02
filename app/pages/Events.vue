@@ -20,9 +20,10 @@
 
 <script setup lang="ts">
 import { ref, getCurrentInstance } from 'vue'
-import Profile from './Profile/Profile.vue'
-import DefaultLayout from '../layouts/Default.vue'
-import { clearAuth } from '../utils/auth'
+import Profile from './Profile/Profile.vue';
+import DefaultLayout from '../layouts/Default.vue';
+import LoginPage from './LoginPage.vue';
+import { clearAuth } from '../utils/auth';
 import type { EventItem } from '../types/event-item'
 
 const events = ref<EventItem[]>([
@@ -61,11 +62,9 @@ function openProfileMenu() {
     navigateTo?.(Profile, { frame: 'root-frame' });
 }
 
-function logout() {
-    clearAuth()
-    import('./LoginPage.vue').then((m) => {
-        navigateTo?.(m.default, { frame: 'root-frame', clearHistory: true })
-    })
+function logout(): void {
+    clearAuth();
+    navigateTo?.(LoginPage, { frame: 'root-frame', clearHistory: true });
 }
 </script>
 

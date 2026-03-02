@@ -104,10 +104,6 @@
   @apply bg-background text-foreground text-base border-3 border-primary rounded-xl p-4;
 }
 
-@utility input-focused {
-  @apply bg-background text-foreground text-base border-2 border-primary rounded-xl p-4;
-}
-
 @utility input-search {
   @apply bg-muted text-foreground text-base border border-input rounded-xl p-4;
 }

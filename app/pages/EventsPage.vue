@@ -3,10 +3,7 @@
         <GridLayout rows="auto, *" class="bg-background">
 
             <!-- Header -->
-            <GridLayout row="0" columns="*, auto" class="px-4 py-3 border-b border-border">
-                <Label col="0" :text="$t('pages.events.title')" class="text-xl font-bold text-foreground" verticalAlignment="center" />
-                <Label col="1" :text="userInitials" class="text-sm font-bold text-primary-foreground bg-primary w-10 h-10 rounded-full text-center" verticalAlignment="center" @tap="openProfileMenu" />
-            </GridLayout>
+            <HeaderComponent row="0" :title="$t('pages.events.title')" />
 
             <!-- Empty State -->
             <StackLayout v-if="events.length === 0" row="1" class="p-8" verticalAlignment="center" horizontalAlignment="center">
@@ -41,26 +38,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, getCurrentInstance } from 'vue';
+import { ref, getCurrentInstance } from 'vue';
 import { useTranslation } from '../composables/useTranslation';
-import { getAuth, clearAuth } from '../utils/auth';
-import Profile from './Profile/Profile.vue';
+import HeaderComponent from '../components/HeaderComponent.vue';
 import DefaultLayout from '../layouts/Default.vue';
-import LoginPage from './LoginPage.vue';
 import type { EventItem } from '../types/event-item';
 import { formatCurrencyBR } from '../utils/format';
 
 const { t } = useTranslation();
-
-const auth = getAuth();
-const userInitials = computed(() => {
-    const name = auth?.name ?? auth?.nick ?? '';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-});
 
 const instance = getCurrentInstance();
 const globals = instance?.appContext.config.globalProperties;
@@ -86,10 +71,6 @@ function statusBadgeClass(status: string): string {
 
 function openEvent(event: EventItem): void {
     navigateTo?.(DefaultLayout, { frame: 'root-frame', props: { event }, clearHistory: true });
-}
-
-function openProfileMenu(): void {
-    navigateTo?.(Profile, { frame: 'root-frame' });
 }
 
 const events = ref<EventItem[]>([

@@ -191,15 +191,54 @@ Use **sempre classe estática** (`input-field` ou `input-search`). Não altere a
 </GridLayout>
 ```
 
-## ActionBar
+## HeaderComponent
+
+Componente reutilizável em `app/components/HeaderComponent.vue`. Substitui a ActionBar nativa para telas com `actionBarHidden="true"`.
+
+### Props
+
+| Prop         | Tipo    | Default | Descrição                          |
+| ------------ | ------- | ------- | ---------------------------------- |
+| `title`      | string  | —       | Título centralizado (obrigatório)  |
+| `showAvatar` | boolean | `true`  | Exibir avatar com iniciais à dir.  |
+
+### Comportamento automático
+
+- **Botão voltar:** aparece automaticamente quando `Frame.topmost().canGoBack()` é `true`. Funciona em qualquer frame (root ou subframe).
+- **Avatar:** lê as iniciais do usuário logado via `getAuth()`. Ao tocar, navega para `Profile` automaticamente (via `root-frame`). A página que usa o HeaderComponent **não precisa** tratar esse evento.
+
+### Exemplos
 
 ```xml
-<!-- Padrão -->
+<!-- Básico — título + avatar (Profile abre automaticamente) -->
+<HeaderComponent row="0" :title="$t('pages.events.title')" />
+
+<!-- Sem avatar (ex.: tela de login, settings) -->
+<HeaderComponent row="0" title="Configurações" :showAvatar="false" />
+```
+
+### Uso com Page Scaffold
+
+```xml
+<Page actionBarHidden="true">
+  <GridLayout rows="auto, *" class="bg-background">
+    <HeaderComponent row="0" :title="pageTitle" />
+    <ScrollView row="1">
+      <!-- conteúdo -->
+    </ScrollView>
+  </GridLayout>
+</Page>
+```
+
+## ActionBar (nativa)
+
+Use ActionBar nativa quando não precisar de header customizado (ex.: telas secundárias simples com botão voltar padrão da plataforma):
+
+```xml
 <ActionBar class="bg-background">
   <Label text="Título" class="text-lg font-bold text-foreground" />
 </ActionBar>
 
-<!-- Com ação à direita -->
 <ActionBar class="bg-background">
   <Label text="Pedidos" class="text-lg font-bold text-foreground" />
   <ActionItem text="+ Novo" class="text-primary" @tap="onCreate" ios.position="right" />
@@ -233,9 +272,7 @@ Estrutura base para qualquer página nova:
 <template>
   <Page actionBarHidden="true">
     <GridLayout rows="auto, *" class="bg-background">
-      <StackLayout row="0" class="p-4 border-b border-border">
-        <Label text="Título" class="text-xl font-bold text-foreground" />
-      </StackLayout>
+      <HeaderComponent row="0" :title="$t('pages.myPage.title')" />
 
       <ScrollView row="1">
         <StackLayout class="p-4">
@@ -247,6 +284,7 @@ Estrutura base para qualquer página nova:
 </template>
 
 <script setup lang="ts">
+import HeaderComponent from '../components/HeaderComponent.vue';
 // lógica aqui
 </script>
 ```
@@ -257,9 +295,7 @@ Estrutura base para qualquer página nova:
 <template>
   <Page actionBarHidden="true">
     <GridLayout rows="auto, *, auto" class="bg-background">
-      <StackLayout row="0" class="p-4 border-b border-border">
-        <Label text="Lista" class="text-xl font-bold text-foreground" />
-      </StackLayout>
+      <HeaderComponent row="0" :title="$t('pages.list.title')" />
 
       <ListView row="1" :items="items" separatorColor="transparent">
         <template #default="{ item }">

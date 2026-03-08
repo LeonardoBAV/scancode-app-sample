@@ -30,6 +30,20 @@
       "statusInProgress": "Em andamento",
       "statusScheduled": "Agendado",
       "statusEnded": "Finalizado"
+    },
+    "profile": {
+      "title": "Perfil",
+      "distributor": "Distribuidora",
+      "menu": "Menu",
+      "details": "Dados do perfil",
+      "registrations": "Cadastros",
+      "clientList": "Lista de clientes",
+      "productList": "Lista de produtos",
+      "paymentMethods": "Formas de pagamento",
+      "sync": "Sincronizar",
+      "syncMessage": "Sincronização em breve.",
+      "logoutSection": "Sessão",
+      "logout": "Sair"
     }
   }
 }

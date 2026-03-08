@@ -31,6 +31,20 @@
       "statusInProgress": "In Progress",
       "statusScheduled": "Scheduled",
       "statusEnded": "Ended"
+    },
+    "profile": {
+      "title": "Profile",
+      "distributor": "Distributor",
+      "menu": "Menu",
+      "details": "Profile details",
+      "registrations": "Registrations",
+      "clientList": "Client list",
+      "productList": "Product list",
+      "paymentMethods": "Payment methods",
+      "sync": "Sync",
+      "syncMessage": "Sync coming soon.",
+      "logoutSection": "Session",
+      "logout": "Log out"
     }
   }
 }

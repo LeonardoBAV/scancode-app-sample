@@ -2,28 +2,14 @@
     <GridLayout columns="auto, *, auto" class="px-4 py-3 border-b border-border bg-card">
 
         <!-- Left: Back button or spacer -->
-        <Label
-            v-if="canGoBack"
-            col="0"
-            text="←"
-            class="text-xl text-foreground w-10 h-10 text-center"
-            verticalAlignment="center"
-            @tap="goBack"
-        />
+        <Label v-if="canGoBack" col="0" text="←" class="text-xl text-foreground w-10 h-10 text-center" verticalAlignment="center" @tap="goBack" />
         <Label v-else col="0" text="" class="w-10" />
 
         <!-- Center: Title -->
         <Label col="1" :text="title" class="text-lg font-bold text-foreground text-center" verticalAlignment="center" />
 
         <!-- Right: Avatar or custom slot area -->
-        <Label
-            v-if="showAvatar && avatarInitials"
-            col="2"
-            :text="avatarInitials"
-            class="text-sm font-bold text-primary-foreground bg-primary w-10 h-10 rounded-full text-center"
-            verticalAlignment="center"
-            @tap="openProfile"
-        />
+        <Label v-if="showAvatar && avatarInitials" col="2" :text="avatarInitials" class="text-sm font-bold text-primary-foreground bg-primary w-10 h-10 rounded-full text-center" verticalAlignment="center" @tap="openProfile" />
         <Label v-else col="2" text="" class="w-10" />
 
     </GridLayout>

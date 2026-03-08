@@ -5,13 +5,7 @@
             <!-- Header -->
             <GridLayout row="0" columns="*, auto" class="px-4 py-3 border-b border-border">
                 <Label col="0" :text="$t('events.title')" class="text-xl font-bold text-foreground" verticalAlignment="center" />
-                <Label
-                    col="1"
-                    :text="userInitials"
-                    class="text-sm font-bold text-primary-foreground bg-primary w-10 h-10 rounded-full text-center"
-                    verticalAlignment="center"
-                    @tap="openProfileMenu"
-                />
+                <Label col="1" :text="userInitials" class="text-sm font-bold text-primary-foreground bg-primary w-10 h-10 rounded-full text-center" verticalAlignment="center" @tap="openProfileMenu" />
             </GridLayout>
 
             <!-- Empty State -->
@@ -24,7 +18,7 @@
             <ListView v-else row="1" :items="events" separatorColor="transparent">
                 <template #default="{ item }">
                     <StackLayout class="px-4 pt-3">
-                        <GridLayout rows="auto, auto, auto" columns="*, auto" class="card" @tap="openEvent(item)">
+                        <GridLayout rows="auto, auto, auto" columns="*, auto" class="card" androidElevation="2" @tap="openEvent(item)">
 
                             <!-- Row 0: Name + Badge -->
                             <Label row="0" col="0" :text="item.name" class="text-base font-semibold text-card-foreground mr-2" textWrap="true" />

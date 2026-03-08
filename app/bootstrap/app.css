@@ -8,7 +8,7 @@
 
 @theme {
   /* ─── Base ─── */
-  --color-background: #ffffff;
+  --color-background: #f8f8fa;
   --color-foreground: #09090b;
 
   /* ─── Card ─── */
@@ -159,4 +159,8 @@
 .btn-icon:pressed,
 .btn-icon-sm:pressed {
   opacity: 0.7;
+}
+
+.card:pressed {
+  background-color: #f4f4f5;
 }

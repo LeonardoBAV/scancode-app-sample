@@ -2,7 +2,7 @@
     <GridLayout columns="auto, *, auto" class="px-4 py-3 border-b border-border bg-card">
 
         <!-- Left: Back button or spacer -->
-        <Label v-if="canGoBack" col="0" text="←" class="text-xl text-foreground w-10 h-10 text-center" verticalAlignment="center" @tap="goBack" />
+        <Label v-if="canGoBack" col="0" :text="lucide('arrow-left')" class="lucide text-foreground w-10 h-10 text-center" verticalAlignment="center" @tap="goBack" />
         <Label v-else col="0" text="" class="w-10" />
 
         <!-- Center: Title -->
@@ -16,9 +16,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, getCurrentInstance } from 'vue';
+import { ref, onMounted, getCurrentInstance, nextTick } from 'vue';
 import { Frame } from '@nativescript/core';
 import { getAuth } from '../utils/auth';
+import { lucide } from '../utils/icons';
 import Profile from '../pages/Profile/Profile.vue';
 
 const props = withDefaults(defineProps<{
@@ -47,13 +48,22 @@ const avatarInitials = (() => {
     return name.substring(0, 2).toUpperCase();
 })();
 
+function getNavFrame(): Frame | null {
+    return Frame.getFrameById('root-frame') ?? Frame.topmost();
+}
+
 onMounted(() => {
-    const frame = Frame.topmost();
-    canGoBack.value = frame?.canGoBack() ?? false;
+    function updateCanGoBack(): void {
+        const frame = getNavFrame();
+        canGoBack.value = frame?.canGoBack() ?? false;
+    }
+    updateCanGoBack();
+    nextTick(() => updateCanGoBack());
+    setTimeout(updateCanGoBack, 50);
 });
 
 function goBack(): void {
-    const frame = Frame.topmost();
+    const frame = getNavFrame();
     if (frame?.canGoBack()) {
         frame.goBack();
     }

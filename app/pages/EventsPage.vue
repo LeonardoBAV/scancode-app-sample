@@ -77,7 +77,7 @@ function statusLabel(status: string): string {
 
 function statusBadgeClass(status: string): string {
     switch (status) {
-        case 'in_progress': return 'badge-success';
+        case 'in_progress': return 'badge';
         case 'scheduled': return 'badge-secondary';
         case 'ended': return 'badge-outline';
         default: return 'badge-outline';

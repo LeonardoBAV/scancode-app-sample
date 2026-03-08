@@ -15,20 +15,22 @@
             <ListView v-else row="1" :items="events" separatorColor="transparent">
                 <template #default="{ item }">
                     <StackLayout class="px-4 pt-3">
-                        <GridLayout rows="auto, auto, auto" columns="*, auto" class="card" androidElevation="2" @tap="openEvent(item)">
+                        <StackLayout class="card p-0" androidElevation="2" @tap="openEvent(item)">
+                            <GridLayout rows="auto, auto, auto" columns="*, auto" class="p-4">
 
-                            <!-- Row 0: Name + Badge -->
-                            <Label row="0" col="0" :text="item.name" class="text-base font-semibold text-card-foreground mr-2" textWrap="true" />
-                            <Label row="0" col="1" :text="statusLabel(item.status)" :class="statusBadgeClass(item.status)" verticalAlignment="top" horizontalAlignment="right" />
+                                <!-- Row 0: Name + Badge -->
+                                <Label row="0" col="0" :text="item.name" class="text-base font-semibold text-card-foreground mr-2" textWrap="true" />
+                                <Label row="0" col="1" :text="statusLabel(item.status)" :class="statusBadgeClass(item.status)" verticalAlignment="top" horizontalAlignment="right" />
 
-                            <!-- Row 1: Date range -->
-                            <Label row="1" col="0" colSpan="2" :text="item.startDate + '  —  ' + item.endDate" class="text-sm text-muted-foreground mt-2" />
+                                <!-- Row 1: Date range -->
+                                <Label row="1" col="0" colSpan="2" :text="item.startDate + '  —  ' + item.endDate" class="text-sm text-muted-foreground mt-2" />
 
-                            <!-- Row 2: Orders + Value -->
-                            <Label row="2" col="0" :text="item.orderCount + ' ' + $t('common.orders')" class="text-sm text-muted-foreground mt-2" />
-                            <Label row="2" col="1" :text="formatCurrencyBR(item.totalValue, $t('common.free'))" class="text-base font-bold text-foreground mt-2" horizontalAlignment="right" />
+                                <!-- Row 2: Orders + Value -->
+                                <Label row="2" col="0" :text="item.orderCount + ' ' + $t('common.orders')" class="text-sm text-muted-foreground mt-2" />
+                                <Label row="2" col="1" :text="formatCurrencyBR(item.totalValue, $t('common.free'))" class="text-base font-bold text-foreground mt-2" horizontalAlignment="right" />
 
-                        </GridLayout>
+                            </GridLayout>
+                        </StackLayout>
                     </StackLayout>
                 </template>
             </ListView>

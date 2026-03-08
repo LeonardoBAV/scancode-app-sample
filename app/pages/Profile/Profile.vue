@@ -27,9 +27,9 @@
                     <StackLayout class="px-4 mt-6">
                         <StackLayout class="card p-0" androidElevation="2">
                             <GridLayout columns="auto, *, auto" class="p-4" @tap="goToProfileDetails">
-                                <Label col="0" text="👤" class="text-xl mr-4" verticalAlignment="center" />
+                                <Label col="0" :text="lucide('circle-user')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.profile.details')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label col="2" text="›" class="text-xl text-muted-foreground" verticalAlignment="center" />
+                                <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
                         </StackLayout>
                     </StackLayout>
@@ -40,25 +40,25 @@
 
                         <StackLayout class="card p-0" androidElevation="2">
                             <GridLayout columns="auto, *, auto" class="p-4" @tap="onClientList">
-                                <Label col="0" text="📋" class="text-xl mr-4" verticalAlignment="center" />
+                                <Label col="0" :text="lucide('users')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.profile.clientList')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label col="2" text="›" class="text-xl text-muted-foreground" verticalAlignment="center" />
+                                <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
 
                             <StackLayout class="bg-border mx-4" style="height: 1" />
 
                             <GridLayout columns="auto, *, auto" class="p-4" @tap="onProductList">
-                                <Label col="0" text="📦" class="text-xl mr-4" verticalAlignment="center" />
+                                <Label col="0" :text="lucide('package')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.profile.productList')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label col="2" text="›" class="text-xl text-muted-foreground" verticalAlignment="center" />
+                                <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
 
                             <StackLayout class="bg-border mx-4" style="height: 1" />
 
                             <GridLayout columns="auto, *, auto" class="p-4" @tap="onPaymentMethodList">
-                                <Label col="0" text="💳" class="text-xl mr-4" verticalAlignment="center" />
+                                <Label col="0" :text="lucide('credit-card')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.profile.paymentMethods')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label col="2" text="›" class="text-xl text-muted-foreground" verticalAlignment="center" />
+                                <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
                         </StackLayout>
                     </StackLayout>
@@ -67,19 +67,19 @@
                     <StackLayout class="px-4 mt-6">
                         <StackLayout class="card p-0" androidElevation="2">
                             <GridLayout columns="auto, *, auto" class="p-4" @tap="onSync">
-                                <Label col="0" text="🔄" class="text-xl mr-4" verticalAlignment="center" />
+                                <Label col="0" :text="lucide('refresh-cw')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.profile.sync')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label col="2" text="›" class="text-xl text-muted-foreground" verticalAlignment="center" />
+                                <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
                         </StackLayout>
                     </StackLayout>
 
-                    <!-- Logout -->
+                    <!-- Logout (primary: fundo preto, fonte branca) -->
                     <StackLayout class="px-4 mt-6">
-                        <StackLayout class="card p-0 border-destructive" androidElevation="1">
+                        <StackLayout class="bg-primary border border-border rounded-lg p-0" androidElevation="1">
                             <GridLayout columns="auto, *" class="p-4" @tap="logout">
-                                <Label col="0" text="🚪" class="text-xl mr-4" verticalAlignment="center" />
-                                <Label col="1" :text="$t('pages.profile.logout')" class="text-base font-semibold text-destructive" verticalAlignment="center" />
+                                <Label col="0" :text="lucide('log-out')" class="lucide text-primary-foreground mr-4" verticalAlignment="center" />
+                                <Label col="1" :text="$t('pages.profile.logout')" class="text-base font-semibold text-primary-foreground" verticalAlignment="center" />
                             </GridLayout>
                         </StackLayout>
                     </StackLayout>
@@ -96,6 +96,7 @@ import { ref, computed, onMounted, getCurrentInstance } from 'vue';
 import { Dialogs } from '@nativescript/core';
 import { useTranslation } from '../../composables/useTranslation';
 import { getAuth, clearAuth } from '../../utils/auth';
+import { lucide } from '../../utils/icons';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 import ProfileDetails from './ProfileDetails.vue';
 import ClientListPage from './ClientListPage.vue';

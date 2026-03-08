@@ -23,10 +23,11 @@
 
 ```
 app/
-├── bootstrap/           # Entry point e raiz da app
+├── bootstrap/           # Entry point e RAIZ DO WEBPACK (ver nota abaixo)
 │   ├── app.css          # @theme (tokens) + @utility (componentes) + :pressed states
-│   ├── app.ts           # Entry point
-│   └── App.vue          # Root component
+│   ├── app.ts           # Entry point (package.json main)
+│   ├── App.vue          # Root component
+│   └── fonts/           # Icon fonts (lucide.ttf) — copiados pelo CopyPlugin
 ├── components/          # Componentes reutilizáveis
 ├── layouts/             # Layouts (Default com TabView)
 ├── pages/               # Páginas por domínio
@@ -37,6 +38,15 @@ app/
 ├── types/               # Interfaces TypeScript
 └── utils/               # Utilitários (auth, helpers)
 ```
+
+### Diretório-base do webpack (IMPORTANTE)
+
+O `main` do `package.json` aponta para `app/bootstrap/app.ts`. O `@nativescript/webpack` usa o **diretório do `main`** (`app/bootstrap/`) como contexto do CopyPlugin para copiar assets estáticos. Isso significa:
+
+- **Fonts** → `app/bootstrap/fonts/` (NÃO `app/fonts/`)
+- **Assets** (imagens, etc.) → `app/bootstrap/assets/` (NÃO `app/assets/`)
+
+Colocar em `app/fonts/` ou `app/assets/` **não funciona** — o webpack ignora esses diretórios.
 
 ## Navegação
 
@@ -53,6 +63,21 @@ app/
 3. **`nativescript-components.mdc`** — Catálogo: exemplos de todos os componentes usando `@utility`
 4. **`nativescript-implementer.mdc`** — Implementação: arquitetura, navegação, code style
 5. **`NATIVESCRIPT.md`** — Referência completa da plataforma NativeScript
+
+## Sistema de cores (referência rápida)
+
+Tokens definidos em `@theme` no `app/bootstrap/app.css`. **Doc completa:** `shadcn-nativescript.mdc` → seção "Paleta de Cores (Design Tokens)".
+
+| Uso | Fundo | Texto | Exemplo |
+| --- | ----- | ----- | ------- |
+| **Primary** — ação principal, destaque forte | `bg-primary` (preto) | `text-primary-foreground` (branco) | Botão principal, header, card de ação (ex.: Sair) |
+| **Secondary** — ação alternativa | `bg-secondary` (cinza claro) | `text-secondary-foreground` | Botão secundário, stepper − |
+| **Destructive** — perigo, remoção | `bg-destructive` (vermelho) | `text-destructive-foreground` | Excluir, cancelar conta |
+| **Muted** — secundário, hints | `bg-muted` | `text-muted-foreground` | Ícones, captions, placeholders |
+| **Card** — conteúdo em cards | `bg-card` | `text-card-foreground` | Conteúdo dentro de card |
+| **Success** | `bg-success` | `text-success` / `text-success-foreground` | Valores monetários, confirmação |
+
+NUNCA usar hex no template; sempre classes semânticas acima.
 
 ## Estrutura do bootstrap/app.css
 

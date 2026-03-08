@@ -7,6 +7,88 @@ alwaysApply: true
 Referência para criar componentes de UI. Usa as classes `@utility` definidas no `app/bootstrap/app.css`.
 Para detalhes sobre tokens e CSS do NativeScript, consulte `shadcn-nativescript.mdc`.
 
+## Icons (Lucide)
+
+O projeto usa **Lucide icons** via icon font (`app/bootstrap/fonts/lucide.ttf`), o mesmo icon set do shadcn/ui.
+
+### Setup
+
+- Font: `app/bootstrap/fonts/lucide.ttf` (copiado pelo webpack CopyPlugin — DEVE estar em `app/bootstrap/fonts/`, não `app/fonts/`)
+- CSS: `@utility lucide` em `app/bootstrap/app.css` (define `font-family` e `font-size: 20`)
+- Helper: `app/utils/icons.ts` — função `lucide(name)` retorna o caractere unicode
+
+### Uso básico
+
+```xml
+<script setup lang="ts">
+import { lucide } from '../../utils/icons';
+</script>
+
+<!-- Ícone standalone -->
+<Label :text="lucide('user')" class="lucide text-muted-foreground" />
+
+<!-- Ícone com cor customizada -->
+<Label :text="lucide('log-out')" class="lucide text-destructive" />
+
+<!-- Ícone com tamanho diferente (sobrescreve font-size: 20 do @utility) -->
+<Label :text="lucide('star')" class="lucide text-2xl text-warning" />
+
+<!-- Ícone como chevron em item de menu -->
+<Label :text="lucide('chevron-right')" class="lucide text-muted-foreground" />
+```
+
+### Padrão: Item de menu com ícone Lucide
+
+```xml
+<GridLayout columns="auto, *, auto" class="p-4" @tap="onTap">
+  <Label col="0" :text="lucide('users')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+  <Label col="1" text="Clientes" class="text-base text-card-foreground" verticalAlignment="center" />
+  <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
+</GridLayout>
+```
+
+### Ícones disponíveis (seleção)
+
+| Nome | Uso típico |
+| ---- | ---- |
+| `user`, `circle-user`, `user-round` | Perfil, conta |
+| `users` | Lista de clientes/pessoas |
+| `package`, `box` | Produtos, pacotes |
+| `credit-card`, `wallet`, `banknote` | Pagamentos, financeiro |
+| `shopping-cart` | Carrinho |
+| `receipt` | Pedidos, recibos |
+| `log-out`, `log-in` | Autenticação |
+| `refresh-cw` | Sincronização |
+| `chevron-right`, `chevron-left` | Navegação, setas |
+| `search` | Busca |
+| `plus`, `minus`, `x`, `check` | Ações CRUD |
+| `settings` | Configurações |
+| `bell` | Notificações |
+| `trash-2` | Excluir |
+| `pencil` | Editar |
+| `eye`, `eye-off` | Visibilidade |
+| `filter`, `sort-asc`, `sort-desc` | Filtros, ordenação |
+| `calendar`, `calendar-days` | Datas |
+| `map-pin` | Localização |
+| `phone`, `mail` | Contato |
+| `lock`, `unlock` | Segurança |
+| `scan-barcode`, `barcode`, `qr-code` | Códigos |
+| `tag`, `tags` | Categorias |
+| `alert-triangle`, `circle-alert`, `info` | Alertas |
+| `circle-check`, `circle-x` | Status |
+| `star`, `heart` | Favoritos |
+| `sun`, `moon` | Tema |
+| `store`, `truck` | Comércio |
+
+Para a lista completa de codepoints, consulte `app/utils/icons.ts`. Para adicionar novos ícones, busque o codepoint em `node_modules/lucide-static/font/codepoints.json`.
+
+### Regras
+
+1. **NUNCA** use emojis como ícones — use `lucide('nome-do-icone')` com `class="lucide"`
+2. **SEMPRE** importe `lucide` de `../../utils/icons` (ou caminho relativo correto)
+3. Cor do ícone: `text-muted-foreground` (padrão), `text-foreground` (destaque), `text-destructive` (perigo)
+4. Tamanho base: `20dp` (via `@utility lucide`). Sobrescreva com `text-lg`, `text-2xl`, etc.
+
 ## Button
 
 Todas as variantes usam a classe correspondente. Sobrescreva com utilities individuais se precisar.
@@ -46,8 +128,23 @@ Todas as variantes usam a classe correspondente. Sobrescreva com utilities indiv
 
 ## Card
 
+**Especificação no design system:** o Card é o padrão visual para blocos de conteúdo (listas, menus, detalhes). A aparência vem da `@utility card` em `app/bootstrap/app.css` (fundo, borda, radius). A estrutura segue um de dois padrões, conforme o uso.
+
+### Dois padrões estruturais
+
+| Padrão | Estrutura | Quando usar |
+|--------|-----------|-------------|
+| **Card único** | O elemento de conteúdo **é** o card: `class="card"` (e opcionalmente `androidElevation="2"`) no mesmo GridLayout/StackLayout que tem o conteúdo. Padding vem da utility (`p-4`). | Um card = um item (ex.: item da lista de eventos, item de produto). |
+| **Card container** | Um **wrapper** é o card: `StackLayout class="card p-0" androidElevation="2"`. O conteúdo fica **dentro**; cada bloco interno tem `class="p-4"`. Separadores entre itens com `StackLayout class="bg-border mx-4" style="height: 1"`. | Um card = um grupo de itens (ex.: menu de perfil, seção “Cadastros” com vários links). |
+
+**Regra de elevação:** use `androidElevation="2"` em cards de conteúdo/listas/menus; use `androidElevation="1"` em cards secundários (ex.: logout). Omita para estilo flat quando a borda bastar.
+
+**Implicação:** ao implementar uma nova tela, escolher entre “card único” (conteúdo direto no elemento com `card`) ou “card container” (wrapper `card p-0` + filhos com `p-4` e separadores). Não misturar aleatoriamente; seguir a tabela acima.
+
+### Exemplos
+
 ```xml
-<!-- Card básico -->
+<!-- Card básico (padrão único) -->
 <GridLayout rows="auto, auto" class="card m-2">
   <Label row="0" text="Título" class="text-lg font-semibold text-card-foreground" />
   <Label row="1" text="Descrição" class="text-sm text-muted-foreground mt-1" textWrap="true" />
@@ -72,36 +169,36 @@ Todas as variantes usam a classe correspondente. Sobrescreva com utilities indiv
   <Label text="Card com sombra" class="text-base text-card-foreground" />
 </GridLayout>
 
-<!-- Card tappable com chevron (item de menu) -->
+<!-- Card tappable com chevron (item de menu) — usa Lucide icons -->
 <StackLayout class="card p-0" androidElevation="2">
   <GridLayout columns="auto, *, auto" class="p-4" @tap="onTap">
-    <Label col="0" text="👤" class="text-xl mr-4" verticalAlignment="center" />
+    <Label col="0" :text="lucide('circle-user')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
     <Label col="1" text="Dados do perfil" class="text-base text-card-foreground" verticalAlignment="center" />
-    <Label col="2" text="›" class="text-xl text-muted-foreground" verticalAlignment="center" />
+    <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
   </GridLayout>
 </StackLayout>
 
 <!-- Card agrupado (menu settings) — vários itens em um card -->
 <StackLayout class="card p-0" androidElevation="2">
   <GridLayout columns="auto, *, auto" class="p-4" @tap="onItem1">
-    <Label col="0" text="📋" class="text-xl mr-4" verticalAlignment="center" />
+    <Label col="0" :text="lucide('users')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
     <Label col="1" text="Item 1" class="text-base text-card-foreground" verticalAlignment="center" />
-    <Label col="2" text="›" class="text-xl text-muted-foreground" verticalAlignment="center" />
+    <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
   </GridLayout>
 
   <StackLayout class="bg-border mx-4" style="height: 1" />
 
   <GridLayout columns="auto, *, auto" class="p-4" @tap="onItem2">
-    <Label col="0" text="📦" class="text-xl mr-4" verticalAlignment="center" />
+    <Label col="0" :text="lucide('package')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
     <Label col="1" text="Item 2" class="text-base text-card-foreground" verticalAlignment="center" />
-    <Label col="2" text="›" class="text-xl text-muted-foreground" verticalAlignment="center" />
+    <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
   </GridLayout>
 </StackLayout>
 
 <!-- Card destrutivo (logout, excluir conta) -->
 <StackLayout class="card p-0 border-destructive" androidElevation="1">
   <GridLayout columns="auto, *" class="p-4" @tap="onDestructiveAction">
-    <Label col="0" text="🚪" class="text-xl mr-4" verticalAlignment="center" />
+    <Label col="0" :text="lucide('log-out')" class="lucide text-destructive mr-4" verticalAlignment="center" />
     <Label col="1" text="Sair" class="text-base font-semibold text-destructive" verticalAlignment="center" />
   </GridLayout>
 </StackLayout>
@@ -121,8 +218,8 @@ Todas as variantes usam a classe correspondente. Sobrescreva com utilities indiv
 - Use `class="card p-0"` no wrapper (StackLayout) — o `p-0` remove o padding interno do card.
 - Cada item dentro usa `class="p-4"` — padding individual por item.
 - Separador entre itens: `<StackLayout class="bg-border mx-4" style="height: 1" />` (indentado, não full-width).
-- Ícone (emoji ou futuro font-icon) em `col="0"` com `mr-4`.
-- Chevron `›` em `col="2"` para itens navegáveis. Omitir para ações (logout, sync).
+- Ícone Lucide em `col="0"` com `class="lucide text-muted-foreground mr-4"`. NUNCA use emojis.
+- Chevron em `col="2"`: `:text="lucide('chevron-right')"` com `class="lucide text-muted-foreground"`. Omitir para ações (logout, sync).
 
 ## Input / TextField
 

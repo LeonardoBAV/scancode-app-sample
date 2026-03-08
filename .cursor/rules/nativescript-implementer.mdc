@@ -100,6 +100,27 @@ export interface Product {
 }
 ```
 
+## Assets Estáticos e Build
+
+### Diretório-base do webpack
+
+O `main` do `package.json` é `app/bootstrap/app.ts`. O `@nativescript/webpack` CopyPlugin usa o **diretório do `main`** como contexto. Assets estáticos devem ficar dentro de `app/bootstrap/`:
+
+| Tipo | Caminho correto | NÃO funciona |
+| ---- | ---- | ---- |
+| Fonts (.ttf) | `app/bootstrap/fonts/` | `app/fonts/` |
+| Assets (imagens) | `app/bootstrap/assets/` | `app/assets/` |
+
+### HMR e assets nativos
+
+O HMR (`ns run android --hmr`) só transfere arquivos JS/CSS ao dispositivo. **Fonts, imagens e outros assets nativos fazem parte do APK** e requerem:
+
+1. `ns clean` (ou `rm -rf platforms`)
+2. `ns platform add android`
+3. `ns run android --hmr` (rebuild completo do APK)
+
+Se adicionou uma fonte ou imagem e ela não aparece no device, **pare o HMR e faça rebuild completo**.
+
 ## Performance
 
 - Minimizar nesting de layouts

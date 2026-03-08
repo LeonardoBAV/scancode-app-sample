@@ -130,6 +130,13 @@
   @apply bg-transparent text-foreground text-xs font-medium rounded-full border border-border px-2 py-1;
 }
 
+/* ─── Icons (Lucide) ─── */
+
+@utility lucide {
+  font-family: 'lucide', 'lucide';
+  font-size: 20;
+}
+
 /* ─── Layout Helpers ─── */
 
 @utility separator {

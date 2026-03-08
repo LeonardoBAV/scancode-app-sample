@@ -11,24 +11,26 @@
     "free": "Free",
     "orders": "orders"
   },
-  "login": {
-    "title": "myCoolApp",
-    "subtitle": "Sign in to continue",
-    "username": "Username",
-    "usernamePlaceholder": "your username",
-    "password": "Password",
-    "passwordPlaceholder": "your password",
-    "submit": "Sign in",
-    "forgotPassword": "Forgot password?",
-    "errorInvalid": "Invalid username or password."
-  },
-  "events": {
-    "title": "Events",
-    "profile": "Profile",
-    "empty": "No events found",
-    "emptyHint": "Your events will appear here",
-    "statusInProgress": "In Progress",
-    "statusScheduled": "Scheduled",
-    "statusEnded": "Ended"
+  "pages": {
+    "login": {
+      "title": "myCoolApp",
+      "subtitle": "Sign in to continue",
+      "username": "Username",
+      "usernamePlaceholder": "your username",
+      "password": "Password",
+      "passwordPlaceholder": "your password",
+      "submit": "Sign in",
+      "forgotPassword": "Forgot password?",
+      "errorInvalid": "Invalid username or password."
+    },
+    "events": {
+      "title": "Events",
+      "profile": "Profile",
+      "empty": "No events found",
+      "emptyHint": "Your events will appear here",
+      "statusInProgress": "In Progress",
+      "statusScheduled": "Scheduled",
+      "statusEnded": "Ended"
+    }
   }
 }

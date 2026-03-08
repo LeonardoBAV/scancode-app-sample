@@ -11,23 +11,25 @@
     "free": "Grátis",
     "orders": "pedidos"
   },
-  "login": {
-    "title": "Ordy",
-    "subtitle": "Faça login para continuar",
-    "username": "Usuário",
-    "usernamePlaceholder": "seu usuário",
-    "password": "Senha",
-    "passwordPlaceholder": "sua senha",
-    "submit": "Entrar",
-    "errorInvalid": "Usuário ou senha inválidos."
-  },
-  "events": {
-    "title": "Eventos",
-    "profile": "Perfil",
-    "empty": "Nenhum evento encontrado",
-    "emptyHint": "Seus eventos aparecerão aqui",
-    "statusInProgress": "Em andamento",
-    "statusScheduled": "Agendado",
-    "statusEnded": "Finalizado"
+  "pages": {
+    "login": {
+      "title": "Ordy",
+      "subtitle": "Faça login para continuar",
+      "username": "Usuário",
+      "usernamePlaceholder": "seu usuário",
+      "password": "Senha",
+      "passwordPlaceholder": "sua senha",
+      "submit": "Entrar",
+      "errorInvalid": "Usuário ou senha inválidos."
+    },
+    "events": {
+      "title": "Eventos",
+      "profile": "Perfil",
+      "empty": "Nenhum evento encontrado",
+      "emptyHint": "Seus eventos aparecerão aqui",
+      "statusInProgress": "Em andamento",
+      "statusScheduled": "Agendado",
+      "statusEnded": "Finalizado"
+    }
   }
 }

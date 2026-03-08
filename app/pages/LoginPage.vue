@@ -5,25 +5,25 @@
             <!-- Branding -->
             <StackLayout row="0" verticalAlignment="bottom" class="mb-10">
                 <Label text="OY" class="text-xl font-bold text-primary-foreground bg-primary w-16 h-16 rounded-full text-center" horizontalAlignment="center" verticalAlignment="center" />
-                <Label :text="$t('login.title')" class="text-2xl font-bold text-foreground text-center mt-4" />
-                <Label :text="$t('login.subtitle')" class="text-sm text-muted-foreground text-center mt-1" />
+                <Label :text="$t('pages.login.title')" class="text-2xl font-bold text-foreground text-center mt-4" />
+                <Label :text="$t('pages.login.subtitle')" class="text-sm text-muted-foreground text-center mt-1" />
             </StackLayout>
 
             <!-- Form -->
             <StackLayout row="1">
                 <StackLayout class="mb-4">
-                    <Label :text="$t('login.username')" class="text-sm font-medium text-foreground mb-1" />
-                    <TextField v-model="username" :hint="$t('login.usernamePlaceholder')" class="input-field" placeholderColor="#a1a1aa" autocorrect="false" autocapitalizationType="none" />
+                    <Label :text="$t('pages.login.username')" class="text-sm font-medium text-foreground mb-1" />
+                    <TextField v-model="username" :hint="$t('pages.login.usernamePlaceholder')" class="input-field" placeholderColor="#a1a1aa" autocorrect="false" autocapitalizationType="none" />
                 </StackLayout>
 
                 <StackLayout class="mb-5">
-                    <Label :text="$t('login.password')" class="text-sm font-medium text-foreground mb-1" />
-                    <TextField v-model="password" :hint="$t('login.passwordPlaceholder')" :secure="true" class="input-field" placeholderColor="#a1a1aa" />
+                    <Label :text="$t('pages.login.password')" class="text-sm font-medium text-foreground mb-1" />
+                    <TextField v-model="password" :hint="$t('pages.login.passwordPlaceholder')" :secure="true" class="input-field" placeholderColor="#a1a1aa" />
                 </StackLayout>
 
                 <Label v-if="errorMessage" :text="errorMessage" class="text-sm text-destructive text-center mb-3" textWrap="true" />
 
-                <Button :text="$t('login.submit')" class="btn-primary text-lg p-4" @tap="onLogin" />
+                <Button :text="$t('pages.login.submit')" class="btn-primary text-lg p-4" @tap="onLogin" />
             </StackLayout>
 
             <!-- Footer -->
@@ -73,7 +73,7 @@ function onLogin(): void {
         });
         goToEvents();
     } else {
-        errorMessage.value = t('login.errorInvalid');
+        errorMessage.value = t('pages.login.errorInvalid');
     }
 }
 

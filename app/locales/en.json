@@ -77,6 +77,18 @@
       "tabOrders": "Orders",
       "tabCart": "Cart"
     },
+    "orderList": {
+      "title": "Orders",
+      "addOrder": "New order",
+      "empty": "No orders",
+      "emptyHint": "Tap New order to get started",
+      "items": "items",
+      "statusOpen": "Open",
+      "statusClosed": "Closed",
+      "statusCanceled": "Canceled",
+      "synced": "Synced",
+      "notSynced": "Not synced"
+    },
     "eventHome": {
       "status": "Status",
       "date": "Date",

@@ -1,71 +1,74 @@
 <template>
     <Page actionBarHidden="true">
-        <ScrollView class="bg-background">
-            <StackLayout class="p-4 pb-8">
+        <GridLayout rows="auto, *" class="bg-background">
+            <HeaderComponent row="0" :title="event.name" />
+            <ScrollView row="1">
+                <StackLayout class="p-4 pb-8">
 
-                <!-- Back to events -->
-                <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary mb-4" @tap="goToEvents" />
+                    <!-- Back to events -->
+                    <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary mb-4" @tap="goToEvents" />
 
-                <!-- Summary Card -->
-                <StackLayout class="card p-0">
+                    <!-- Summary Card -->
+                    <StackLayout class="card p-0">
 
-                    <!-- Status + Date -->
-                    <GridLayout columns="*, auto" class="p-4">
-                        <StackLayout col="0">
-                            <Label :text="$t('pages.eventHome.status')" class="text-xs text-muted-foreground mb-1" />
-                            <Label :text="statusLabel(event.status)" :class="statusBadgeClass(event.status)" horizontalAlignment="left" />
-                        </StackLayout>
-                        <StackLayout col="1" horizontalAlignment="right">
-                            <Label :text="$t('pages.eventHome.date')" class="text-xs text-muted-foreground mb-1 text-right" />
-                            <Label :text="event.startDate + ' — ' + event.endDate" class="text-sm text-card-foreground text-right" />
-                        </StackLayout>
-                    </GridLayout>
+                        <!-- Status + Date -->
+                        <GridLayout columns="*, auto" class="p-4">
+                            <StackLayout col="0">
+                                <Label :text="$t('pages.eventHome.status')" class="text-xs text-muted-foreground mb-1" />
+                                <Label :text="statusLabel(event.status)" :class="statusBadgeClass(event.status)" horizontalAlignment="left" />
+                            </StackLayout>
+                            <StackLayout col="1" horizontalAlignment="right">
+                                <Label :text="$t('pages.eventHome.date')" class="text-xs text-muted-foreground mb-1 text-right" />
+                                <Label :text="event.startDate + ' — ' + event.endDate" class="text-sm text-card-foreground text-right" />
+                            </StackLayout>
+                        </GridLayout>
 
-                    <StackLayout class="bg-border mx-4" style="height: 1" />
+                        <StackLayout class="bg-border mx-4" style="height: 1" />
 
-                    <!-- Total -->
-                    <GridLayout columns="auto, *, auto" class="p-4">
-                        <Label col="0" :text="lucide('wallet')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
-                        <Label col="1" :text="$t('pages.eventHome.totalValue')" class="text-base text-card-foreground" verticalAlignment="center" />
-                        <Label col="2" :text="formatCurrencyBR(event.totalValue, $t('common.free'))" class="text-lg font-bold text-success" verticalAlignment="center" />
-                    </GridLayout>
+                        <!-- Total -->
+                        <GridLayout columns="auto, *, auto" class="p-4">
+                            <Label col="0" :text="lucide('wallet')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                            <Label col="1" :text="$t('pages.eventHome.totalValue')" class="text-base text-card-foreground" verticalAlignment="center" />
+                            <Label col="2" :text="formatCurrencyBR(event.totalValue, $t('common.free'))" class="text-lg font-bold text-success" verticalAlignment="center" />
+                        </GridLayout>
+
+                    </StackLayout>
+
+                    <!-- Orders Card -->
+                    <Label :text="$t('pages.eventHome.ordersSection')" class="text-xs font-semibold text-muted-foreground uppercase mt-6 mb-2 px-1" />
+
+                    <StackLayout class="card p-0">
+
+                        <!-- Total Orders -->
+                        <GridLayout columns="auto, *, auto" class="p-4">
+                            <Label col="0" :text="lucide('receipt')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                            <Label col="1" :text="$t('pages.eventHome.orders')" class="text-base text-card-foreground" verticalAlignment="center" />
+                            <Label col="2" :text="String(event.orderCount)" class="text-base font-semibold text-card-foreground" verticalAlignment="center" />
+                        </GridLayout>
+
+                        <StackLayout class="bg-border mx-4" style="height: 1" />
+
+                        <!-- Synced -->
+                        <GridLayout columns="auto, *, auto" class="p-4">
+                            <Label col="0" :text="lucide('circle-check')" class="lucide text-success mr-4" verticalAlignment="center" />
+                            <Label col="1" :text="$t('pages.eventHome.synced')" class="text-base text-card-foreground" verticalAlignment="center" />
+                            <Label col="2" :text="String(event.ordersSynced)" class="text-base font-semibold text-success" verticalAlignment="center" />
+                        </GridLayout>
+
+                        <StackLayout class="bg-border mx-4" style="height: 1" />
+
+                        <!-- Unsynced -->
+                        <GridLayout columns="auto, *, auto" class="p-4">
+                            <Label col="0" :text="lucide('clock')" class="lucide text-warning mr-4" verticalAlignment="center" />
+                            <Label col="1" :text="$t('pages.eventHome.unsynced')" class="text-base text-card-foreground" verticalAlignment="center" />
+                            <Label col="2" :text="String(event.ordersUnsynced)" class="text-base font-semibold text-warning" verticalAlignment="center" />
+                        </GridLayout>
+
+                    </StackLayout>
 
                 </StackLayout>
-
-                <!-- Orders Card -->
-                <Label :text="$t('pages.eventHome.ordersSection')" class="text-xs font-semibold text-muted-foreground uppercase mt-6 mb-2 px-1" />
-
-                <StackLayout class="card p-0">
-
-                    <!-- Total Orders -->
-                    <GridLayout columns="auto, *, auto" class="p-4">
-                        <Label col="0" :text="lucide('receipt')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
-                        <Label col="1" :text="$t('pages.eventHome.orders')" class="text-base text-card-foreground" verticalAlignment="center" />
-                        <Label col="2" :text="String(event.orderCount)" class="text-base font-semibold text-card-foreground" verticalAlignment="center" />
-                    </GridLayout>
-
-                    <StackLayout class="bg-border mx-4" style="height: 1" />
-
-                    <!-- Synced -->
-                    <GridLayout columns="auto, *, auto" class="p-4">
-                        <Label col="0" :text="lucide('circle-check')" class="lucide text-success mr-4" verticalAlignment="center" />
-                        <Label col="1" :text="$t('pages.eventHome.synced')" class="text-base text-card-foreground" verticalAlignment="center" />
-                        <Label col="2" :text="String(event.ordersSynced)" class="text-base font-semibold text-success" verticalAlignment="center" />
-                    </GridLayout>
-
-                    <StackLayout class="bg-border mx-4" style="height: 1" />
-
-                    <!-- Unsynced -->
-                    <GridLayout columns="auto, *, auto" class="p-4">
-                        <Label col="0" :text="lucide('clock')" class="lucide text-warning mr-4" verticalAlignment="center" />
-                        <Label col="1" :text="$t('pages.eventHome.unsynced')" class="text-base text-card-foreground" verticalAlignment="center" />
-                        <Label col="2" :text="String(event.ordersUnsynced)" class="text-base font-semibold text-warning" verticalAlignment="center" />
-                    </GridLayout>
-
-                </StackLayout>
-
-            </StackLayout>
-        </ScrollView>
+            </ScrollView>
+        </GridLayout>
     </Page>
 </template>
 
@@ -75,6 +78,7 @@ import { useTranslation } from '../../../composables/useTranslation';
 import type { EventItem } from '../../../types/event-item';
 import { lucide } from '../../../utils/icons';
 import { formatCurrencyBR } from '../../../utils/format';
+import HeaderComponent from '../../../components/HeaderComponent.vue';
 import EventsPage from '../../EventsPage.vue';
 
 const { t } = useTranslation();

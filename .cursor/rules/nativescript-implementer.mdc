@@ -68,6 +68,16 @@ NUNCA use:
 - Hex hardcoded no template ou `<style>`
 - `className` (é `class` no Vue)
 
+## Layout Default (TabView de evento)
+
+O `app/layouts/Default.vue` é o layout com TabView (Evento, Pedidos, Sacola). **O layout NÃO tem header** — cada aba tem seu próprio header na página:
+
+- **Home** (`event/home/Home.vue`) — HeaderComponent com `:title="event.name"`
+- **OrderListPage** (`event/orders/OrderListPage.vue`) — HeaderComponent com título "Pedidos"
+- **Cart** (`event/cart/Cart.vue`) — deve ter HeaderComponent com título "Sacola"
+
+Ao adicionar nova aba ou nova página dentro de um Frame do TabView, inclua o HeaderComponent na própria página, não no layout.
+
 ## Padrões de Navegação
 
 ```typescript

@@ -1,43 +1,28 @@
 <template>
     <Page actionBarHidden="true">
-        <GridLayout rows="auto, *" class="bg-background">
-
-            <!-- Header with event name + avatar -->
-            <HeaderComponent row="0" :title="event.name" />
-
-            <!-- TabView -->
-            <TabView
-                row="1"
-                :selectedIndex="selectedIndex"
-                androidTabsPosition="bottom"
-                class="tab-view"
-                @selectedIndexChange="onSelectedIndexChange"
-            >
-                <TabViewItem :title="$t('pages.eventLayout.tabHome')">
-                    <Frame>
-                        <Home :event="event" />
-                    </Frame>
-                </TabViewItem>
-                <TabViewItem :title="$t('pages.eventLayout.tabOrders')">
-                    <Frame>
-                        <OrderListPage />
-                    </Frame>
-                </TabViewItem>
-                <TabViewItem :title="$t('pages.eventLayout.tabCart')">
-                    <Frame>
-                        <Cart />
-                    </Frame>
-                </TabViewItem>
-            </TabView>
-
-        </GridLayout>
+        <TabView :selectedIndex="selectedIndex" androidTabsPosition="bottom" class="tab-view bg-background" @selectedIndexChange="onSelectedIndexChange">
+            <TabViewItem :title="$t('pages.eventLayout.tabHome')">
+                <Frame>
+                    <Home :event="event" />
+                </Frame>
+            </TabViewItem>
+            <TabViewItem :title="$t('pages.eventLayout.tabOrders')">
+                <Frame>
+                    <OrderListPage />
+                </Frame>
+            </TabViewItem>
+            <TabViewItem :title="$t('pages.eventLayout.tabCart')">
+                <Frame>
+                    <Cart />
+                </Frame>
+            </TabViewItem>
+        </TabView>
     </Page>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { EventItem } from '../types/event-item';
-import HeaderComponent from '../components/HeaderComponent.vue';
 import Home from '../pages/event/home/Home.vue';
 import Cart from '../pages/event/cart/Cart.vue';
 import OrderListPage from '../pages/event/orders/OrderListPage.vue';

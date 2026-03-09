@@ -76,6 +76,18 @@
       "tabOrders": "Pedidos",
       "tabCart": "Sacola"
     },
+    "orderList": {
+      "title": "Pedidos",
+      "addOrder": "Novo pedido",
+      "empty": "Nenhum pedido",
+      "emptyHint": "Toque em Novo pedido para começar",
+      "items": "itens",
+      "statusOpen": "Aberto",
+      "statusClosed": "Fechado",
+      "statusCanceled": "Cancelado",
+      "synced": "Sincronizado",
+      "notSynced": "Não sincronizado"
+    },
     "eventHome": {
       "status": "Status",
       "date": "Data",

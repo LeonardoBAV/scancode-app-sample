@@ -44,6 +44,14 @@
       "syncMessage": "Sincronização em breve.",
       "logoutSection": "Sessão",
       "logout": "Sair"
+    },
+    "profileDetails": {
+      "title": "Dados do perfil",
+      "name": "Nome",
+      "username": "Usuário (nick)",
+      "email": "E-mail",
+      "cpf": "CPF",
+      "distributor": "Distribuidora"
     }
   }
 }

@@ -84,6 +84,17 @@ nav?.$navigateTo(TargetPage, {
 nav?.$navigateBack();
 ```
 
+## Helpers / Utilitários (`app/utils/`)
+
+| Arquivo | Funções | Uso |
+| ---- | ---- | ---- |
+| `format.ts` | `formatCurrencyBR(value, freeText?)` | Formata número em `R$ 1.234,56`. Se `value === 0` e `freeText` fornecido, retorna `freeText`. |
+| `format.ts` | `formatCPF(value)` | Aplica máscara `000.000.000-00`. Retorna `'—'` se nulo/vazio, ou o valor original se não tiver 11 dígitos. |
+| `icons.ts` | `lucide(name)` | Retorna caractere unicode do ícone Lucide. Usar com `class="lucide"`. |
+| `auth.ts` | `getAuth()`, `setAuth(profile)`, `clearAuth()` | Leitura/escrita do perfil autenticado em `ApplicationSettings`. |
+
+Ao criar novos helpers, adicione-os na tabela acima.
+
 ## Padrão de Tipos
 
 Definir interfaces em `app/types/`:

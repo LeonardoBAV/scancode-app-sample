@@ -45,6 +45,14 @@
       "syncMessage": "Sync coming soon.",
       "logoutSection": "Session",
       "logout": "Log out"
+    },
+    "profileDetails": {
+      "title": "Profile details",
+      "name": "Name",
+      "username": "Username (nick)",
+      "email": "Email",
+      "cpf": "CPF",
+      "distributor": "Distributor"
     }
   }
 }

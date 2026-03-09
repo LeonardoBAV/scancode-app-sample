@@ -1,51 +1,87 @@
 <template>
-    <Page>
-        <ActionBar title="Profile details">
-            <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
-        </ActionBar>
+    <Page actionBarHidden="true">
+        <GridLayout rows="auto, *" class="bg-background">
 
-        <ScrollView>
-            <StackLayout class="p-4">
-                <StackLayout class="mb-4 p-3 bg-gray-100 rounded-lg">
-                    <Label text="Name" class="text-xs text-gray-500" />
-                    <Label :text="profile?.name ?? '—'" class="text-base text-gray-900" />
+            <HeaderComponent row="0" :title="$t('pages.profileDetails.title')" :showAvatar="false" />
+
+            <ScrollView row="1">
+                <StackLayout class="p-4">
+
+                    <!-- Info Card -->
+                    <StackLayout class="card p-0" androidElevation="2">
+
+                        <!-- Name -->
+                        <GridLayout columns="auto, *" class="p-4">
+                            <Label col="0" :text="lucide('user')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <StackLayout col="1">
+                                <Label :text="$t('pages.profileDetails.name')" class="text-xs text-muted-foreground mb-1" />
+                                <Label :text="profile?.name ?? '—'" class="text-base text-card-foreground" textWrap="true" />
+                            </StackLayout>
+                        </GridLayout>
+
+                        <StackLayout class="bg-border mx-4" style="height: 1" />
+
+                        <!-- Username -->
+                        <GridLayout columns="auto, *" class="p-4">
+                            <Label col="0" :text="lucide('at-sign')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <StackLayout col="1">
+                                <Label :text="$t('pages.profileDetails.username')" class="text-xs text-muted-foreground mb-1" />
+                                <Label :text="profile?.nick ?? '—'" class="text-base text-card-foreground" />
+                            </StackLayout>
+                        </GridLayout>
+
+                        <StackLayout class="bg-border mx-4" style="height: 1" />
+
+                        <!-- Email -->
+                        <GridLayout columns="auto, *" class="p-4">
+                            <Label col="0" :text="lucide('mail')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <StackLayout col="1">
+                                <Label :text="$t('pages.profileDetails.email')" class="text-xs text-muted-foreground mb-1" />
+                                <Label :text="profile?.email ?? '—'" class="text-base text-card-foreground" />
+                            </StackLayout>
+                        </GridLayout>
+
+                        <StackLayout class="bg-border mx-4" style="height: 1" />
+
+                        <!-- CPF -->
+                        <GridLayout columns="auto, *" class="p-4">
+                            <Label col="0" :text="lucide('hash')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <StackLayout col="1">
+                                <Label :text="$t('pages.profileDetails.cpf')" class="text-xs text-muted-foreground mb-1" />
+                                <Label :text="formatCPF(profile?.cpf)" class="text-base text-card-foreground" />
+                            </StackLayout>
+                        </GridLayout>
+
+                        <StackLayout class="bg-border mx-4" style="height: 1" />
+
+                        <!-- Distributor -->
+                        <GridLayout columns="auto, *" class="p-4">
+                            <Label col="0" :text="lucide('store')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <StackLayout col="1">
+                                <Label :text="$t('pages.profileDetails.distributor')" class="text-xs text-muted-foreground mb-1" />
+                                <Label :text="profile?.distribuidora ?? '—'" class="text-base text-card-foreground" textWrap="true" />
+                            </StackLayout>
+                        </GridLayout>
+
+                    </StackLayout>
+
                 </StackLayout>
-                <StackLayout class="mb-4 p-3 bg-gray-100 rounded-lg">
-                    <Label text="Username (nick)" class="text-xs text-gray-500" />
-                    <Label :text="profile?.nick ?? '—'" class="text-base text-gray-900" />
-                </StackLayout>
-                <StackLayout class="mb-4 p-3 bg-gray-100 rounded-lg">
-                    <Label text="Email" class="text-xs text-gray-500" />
-                    <Label :text="profile?.email ?? '—'" class="text-base text-gray-900" />
-                </StackLayout>
-                <StackLayout class="mb-4 p-3 bg-gray-100 rounded-lg">
-                    <Label text="CPF" class="text-xs text-gray-500" />
-                    <Label :text="profile?.cpf ?? '—'" class="text-base text-gray-900" />
-                </StackLayout>
-                <StackLayout class="mb-4 p-3 bg-gray-100 rounded-lg">
-                    <Label text="Distributor" class="text-xs text-gray-500" />
-                    <Label :text="profile?.distribuidora ?? '—'" class="text-base text-gray-900" />
-                </StackLayout>
-            </StackLayout>
-        </ScrollView>
+            </ScrollView>
+
+        </GridLayout>
     </Page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, getCurrentInstance } from 'vue';
+import { ref, onMounted } from 'vue';
 import { getAuth } from '../../utils/auth';
+import { formatCPF } from '../../utils/format';
+import { lucide } from '../../utils/icons';
+import HeaderComponent from '../../components/HeaderComponent.vue';
 
 const profile = ref<ReturnType<typeof getAuth>>(null);
 
 onMounted(() => {
     profile.value = getAuth();
 });
-
-const instance = getCurrentInstance();
-const globals = instance?.appContext.config.globalProperties;
-const navigateBack = globals?.$navigateBack as () => Promise<void> | void;
-
-function goBack(): void {
-    return navigateBack?.();
-}
 </script>

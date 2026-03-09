@@ -5,7 +5,7 @@
             <HeaderComponent row="0" :title="$t('pages.productList.title')" :showAvatar="false" />
 
             <!-- Search -->
-            <StackLayout row="1" class="px-4 pt-4 pb-2">
+            <StackLayout row="1" class="px-4 pt-2 pb-2 bg-accent-foreground">
                 <GridLayout columns="auto, *" class="input-search">
                     <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
                     <TextField col="1" v-model="searchQuery" :hint="$t('pages.productList.searchHint')" class="text-base text-foreground p-0" placeholderColor="#a1a1aa" />

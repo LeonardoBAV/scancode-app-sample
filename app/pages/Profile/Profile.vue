@@ -84,6 +84,12 @@
                         </StackLayout>
                     </StackLayout>
 
+                    <!-- Footer: versão do app -->
+                    <StackLayout class="px-4 mt-8 pb-4">
+                        <StackLayout class="separator" />
+                        <Label :text="'v' + appVersion" class="text-xs text-muted-foreground text-center mt-2" />
+                    </StackLayout>
+
                 </StackLayout>
             </ScrollView>
 
@@ -95,6 +101,7 @@
 import { ref, computed, onMounted, getCurrentInstance } from 'vue';
 import { Dialogs } from '@nativescript/core';
 import { useTranslation } from '../../composables/useTranslation';
+import { useAppVersion } from '../../composables/useAppVersion';
 import { getAuth, clearAuth } from '../../utils/auth';
 import { lucide } from '../../utils/icons';
 import HeaderComponent from '../../components/HeaderComponent.vue';
@@ -105,6 +112,7 @@ import PaymentMethodListPage from './PaymentMethodListPage.vue';
 import LoginPage from '../LoginPage.vue';
 
 const { t } = useTranslation();
+const appVersion = useAppVersion();
 
 const profile = ref<ReturnType<typeof getAuth>>(null);
 const userName = computed(() => profile.value?.name ?? profile.value?.nick ?? 'User');

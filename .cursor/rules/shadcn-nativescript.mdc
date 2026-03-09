@@ -81,8 +81,8 @@ Use SEMPRE classes semânticas — NUNCA hex hardcoded.
 | `accent-foreground`      | `text-accent-foreground`        | Texto sobre accent                     |
 | `destructive`            | `bg-destructive`                | Ações de remoção/perigo                |
 | `destructive-foreground` | `text-destructive-foreground`   | Texto sobre destructive                |
-| `success`                | `text-success` / `bg-success`   | Valores monetários, confirmações       |
-| `success-foreground`     | `text-success-foreground`       | Texto sobre bg success                 |
+| `success` (Teal 400)     | `text-success` / `bg-success`   | Valores monetários, confirmações, badges de sucesso. Em fundo claro use `text-success`. |
+| `success-foreground`     | `text-success-foreground`       | **Sempre** texto sobre `bg-success` (claro, ~branco). Ex.: badge-success, botão success. |
 | `warning`                | `text-warning` / `bg-warning`   | Alertas, atenção                       |
 | `warning-foreground`     | `text-warning-foreground`       | Texto sobre bg warning                 |
 | `border`                 | `border-border`                 | Bordas de cards, separadores           |

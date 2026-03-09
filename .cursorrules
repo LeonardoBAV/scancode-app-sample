@@ -75,7 +75,9 @@ Tokens definidos em `@theme` no `app/bootstrap/app.css`. **Doc completa:** `shad
 | **Destructive** — perigo, remoção | `bg-destructive` (vermelho) | `text-destructive-foreground` | Excluir, cancelar conta |
 | **Muted** — secundário, hints | `bg-muted` | `text-muted-foreground` | Ícones, captions, placeholders |
 | **Card** — conteúdo em cards | `bg-card` | `text-card-foreground` | Conteúdo dentro de card |
-| **Success** | `bg-success` | `text-success` / `text-success-foreground` | Valores monetários, confirmação |
+| **Success** (Teal 400) | `bg-success` | Em fundo claro: `text-success`. Sobre bg success: `text-success-foreground` (branco) | Valores monetários, badge sucesso, confirmação |
+
+**Regra Success:** fundo success (badge, botão) → sempre `text-success-foreground`. Texto em fundo claro (ex.: preço) → `text-success`.
 
 NUNCA usar hex no template; sempre classes semânticas acima.
 

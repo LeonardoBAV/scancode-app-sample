@@ -35,8 +35,9 @@
   --color-destructive: #ef4444;
   --color-destructive-foreground: #fafafa;
 
-  /* ─── Success ─── */
-  --color-success: #22c55e;
+  /* ─── Success (Teal 400) ─── */
+  /* Sempre em par: bg success → text success-foreground (claro). text-success em fundo claro. */
+  --color-success: #2dd4bf;
   --color-success-foreground: #fafafa;
 
   /* ─── Warning ─── */
@@ -144,7 +145,7 @@ TextView {
 /* ─── Icons (Lucide) ─── */
 
 @utility lucide {
-  font-family: 'lucide', 'lucide';
+  font-family: "lucide", "lucide";
   font-size: 20;
 }
 

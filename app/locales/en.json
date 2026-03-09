@@ -53,6 +53,24 @@
       "email": "Email",
       "cpf": "CPF",
       "distributor": "Distributor"
+    },
+    "clientList": {
+      "title": "Clients",
+      "searchHint": "Search by name or CPF/CNPJ...",
+      "empty": "No clients found",
+      "emptyHint": "Try a different search term"
+    },
+    "productList": {
+      "title": "Products",
+      "searchHint": "Search by SKU, name or category...",
+      "empty": "No products found",
+      "emptyHint": "Try a different search term"
+    },
+    "paymentMethodList": {
+      "title": "Payment methods",
+      "searchHint": "Search by name...",
+      "empty": "No payment methods found",
+      "emptyHint": "Try a different search term"
     }
   }
 }

@@ -1,37 +1,47 @@
 <template>
-    <Page>
-        <ActionBar title="Product list">
-            <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
-        </ActionBar>
-        <StackLayout>
-            <TextField
-                v-model="searchQuery"
-                hint="Search by SKU, name or category..."
-                class="search-field p-3 m-3 rounded-lg border border-gray-300 text-base"
-            />
-            <ListView :items="filteredProducts" separatorColor="transparent" class="list">
+    <Page actionBarHidden="true">
+        <GridLayout rows="auto, auto, *" class="bg-background">
+
+            <HeaderComponent row="0" :title="$t('pages.productList.title')" :showAvatar="false" />
+
+            <!-- Search -->
+            <StackLayout row="1" class="px-4 pt-4 pb-2">
+                <GridLayout columns="auto, *" class="input-search">
+                    <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+                    <TextField col="1" v-model="searchQuery" :hint="$t('pages.productList.searchHint')" class="text-base text-foreground p-0" placeholderColor="#a1a1aa" />
+                </GridLayout>
+            </StackLayout>
+
+            <!-- List -->
+            <ListView row="2" :items="filteredProducts" separatorColor="transparent">
                 <template #default="{ item }">
-                    <GridLayout rows="auto, auto, auto" columns="*, auto" class="product-item p-3 m-2 rounded-lg border border-gray-200">
-                        <Label row="0" col="0" colSpan="2" :text="item.name" class="text-base font-bold text-gray-900" textWrap="true" />
-                        <Label row="1" col="0" :text="'SKU: ' + item.sku" class="text-sm text-gray-600 mt-1" textWrap="true" />
-                        <Label row="1" col="1" :text="formatPrice(item.price)" class="text-sm font-semibold text-gray-900 mt-1" horizontalAlignment="right" />
-                        <Label row="2" col="0" colSpan="2" :text="item.product_category.name" class="text-xs text-gray-500 mt-1" textWrap="true" />
+                    <GridLayout rows="auto, auto" columns="auto, *, auto" class="p-4 mx-4 mb-2 bg-card border border-border rounded-lg">
+                        <Label row="0" col="0" rowSpan="2" :text="lucide('package')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                        <Label row="0" col="1" :text="item.name" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                        <Label row="0" col="2" :text="formatCurrencyBR(item.price)" class="text-base font-bold text-primary" />
+                        <Label row="1" col="1" colSpan="2" :text="item.sku + ' · ' + item.product_category.name" class="text-xs text-muted-foreground mt-1" />
                     </GridLayout>
                 </template>
             </ListView>
-        </StackLayout>
+
+            <!-- Empty state -->
+            <StackLayout v-if="filteredProducts.length === 0" row="2" class="p-8" verticalAlignment="center" horizontalAlignment="center">
+                <Label :text="lucide('package')" class="lucide text-muted-foreground text-4xl text-center mb-4" />
+                <Label :text="$t('pages.productList.empty')" class="text-lg font-semibold text-foreground text-center mb-2" />
+                <Label :text="$t('pages.productList.emptyHint')" class="text-sm text-muted-foreground text-center" textWrap="true" />
+            </StackLayout>
+
+        </GridLayout>
     </Page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, getCurrentInstance } from 'vue';
+import { ref, computed } from 'vue';
 import type { Product } from '../../types/product';
 import type { ProductCategory } from '../../types/product-category';
-
-function likeMatch(value: string, term: string): boolean {
-    if (!term) return true;
-    return value.toLowerCase().includes(term.toLowerCase());
-}
+import { lucide } from '../../utils/icons';
+import { formatCurrencyBR } from '../../utils/format';
+import HeaderComponent from '../../components/HeaderComponent.vue';
 
 const searchQuery = ref('');
 
@@ -63,34 +73,13 @@ const products = ref<Product[]>([
 ]);
 
 const filteredProducts = computed(() => {
-    const term = searchQuery.value.trim();
+    const term = searchQuery.value.trim().toLowerCase();
     if (!term) return products.value;
     return products.value.filter(
         (p: Product) =>
-            likeMatch(p.sku, term) ||
-            likeMatch(p.name, term) ||
-            likeMatch(p.product_category.name, term)
+            p.sku.toLowerCase().includes(term) ||
+            p.name.toLowerCase().includes(term) ||
+            p.product_category.name.toLowerCase().includes(term),
     );
 });
-
-const instance = getCurrentInstance();
-const globals = instance?.appContext.config.globalProperties;
-const navigateBack = globals?.$navigateBack as () => Promise<void> | void;
-
-function formatPrice(price: number): string {
-    return 'R$ ' + price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function goBack(): void {
-    return navigateBack?.();
-}
 </script>
-
-<style scoped>
-.search-field {
-    background-color: #f8fafc;
-}
-.product-item {
-    background-color: #fafafa;
-}
-</style>

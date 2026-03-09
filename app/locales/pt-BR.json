@@ -52,6 +52,24 @@
       "email": "E-mail",
       "cpf": "CPF",
       "distributor": "Distribuidora"
+    },
+    "clientList": {
+      "title": "Clientes",
+      "searchHint": "Buscar por nome ou CPF/CNPJ...",
+      "empty": "Nenhum cliente encontrado",
+      "emptyHint": "Tente buscar com outro termo"
+    },
+    "productList": {
+      "title": "Produtos",
+      "searchHint": "Buscar por SKU, nome ou categoria...",
+      "empty": "Nenhum produto encontrado",
+      "emptyHint": "Tente buscar com outro termo"
+    },
+    "paymentMethodList": {
+      "title": "Formas de pagamento",
+      "searchHint": "Buscar por nome...",
+      "empty": "Nenhuma forma de pagamento encontrada",
+      "emptyHint": "Tente buscar com outro termo"
     }
   }
 }

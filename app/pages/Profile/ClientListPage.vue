@@ -1,34 +1,51 @@
 <template>
-    <Page>
-        <ActionBar title="Client list">
-            <NavigationButton text="Back" android.systemIcon="ic_menu_back" @tap="goBack" />
-        </ActionBar>
-        <StackLayout>
-            <TextField
-                v-model="searchQuery"
-                hint="Search by name or CPF/CNPJ..."
-                class="search-field p-3 m-3 rounded-lg border border-gray-300 text-base"
-            />
-            <ListView :items="filteredClients" separatorColor="transparent" class="list">
+    <Page actionBarHidden="true">
+        <GridLayout rows="auto, auto, *" class="bg-background">
+
+            <HeaderComponent row="0" :title="$t('pages.clientList.title')" :showAvatar="false" />
+
+            <!-- Search -->
+            <StackLayout row="1" class="px-4 pt-4 pb-2">
+                <GridLayout columns="auto, *" class="input-search">
+                    <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+                    <TextField
+                        col="1"
+                        v-model="searchQuery"
+                        :hint="$t('pages.clientList.searchHint')"
+                        class="text-base text-foreground p-0"
+                        placeholderColor="#a1a1aa"
+                    />
+                </GridLayout>
+            </StackLayout>
+
+            <!-- List -->
+            <ListView row="2" :items="filteredClients" separatorColor="transparent">
                 <template #default="{ item }">
-                    <GridLayout rows="auto, auto" columns="*" class="client-item p-3 m-2 rounded-lg border border-gray-200">
-                        <Label row="0" col="0" :text="item.fantasy_name" class="text-base font-bold text-gray-900" textWrap="true" />
-                        <Label row="1" col="0" :text="item.cpf_cnpj" class="text-sm text-gray-600 mt-1" textWrap="true" />
+                    <GridLayout rows="auto, auto, auto" columns="auto, *" class="p-4 mx-4 mb-2 bg-card border border-border rounded-lg">
+                        <Label row="0" col="0" rowSpan="3" :text="lucide('users')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                        <Label row="0" col="1" :text="item.fantasy_name" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                        <Label row="1" col="1" :text="item.cpf_cnpj" class="text-sm text-muted-foreground mt-1" />
+                        <Label row="2" col="1" :text="item.phone" class="text-xs text-muted-foreground mt-1" />
                     </GridLayout>
                 </template>
             </ListView>
-        </StackLayout>
+
+            <!-- Empty state -->
+            <StackLayout v-if="filteredClients.length === 0" row="2" class="p-8" verticalAlignment="center" horizontalAlignment="center">
+                <Label :text="lucide('users')" class="lucide text-muted-foreground text-4xl text-center mb-4" />
+                <Label :text="$t('pages.clientList.empty')" class="text-lg font-semibold text-foreground text-center mb-2" />
+                <Label :text="$t('pages.clientList.emptyHint')" class="text-sm text-muted-foreground text-center" textWrap="true" />
+            </StackLayout>
+
+        </GridLayout>
     </Page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, getCurrentInstance } from 'vue';
+import { ref, computed } from 'vue';
 import type { Client } from '../../types/client';
-
-function likeMatch(value: string, term: string): boolean {
-    if (!term) return true;
-    return value.toLowerCase().includes(term.toLowerCase());
-}
+import { lucide } from '../../utils/icons';
+import HeaderComponent from '../../components/HeaderComponent.vue';
 
 const searchQuery = ref('');
 
@@ -56,27 +73,10 @@ const clients = ref<Client[]>([
 ]);
 
 const filteredClients = computed(() => {
-    const term = searchQuery.value.trim();
+    const term = searchQuery.value.trim().toLowerCase();
     if (!term) return clients.value;
     return clients.value.filter(
-        (c: Client) => likeMatch(c.fantasy_name, term) || likeMatch(c.cpf_cnpj, term)
+        (c: Client) => c.fantasy_name.toLowerCase().includes(term) || c.cpf_cnpj.includes(term),
     );
 });
-
-const instance = getCurrentInstance();
-const globals = instance?.appContext.config.globalProperties;
-const navigateBack = globals?.$navigateBack as () => Promise<void> | void;
-
-function goBack(): void {
-    navigateBack?.();
-}
 </script>
-
-<style scoped>
-.search-field {
-    background-color: #f8fafc;
-}
-.client-item {
-    background-color: #fafafa;
-}
-</style>

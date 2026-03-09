@@ -1,17 +1,17 @@
 <template>
     <Page actionBarHidden="true">
         <TabView :selectedIndex="selectedIndex" androidTabsPosition="bottom" class="tab-view bg-background" @selectedIndexChange="onSelectedIndexChange">
-            <TabViewItem :title="$t('pages.eventLayout.tabHome')">
+            <TabViewItem :title="$t('pages.eventLayout.tabHome')" iconSource="res://ic_tab_home_selector">
                 <Frame>
                     <Home :event="event" />
                 </Frame>
             </TabViewItem>
-            <TabViewItem :title="$t('pages.eventLayout.tabOrders')">
+            <TabViewItem :title="$t('pages.eventLayout.tabOrders')" iconSource="res://ic_tab_receipt_selector">
                 <Frame>
                     <OrderListPage />
                 </Frame>
             </TabViewItem>
-            <TabViewItem :title="$t('pages.eventLayout.tabCart')">
+            <TabViewItem :title="$t('pages.eventLayout.tabCart')" iconSource="res://ic_tab_cart_selector">
                 <Frame>
                     <Cart />
                 </Frame>

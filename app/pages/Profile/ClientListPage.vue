@@ -5,16 +5,10 @@
             <HeaderComponent row="0" :title="$t('pages.clientList.title')" :showAvatar="false" />
 
             <!-- Search -->
-            <StackLayout row="1" class="px-4 pt-4 pb-2">
+            <StackLayout row="1" class="px-4 pt-4 pb-2 bg-accent-foreground">
                 <GridLayout columns="auto, *" class="input-search">
                     <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
-                    <TextField
-                        col="1"
-                        v-model="searchQuery"
-                        :hint="$t('pages.clientList.searchHint')"
-                        class="text-base text-foreground p-0"
-                        placeholderColor="#a1a1aa"
-                    />
+                    <TextField col="1" v-model="searchQuery" :hint="$t('pages.clientList.searchHint')" class="text-base text-foreground p-0" placeholderColor="#a1a1aa" />
                 </GridLayout>
             </StackLayout>
 
@@ -24,7 +18,7 @@
                     <GridLayout rows="auto, auto, auto" columns="auto, *" class="p-4 mx-4 mb-2 bg-card border border-border rounded-lg">
                         <Label row="0" col="0" rowSpan="3" :text="lucide('users')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
                         <Label row="0" col="1" :text="item.fantasy_name" class="text-base font-semibold text-card-foreground" textWrap="true" />
-                        <Label row="1" col="1" :text="item.cpf_cnpj" class="text-sm text-muted-foreground mt-1" />
+                        <Label row="1" col="1" :text="formatCPFCNPJ(item.cpf_cnpj)" class="text-sm text-muted-foreground mt-1" />
                         <Label row="2" col="1" :text="item.phone" class="text-xs text-muted-foreground mt-1" />
                     </GridLayout>
                 </template>
@@ -45,6 +39,7 @@
 import { ref, computed } from 'vue';
 import type { Client } from '../../types/client';
 import { lucide } from '../../utils/icons';
+import { formatCPFCNPJ } from '../../utils/format';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
 const searchQuery = ref('');

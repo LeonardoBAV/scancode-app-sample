@@ -93,10 +93,16 @@ nav?.$navigateBack();
 | ---- | ---- | ---- |
 | `format.ts` | `formatCurrencyBR(value, freeText?)` | Formata número em `R$ 1.234,56`. Se `value === 0` e `freeText` fornecido, retorna `freeText`. |
 | `format.ts` | `formatCPF(value)` | Aplica máscara `000.000.000-00`. Retorna `'—'` se nulo/vazio, ou o valor original se não tiver 11 dígitos. |
+| `format.ts` | `formatCNPJ(value)` | Aplica máscara `00.000.000/0000-00`. Retorna `'—'` se nulo/vazio, ou o valor original se não tiver 14 dígitos. |
+| `format.ts` | `formatCPFCNPJ(value)` | Auto-detecta CPF (11 dígitos) ou CNPJ (14 dígitos) e aplica a máscara correspondente. **Usar como padrão** ao exibir CPF/CNPJ. |
 | `icons.ts` | `lucide(name)` | Retorna caractere unicode do ícone Lucide. Usar com `class="lucide"`. |
 | `auth.ts` | `getAuth()`, `setAuth(profile)`, `clearAuth()` | Leitura/escrita do perfil autenticado em `ApplicationSettings`. |
 
 Ao criar novos helpers, adicione-os na tabela acima.
+
+### Regra: CPF/CNPJ sempre com máscara
+
+Ao renderizar CPF ou CNPJ na UI, **sempre** usar `formatCPFCNPJ(value)` (ou `formatCPF` / `formatCNPJ` se o tipo for conhecido). Nunca exibir dígitos crus sem máscara.
 
 ## Padrão de Tipos
 

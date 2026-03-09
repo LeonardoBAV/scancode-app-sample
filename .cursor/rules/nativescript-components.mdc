@@ -230,6 +230,10 @@ Use **sempre classe estática** (`input-field` ou `input-search`). Não altere a
 - `input-field` — TextField padrão (borda, rounded-xl, padding)
 - `input-search` — TextField de busca (fundo muted)
 
+### Underline do Android
+
+O underline nativo do Material Design é removido globalmente em `app/bootstrap/app.css` (regras `TextField` / `TextView`). NUNCA remover essas regras. Ver `shadcn-nativescript.mdc` § 6.1.
+
 ### Exemplos
 
 ```xml
@@ -241,12 +245,34 @@ Use **sempre classe estática** (`input-field` ou `input-search`). Não altere a
 
 <TextField v-model="name" hint="Nome completo" class="input-field" placeholderColor="#a1a1aa" />
 
-<TextField v-model="searchQuery" hint="Buscar..." class="input-search" placeholderColor="#a1a1aa" @textChange="onSearch" />
-
 <TextField v-model="password" hint="Senha" :secure="true" class="input-field" placeholderColor="#a1a1aa" />
 
 <TextView v-model="notes" hint="Observações..." class="input-field" height="100" />
 ```
+
+### Padrão: Search com ícone Lucide
+
+Não é um componente separado — é um padrão de template usando `GridLayout` + `input-search`. Não componentizar: encapsular TextField em componente Vue causa problemas com foco/teclado no NativeScript.
+
+```xml
+<StackLayout class="px-4 pt-4 pb-2">
+  <GridLayout columns="auto, *" class="input-search">
+    <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+    <TextField
+      col="1"
+      v-model="searchQuery"
+      :hint="$t('pages.myPage.searchHint')"
+      class="text-base text-foreground p-0"
+      placeholderColor="#a1a1aa"
+    />
+  </GridLayout>
+</StackLayout>
+```
+
+**Regras do padrão search:**
+- O `input-search` vai no `GridLayout` wrapper (não no `TextField`)
+- O `TextField` interno usa `class="text-base text-foreground p-0"` (sem border/background próprios)
+- Ícone `search` Lucide em `col="0"` com `mr-3`
 
 ## Badge
 

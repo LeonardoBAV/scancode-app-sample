@@ -141,6 +141,19 @@ NativeScript NÃO suporta `box-shadow` CSS. Use atributos XML nativos:
 
 **Regra:** Shadcn é flat. Prefira `androidElevation="0"` e use bordas (`border border-border`) para separação visual.
 
+## 6.1 Underline do TextField Android (Material Design)
+
+O Android aplica um underline nativo (Material Design) em `TextField` e `TextView`. Este underline **quebra o design system** e já está **removido globalmente** em `app/bootstrap/app.css`:
+
+```css
+TextField {
+  border-bottom-width: 1;
+  border-bottom-color: transparent;
+}
+```
+
+**NUNCA** remover essas regras. `border-bottom-width: 0` não funciona; é necessário `width: 1` + `color: transparent`.
+
 ## 7. CSS que NÃO funciona no NativeScript → Alternativas
 
 ### Propriedades CSS sem suporte

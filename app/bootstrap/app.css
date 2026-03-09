@@ -108,6 +108,17 @@
   @apply bg-muted text-foreground text-base border border-input rounded-xl p-4;
 }
 
+/* Remove Android Material underline from all TextFields */
+TextField {
+  border-bottom-width: 1;
+  border-bottom-color: transparent;
+}
+
+TextView {
+  border-bottom-width: 1;
+  border-bottom-color: transparent;
+}
+
 /* ─── Badge ─── */
 
 @utility badge {

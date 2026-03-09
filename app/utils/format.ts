@@ -22,3 +22,26 @@ export function formatCPF(value: string | null | undefined): string {
     if (digits.length !== 11) return value;
     return digits.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
+
+/**
+ * Aplica máscara de CNPJ: 00.000.000/0000-00
+ * Aceita string com ou sem formatação prévia. Retorna '—' se inválido/vazio.
+ */
+export function formatCNPJ(value: string | null | undefined): string {
+    if (!value) return '—';
+    const digits = value.replace(/\D/g, '');
+    if (digits.length !== 14) return value;
+    return digits.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+}
+
+/**
+ * Detecta CPF (11 dígitos) ou CNPJ (14 dígitos) e aplica a máscara correspondente.
+ * Retorna '—' se nulo/vazio, ou o valor original se não tiver 11 nem 14 dígitos.
+ */
+export function formatCPFCNPJ(value: string | null | undefined): string {
+    if (!value) return '—';
+    const digits = value.replace(/\D/g, '');
+    if (digits.length === 11) return formatCPF(value);
+    if (digits.length === 14) return formatCNPJ(value);
+    return value;
+}

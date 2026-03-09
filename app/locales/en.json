@@ -71,6 +71,21 @@
       "searchHint": "Search by name...",
       "empty": "No payment methods found",
       "emptyHint": "Try a different search term"
+    },
+    "eventLayout": {
+      "tabHome": "Event",
+      "tabOrders": "Orders",
+      "tabCart": "Cart"
+    },
+    "eventHome": {
+      "status": "Status",
+      "date": "Date",
+      "totalValue": "Total value",
+      "ordersSection": "Orders",
+      "orders": "Total orders",
+      "synced": "Synced",
+      "unsynced": "Unsynced",
+      "backToEvents": "Event list"
     }
   }
 }

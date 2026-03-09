@@ -1,65 +1,63 @@
 <template>
-    <Page>
-        <ActionBar class="action-bar">
-            <Label :text="event.name" class="font-bold text-lg" />
-            <ActionItem text="👤 Perfil" @tap="openProfile" />
-        </ActionBar>
+    <Page actionBarHidden="true">
+        <GridLayout rows="auto, *" class="bg-background">
 
-        <TabView ref="tabViewRef" :selectedIndex="selectedIndex" androidTabsPosition="bottom" class="tab-view-custom" @selectedIndexChange="onSelectedIndexChange">
-            <TabViewItem title="Evento">
-                <Frame>
-                    <Home :event="event" />
-                </Frame>
-            </TabViewItem>
-            <TabViewItem title="Pedidos">
-                <Frame>
-                    <OrderListPage />
-                </Frame>
-            </TabViewItem>
-            <TabViewItem title="Sacola">
-                <Frame>
-                    <Cart />
-                </Frame>
-            </TabViewItem>
-        </TabView>
+            <!-- Header with event name + avatar -->
+            <HeaderComponent row="0" :title="event.name" />
+
+            <!-- TabView -->
+            <TabView
+                row="1"
+                :selectedIndex="selectedIndex"
+                androidTabsPosition="bottom"
+                class="tab-view"
+                @selectedIndexChange="onSelectedIndexChange"
+            >
+                <TabViewItem :title="$t('pages.eventLayout.tabHome')">
+                    <Frame>
+                        <Home :event="event" />
+                    </Frame>
+                </TabViewItem>
+                <TabViewItem :title="$t('pages.eventLayout.tabOrders')">
+                    <Frame>
+                        <OrderListPage />
+                    </Frame>
+                </TabViewItem>
+                <TabViewItem :title="$t('pages.eventLayout.tabCart')">
+                    <Frame>
+                        <Cart />
+                    </Frame>
+                </TabViewItem>
+            </TabView>
+
+        </GridLayout>
     </Page>
 </template>
 
 <script setup lang="ts">
-import { ref, getCurrentInstance } from 'vue';
+import { ref } from 'vue';
 import type { EventItem } from '../types/event-item';
+import HeaderComponent from '../components/HeaderComponent.vue';
 import Home from '../pages/event/home/Home.vue';
 import Cart from '../pages/event/cart/Cart.vue';
 import OrderListPage from '../pages/event/orders/OrderListPage.vue';
-import Profile from '../pages/Profile/Profile.vue';
 
 const props = defineProps<{ event: EventItem }>();
 const event = props.event;
 
-/** Currently selected tab index: 0 = Evento, 1 = Pedidos, 2 = Sacola */
 const selectedIndex = ref(0);
-const tabViewRef = ref(null);
-
-const instance = getCurrentInstance();
-const globals = instance?.appContext.config.globalProperties;
-const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void;
 
 function onSelectedIndexChange(args: { newIndex: number }): void {
     selectedIndex.value = args.newIndex;
 }
-
-function openProfile(): void {
-    navigateTo?.(Profile, {
-        frame: 'root-frame',
-        transition: { name: 'slideLeft', duration: 300 },
-    });
-}
 </script>
 
 <style scoped>
-.tab-view-custom {
-    selected-tab-text-color: #2563eb;
-    tab-text-color: #64748b;
-    android-selected-tab-highlight-color: #2563eb;
+.tab-view {
+    tab-background-color: #ffffff;
+    selected-tab-text-color: #18181b;
+    tab-text-color: #71717a;
+    android-selected-tab-highlight-color: #18181b;
+    tab-text-font-size: 13;
 }
 </style>

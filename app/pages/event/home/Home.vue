@@ -1,86 +1,112 @@
 <template>
     <Page actionBarHidden="true">
-        <GridLayout rows="*" columns="*">
-            <ScrollView row="0" col="0">
-                <StackLayout class="p-4 pb-8">
-                    <Label :text="event.name" class="text-xl font-bold text-gray-900 mb-2" />
+        <ScrollView class="bg-background">
+            <StackLayout class="p-4 pb-8">
 
-                    <GridLayout rows="auto, auto, auto, auto, auto, auto" columns="auto, *" class="mt-2">
-                        <Label row="0" col="0" text="Status" class="text-sm text-gray-500 mr-2" />
-                        <Label row="0" col="1" :text="event.status" :class="'text-sm font-semibold ' + statusClass(event.status)" />
+                <!-- Back to events -->
+                <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary mb-4" @tap="goToEvents" />
 
-                        <Label row="1" col="0" text="Orders" class="text-sm text-gray-500 mr-2 mt-1" />
-                        <Label row="1" col="1" :text="String(event.orderCount)" class="text-sm font-semibold text-gray-900 mt-1" />
+                <!-- Summary Card -->
+                <StackLayout class="card p-0">
 
-                        <Label row="2" col="0" text="Synced orders" class="text-sm text-gray-500 mr-2 mt-1" />
-                        <Label row="2" col="1" :text="String(event.ordersSynced)" class="text-sm font-semibold text-green-600 mt-1" />
-
-                        <Label row="3" col="0" text="Unsynced orders" class="text-sm text-gray-500 mr-2 mt-1" />
-                        <Label row="3" col="1" :text="String(event.ordersUnsynced)" class="text-sm font-semibold text-amber-600 mt-1" />
-
-                        <Label row="4" col="0" text="Total value" class="text-sm text-gray-500 mr-2 mt-1" />
-                        <Label row="4" col="1" :text="formatValor(event.totalValue)" class="text-sm font-semibold text-blue-600 mt-1" />
-
-                        <Label row="5" col="0" text="Date" class="text-sm text-gray-500 mr-2 mt-1" />
-                        <Label row="5" col="1" :text="event.startDate + ' - ' + event.endDate" class="text-sm font-semibold text-gray-900 mt-1" />
+                    <!-- Status + Date -->
+                    <GridLayout columns="*, auto" class="p-4">
+                        <StackLayout col="0">
+                            <Label :text="$t('pages.eventHome.status')" class="text-xs text-muted-foreground mb-1" />
+                            <Label :text="statusLabel(event.status)" :class="statusBadgeClass(event.status)" horizontalAlignment="left" />
+                        </StackLayout>
+                        <StackLayout col="1" horizontalAlignment="right">
+                            <Label :text="$t('pages.eventHome.date')" class="text-xs text-muted-foreground mb-1 text-right" />
+                            <Label :text="event.startDate + ' — ' + event.endDate" class="text-sm text-card-foreground text-right" />
+                        </StackLayout>
                     </GridLayout>
+
+                    <StackLayout class="bg-border mx-4" style="height: 1" />
+
+                    <!-- Total -->
+                    <GridLayout columns="auto, *, auto" class="p-4">
+                        <Label col="0" :text="lucide('wallet')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                        <Label col="1" :text="$t('pages.eventHome.totalValue')" class="text-base text-card-foreground" verticalAlignment="center" />
+                        <Label col="2" :text="formatCurrencyBR(event.totalValue, $t('common.free'))" class="text-lg font-bold text-success" verticalAlignment="center" />
+                    </GridLayout>
+
                 </StackLayout>
-            </ScrollView>
-            <Button
-                row="0"
-                col="0"
-                text="Events"
-                class="fab-events"
-                horizontalAlignment="stretch"
-                verticalAlignment="bottom"
-                @tap="goToEvents"
-            />
-        </GridLayout>
+
+                <!-- Orders Card -->
+                <Label :text="$t('pages.eventHome.ordersSection')" class="text-xs font-semibold text-muted-foreground uppercase mt-6 mb-2 px-1" />
+
+                <StackLayout class="card p-0">
+
+                    <!-- Total Orders -->
+                    <GridLayout columns="auto, *, auto" class="p-4">
+                        <Label col="0" :text="lucide('receipt')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                        <Label col="1" :text="$t('pages.eventHome.orders')" class="text-base text-card-foreground" verticalAlignment="center" />
+                        <Label col="2" :text="String(event.orderCount)" class="text-base font-semibold text-card-foreground" verticalAlignment="center" />
+                    </GridLayout>
+
+                    <StackLayout class="bg-border mx-4" style="height: 1" />
+
+                    <!-- Synced -->
+                    <GridLayout columns="auto, *, auto" class="p-4">
+                        <Label col="0" :text="lucide('circle-check')" class="lucide text-success mr-4" verticalAlignment="center" />
+                        <Label col="1" :text="$t('pages.eventHome.synced')" class="text-base text-card-foreground" verticalAlignment="center" />
+                        <Label col="2" :text="String(event.ordersSynced)" class="text-base font-semibold text-success" verticalAlignment="center" />
+                    </GridLayout>
+
+                    <StackLayout class="bg-border mx-4" style="height: 1" />
+
+                    <!-- Unsynced -->
+                    <GridLayout columns="auto, *, auto" class="p-4">
+                        <Label col="0" :text="lucide('clock')" class="lucide text-warning mr-4" verticalAlignment="center" />
+                        <Label col="1" :text="$t('pages.eventHome.unsynced')" class="text-base text-card-foreground" verticalAlignment="center" />
+                        <Label col="2" :text="String(event.ordersUnsynced)" class="text-base font-semibold text-warning" verticalAlignment="center" />
+                    </GridLayout>
+
+                </StackLayout>
+
+            </StackLayout>
+        </ScrollView>
     </Page>
 </template>
 
 <script setup lang="ts">
 import { getCurrentInstance } from 'vue';
-import type { EventItem } from '../../types/event-item';
+import { useTranslation } from '../../../composables/useTranslation';
+import type { EventItem } from '../../../types/event-item';
+import { lucide } from '../../../utils/icons';
+import { formatCurrencyBR } from '../../../utils/format';
 import EventsPage from '../../EventsPage.vue';
+
+const { t } = useTranslation();
 
 const props = defineProps<{ event: EventItem }>();
 const event = props.event;
 
 const instance = getCurrentInstance();
-const globals = instance?.appContext.config.globalProperties;
-const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void;
+const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
+    target: unknown,
+    options?: Record<string, unknown>,
+) => void;
 
 function goToEvents(): void {
     navigateTo?.(EventsPage, { frame: 'root-frame', clearHistory: true });
 }
 
-function formatValor(valor: number): string {
-    return valor === 0 ? 'Free' : 'R$ ' + valor.toLocaleString('pt-BR');
+function statusLabel(status: string): string {
+    switch (status) {
+        case 'in_progress': return t('pages.events.statusInProgress');
+        case 'scheduled': return t('pages.events.statusScheduled');
+        case 'ended': return t('pages.events.statusEnded');
+        default: return status;
+    }
 }
 
-function statusClass(status: string): string {
+function statusBadgeClass(status: string): string {
     switch (status) {
-        case 'Active':
-            return 'text-green-600';
-        case 'Scheduled':
-            return 'text-blue-600';
-        case 'Ended':
-            return 'text-gray-500';
-        default:
-            return 'text-gray-600';
+        case 'in_progress': return 'badge-success';
+        case 'scheduled': return 'badge-secondary';
+        case 'ended': return 'badge-outline';
+        default: return 'badge-outline';
     }
 }
 </script>
-
-<style scoped>
-.fab-events {
-    margin: 16;
-    padding: 14;
-    font-size: 16;
-    font-weight: 600;
-    background-color: #3b82f6;
-    color: white;
-    border-radius: 8;
-}
-</style>

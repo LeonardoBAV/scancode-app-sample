@@ -70,6 +70,21 @@
       "searchHint": "Buscar por nome...",
       "empty": "Nenhuma forma de pagamento encontrada",
       "emptyHint": "Tente buscar com outro termo"
+    },
+    "eventLayout": {
+      "tabHome": "Evento",
+      "tabOrders": "Pedidos",
+      "tabCart": "Sacola"
+    },
+    "eventHome": {
+      "status": "Status",
+      "date": "Data",
+      "totalValue": "Valor total",
+      "ordersSection": "Pedidos",
+      "orders": "Total de pedidos",
+      "synced": "Sincronizados",
+      "unsynced": "Não sincronizados",
+      "backToEvents": "Lista de Eventos"
     }
   }
 }

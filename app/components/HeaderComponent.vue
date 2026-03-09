@@ -70,6 +70,9 @@ function goBack(): void {
 }
 
 function openProfile(): void {
-    navigateTo?.(Profile, { frame: 'root-frame' });
+    navigateTo?.(Profile, {
+        frame: 'root-frame',
+        transition: { name: 'slideLeft', duration: 300 },
+    });
 }
 </script>

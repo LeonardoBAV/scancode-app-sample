@@ -79,10 +79,13 @@ nav?.$navigateTo(TargetPage, {
   props: { /* props */ },
   frame: 'root-frame',
   clearHistory: false,
+  transition: { name: 'slideLeft', duration: 300 }, // opcional: slide lateral nativo
 });
 
 nav?.$navigateBack();
 ```
+
+**Transições nativas:** O `$navigateTo` repassa `transition` ao `frame.navigate()`. Valores úteis para `name`: `slideLeft` (nova página entra da direita), `slideRight`, `fade`, `slideTop`, `slideBottom`. `duration` em ms (ex.: 300). Usar para telas “empilhadas” (ex.: abrir Perfil) para animação lateral nativa.
 
 ## Helpers / Utilitários (`app/utils/`)
 

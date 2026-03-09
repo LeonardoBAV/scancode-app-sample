@@ -31,8 +31,8 @@
   --color-accent: #f4f4f5;
   --color-accent-foreground: #18181b;
 
-  /* ─── Destructive ─── */
-  --color-destructive: #ef4444;
+  /* ─── Destructive (Red 400) ─── */
+  --color-destructive: #f87171;
   --color-destructive-foreground: #fafafa;
 
   /* ─── Success (Teal 400) ─── */

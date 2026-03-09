@@ -79,8 +79,8 @@ Use SEMPRE classes semânticas — NUNCA hex hardcoded.
 | `muted-foreground`       | `text-muted-foreground`         | Texto secundário, hints, captions      |
 | `accent`                 | `bg-accent`                     | Destaques press                        |
 | `accent-foreground`      | `text-accent-foreground`        | Texto sobre accent                     |
-| `destructive`            | `bg-destructive`                | Ações de remoção/perigo                |
-| `destructive-foreground` | `text-destructive-foreground`   | Texto sobre destructive                |
+| `destructive` (Red 400)  | `bg-destructive`                | Ações de remoção/perigo (excluir, cancelar) |
+| `destructive-foreground` | `text-destructive-foreground`   | Texto sobre bg destructive (claro)     |
 | `success` (Teal 400)     | `text-success` / `bg-success`   | Valores monetários, confirmações, badges de sucesso. Em fundo claro use `text-success`. |
 | `success-foreground`     | `text-success-foreground`       | **Sempre** texto sobre `bg-success` (claro, ~branco). Ex.: badge-success, botão success. |
 | `warning`                | `text-warning` / `bg-warning`   | Alertas, atenção                       |

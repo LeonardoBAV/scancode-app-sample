@@ -72,7 +72,7 @@ Tokens definidos em `@theme` no `app/bootstrap/app.css`. **Doc completa:** `shad
 | --- | ----- | ----- | ------- |
 | **Primary** — ação principal, destaque forte | `bg-primary` (preto) | `text-primary-foreground` (branco) | Botão principal, header, card de ação (ex.: Sair) |
 | **Secondary** — ação alternativa | `bg-secondary` (cinza claro) | `text-secondary-foreground` | Botão secundário, stepper − |
-| **Destructive** — perigo, remoção | `bg-destructive` (vermelho) | `text-destructive-foreground` | Excluir, cancelar conta |
+| **Destructive** (Red 400) — perigo, remoção | `bg-destructive` | `text-destructive-foreground` | Excluir, cancelar conta |
 | **Muted** — secundário, hints | `bg-muted` | `text-muted-foreground` | Ícones, captions, placeholders |
 | **Card** — conteúdo em cards | `bg-card` | `text-card-foreground` | Conteúdo dentro de card |
 | **Success** (Teal 400) | `bg-success` | Em fundo claro: `text-success`. Sobre bg success: `text-success-foreground` (branco) | Valores monetários, badge sucesso, confirmação |

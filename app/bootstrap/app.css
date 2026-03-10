@@ -164,6 +164,16 @@ TextView {
   @apply bg-card p-4 border-t border-border;
 }
 
+/* ─── TabView (bottom tabs) ─── */
+/* Selected: primary (#18181b). Unselected: muted-foreground (#71717a). */
+@utility tab-view {
+  tab-background-color: #ffffff;
+  selected-tab-text-color: #18181b;
+  tab-text-color: #71717a;
+  android-selected-tab-highlight-color: #18181b;
+  tab-text-font-size: 13;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    PRESSED STATES
    NativeScript não suporta :active/:hover/:focus.

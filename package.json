@@ -3,6 +3,9 @@
   "main": "app/bootstrap/app.ts",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "generate-tab-icons": "node scripts/generate-tab-icons.js"
+  },
   "dependencies": {
     "@nativescript-community/drawingpad": "^4.1.0",
     "@nativescript/core": "~9.0.0",
@@ -17,6 +20,7 @@
     "@nativescript/types": "~9.0.0",
     "@nativescript/webpack": "~5.0.31",
     "@types/node": "^20.0.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.0.0",
     "typescript": "~5.4.0"
   }

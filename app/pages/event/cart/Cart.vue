@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Dialogs } from '@nativescript/core';
+import { Dialogs, type TextField } from '@nativescript/core';
 import { Haptics, HapticNotificationType } from '@nativescript/haptics';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import { useTranslation } from '../../../composables/useTranslation';
@@ -70,7 +70,7 @@ interface CartItem {
 }
 
 const searchQuery = ref('');
-const searchFieldRef = ref<{ dismissSoftInput?: () => void } | null>(null);
+const searchFieldRef = ref<{ nativeView?: TextField } | null>(null);
 
 
 const searchResults = computed(() => {
@@ -108,7 +108,9 @@ function addProduct(product: Product): void {
         cartItems.value.push({ product, quantity: 1 });
     }
     searchQuery.value = '';
-    searchFieldRef.value?.dismissSoftInput?.();
+    setTimeout(() => {
+        searchFieldRef.value?.nativeView?.dismissSoftInput();
+    }, 50);
     try {
         if (Haptics.isSupported()) {
             Haptics.notification(HapticNotificationType.SUCCESS);

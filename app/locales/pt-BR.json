@@ -88,6 +88,19 @@
       "synced": "Sincronizado",
       "notSynced": "Não sincronizado"
     },
+    "cart": {
+      "title": "Sacola",
+      "searchHint": "Buscar produto por nome ou SKU...",
+      "empty": "Sacola vazia",
+      "emptyHint": "Busque produtos acima para adicionar",
+      "item": "item",
+      "items": "itens",
+      "perUnit": "/un",
+      "removeConfirmTitle": "Remover produto",
+      "removeConfirmMessage": "Deseja remover este produto da sacola?",
+      "removeConfirmOk": "Remover",
+      "removeConfirmCancel": "Cancelar"
+    },
     "eventHome": {
       "status": "Status",
       "date": "Data",

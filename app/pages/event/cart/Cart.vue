@@ -1,46 +1,54 @@
 <template>
     <Page actionBarHidden="true">
-        <GridLayout rows="auto, auto, *, auto" columns="*">
+        <GridLayout rows="auto, auto, *, auto" class="bg-background">
             <!-- Header -->
-            <!--<GridLayout row="0" col="0" rows="auto" columns="*" class="header">
-                <Label row="0" col="0" text="Sacola" class="header-title" />
-            </GridLayout>
--->
-            <!-- Busca de produto -->
-            <StackLayout row="1" col="0" class="search-section">
-                <TextField v-model="searchQuery" hint="Buscar produto por nome ou SKU..." class="search-field" @textChange="onSearchChange" />
-                <ListView v-if="searchQuery.length > 0 && searchResults.length > 0" :items="searchResults" separatorColor="transparent" class="search-results" height="180">
+            <HeaderComponent row="0" :title="$t('pages.cart.title')" />
+
+            <!-- Search -->
+            <StackLayout row="1" class="px-4 pt-4 pb-2">
+                <GridLayout columns="auto, *" class="input-search">
+                    <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+                    <TextField ref="searchFieldRef" col="1" v-model="searchQuery" :hint="$t('pages.cart.searchHint')" class="text-base text-foreground p-0" placeholderColor="#71717a" @textChange="onSearchChange" />
+                </GridLayout>
+                <ListView v-if="searchQuery.length > 0 && searchResults.length > 0" :items="searchResults" separatorColor="transparent" class="mt-2 rounded-xl border border-border bg-card" height="180">
                     <template #default="{ item }">
-                        <GridLayout rows="auto, auto" columns="*, auto" class="search-item" @tap="addProduct(item)">
-                            <Label row="0" col="0" :text="item.name" class="search-item-name" textWrap="true" />
-                            <Label row="1" col="0" :text="item.sku + ' · ' + item.product_category.name" class="search-item-detail" />
-                            <Label row="0" col="1" :text="formatCurrency(item.price)" class="search-item-price" />
+                        <GridLayout rows="auto, auto" columns="*, auto" class="p-4 border-b border-border" @tap="addProduct(item)">
+                            <Label row="0" col="0" :text="item.name" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                            <Label row="1" col="0" :text="item.sku + ' · ' + item.product_category.name" class="text-xs text-muted-foreground mt-1" />
+                            <Label row="0" col="1" rowSpan="2" :text="formatCurrency(item.price)" class="text-base font-bold text-success" verticalAlignment="center" />
                         </GridLayout>
                     </template>
                 </ListView>
             </StackLayout>
 
-            <!-- Lista do carrinho -->
-            <ListView row="2" col="0" :items="cartItems" separatorColor="transparent" class="cart-list">
-                <template #default="{ item }">
-                    <GridLayout rows="auto, auto, auto" columns="*, auto" class="cart-item">
-                        <Label row="0" col="0" :text="item.product.name" class="cart-item-name" textWrap="true" />
-                        <Label row="0" col="1" :text="formatCurrency(item.product.price * item.quantity)" class="cart-item-total" />
-                        <Label row="1" col="0" :text="item.product.sku + ' · ' + item.product.product_category.name" class="cart-item-detail" />
-                        <Label row="1" col="1" :text="formatCurrency(item.product.price) + '/un'" class="cart-item-unit-price" />
-                        <GridLayout row="2" col="0" colSpan="2" rows="auto" columns="auto, auto, auto, *" class="qty-row">
-                            <Button row="0" col="0" text="−" class="btn-qty" @tap="decreaseQty(item)" />
-                            <Label row="0" col="1" :text="String(item.quantity)" class="qty-label" />
-                            <Button row="0" col="2" text="+" class="btn-qty" @tap="increaseQty(item)" />
+            <!-- Cart list or empty state -->
+            <GridLayout row="2" rows="*">
+                <StackLayout v-if="cartItems.length === 0" class="p-8" verticalAlignment="center" horizontalAlignment="center">
+                    <Label :text="lucide('shopping-cart')" class="lucide text-4xl text-muted-foreground mb-4" />
+                    <Label :text="$t('pages.cart.empty')" class="text-lg font-semibold text-foreground text-center mb-2" />
+                    <Label :text="$t('pages.cart.emptyHint')" class="text-sm text-muted-foreground text-center" textWrap="true" />
+                </StackLayout>
+                <ListView v-else :items="cartItems" separatorColor="transparent" class="bg-background">
+                    <template #default="{ item }">
+                        <GridLayout rows="auto, auto, auto" columns="*, auto" class="card m-2 mx-4" androidElevation="2">
+                            <Label row="0" col="0" :text="item.product.name" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                            <Label row="0" col="1" :text="formatCurrency(item.product.price * item.quantity)" class="text-base font-bold text-success" verticalAlignment="top" />
+                            <Label row="1" col="0" :text="item.product.sku + ' · ' + item.product.product_category.name" class="text-xs text-muted-foreground mt-1" />
+                            <Label row="1" col="1" :text="formatCurrency(item.product.price) + ' ' + perUnitLabel" class="text-xs text-muted-foreground" verticalAlignment="center" />
+                            <GridLayout row="2" col="0" colSpan="2" rows="auto" columns="auto, auto, auto" class="mt-3">
+                                <Button col="0" text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" @tap="decreaseQty(item)" />
+                                <Label col="1" :text="String(item.quantity)" class="text-base font-semibold text-foreground text-center min-w-8 mx-2" verticalAlignment="center" />
+                                <Button col="2" text="+" class="btn-icon-sm bg-primary text-primary-foreground" @tap="increaseQty(item)" />
+                            </GridLayout>
                         </GridLayout>
-                    </GridLayout>
-                </template>
-            </ListView>
+                    </template>
+                </ListView>
+            </GridLayout>
 
-            <!-- Rodapé com totais -->
-            <GridLayout row="3" col="0" rows="auto" columns="*, *" class="footer-totals">
-                <Label row="0" col="0" :text="totalItemsLabel" class="footer-label" />
-                <Label row="0" col="1" :text="formatCurrency(cartTotal)" class="footer-total" />
+            <!-- Footer -->
+            <GridLayout row="3" rows="auto" columns="*, *" class="footer-bar">
+                <Label col="0" :text="totalItemsLabel" class="text-base font-semibold text-foreground" verticalAlignment="center" />
+                <Label col="1" :text="formatCurrency(cartTotal)" class="text-xl font-bold text-success text-right" verticalAlignment="center" />
             </GridLayout>
         </GridLayout>
     </Page>
@@ -48,6 +56,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { Dialogs } from '@nativescript/core';
+import { Haptics, HapticNotificationType } from '@nativescript/haptics';
+import HeaderComponent from '../../../components/HeaderComponent.vue';
+import { useTranslation } from '../../../composables/useTranslation';
+import { formatCurrencyBR } from '../../../utils/format';
+import { lucide } from '../../../utils/icons';
 import type { Product } from '../../../types/product';
 
 interface CartItem {
@@ -56,6 +70,74 @@ interface CartItem {
 }
 
 const searchQuery = ref('');
+const searchFieldRef = ref<{ dismissSoftInput?: () => void } | null>(null);
+
+
+const searchResults = computed(() => {
+    const term = searchQuery.value.trim().toLowerCase();
+    if (!term) return [];
+    return allProducts.value.filter(
+        (p) => p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term)
+    );
+});
+
+const cartTotal = computed(() =>
+    cartItems.value.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+);
+
+const { t } = useTranslation();
+const perUnitLabel = t('pages.cart.perUnit');
+const totalItemsLabel = computed(() => {
+    const count = cartItems.value.reduce((sum, item) => sum + item.quantity, 0);
+    return count === 1 ? `1 ${t('pages.cart.item')}` : `${count} ${t('pages.cart.items')}`;
+});
+
+function formatCurrency(value: number): string {
+    return formatCurrencyBR(value);
+}
+
+function onSearchChange(): void {
+    // reactivity handles filtering
+}
+
+function addProduct(product: Product): void {
+    const existing = cartItems.value.find((c) => c.product.id === product.id);
+    if (existing) {
+        existing.quantity++;
+    } else {
+        cartItems.value.push({ product, quantity: 1 });
+    }
+    searchQuery.value = '';
+    searchFieldRef.value?.dismissSoftInput?.();
+    try {
+        if (Haptics.isSupported()) {
+            Haptics.notification(HapticNotificationType.SUCCESS);
+        }
+    } catch {
+        // ignore if haptics fails
+    }
+}
+
+function increaseQty(item: CartItem): void {
+    item.quantity++;
+}
+
+async function decreaseQty(item: CartItem): Promise<void> {
+    if (item.quantity > 1) {
+        item.quantity--;
+        return;
+    }
+    const confirmed = await Dialogs.confirm({
+        title: t('pages.cart.removeConfirmTitle'),
+        message: t('pages.cart.removeConfirmMessage'),
+        okButtonText: t('pages.cart.removeConfirmOk'),
+        cancelButtonText: t('pages.cart.removeConfirmCancel'),
+    });
+    if (confirmed) {
+        const idx = cartItems.value.indexOf(item);
+        if (idx >= 0) cartItems.value.splice(idx, 1);
+    }
+}
 
 const allProducts = ref<Product[]>([
     { id: 1, sku: 'SKU-001', barcode: '7891000100', name: 'Coca-Cola 350ml', price: 5.50, product_category_id: 1, product_category: { id: 1, name: 'Bebidas' } },
@@ -75,215 +157,10 @@ const allProducts = ref<Product[]>([
     { id: 15, sku: 'SKU-042', barcode: '7891004200', name: 'Resma Papel A4 500fls', price: 28.90, product_category_id: 5, product_category: { id: 5, name: 'Papelaria' } },
 ]);
 
+
 const cartItems = ref<CartItem[]>([
-    { product: { id: 1, sku: 'SKU-001', barcode: '7891000100', name: 'Coca-Cola 350ml', price: 5.50, product_category_id: 1, product_category: { id: 1, name: 'Bebidas' } }, quantity: 2 },
-    { product: { id: 7, sku: 'SKU-011', barcode: '7891001100', name: 'Coxinha de Frango', price: 7.50, product_category_id: 2, product_category: { id: 2, name: 'Lanches' } }, quantity: 3 },
-    { product: { id: 9, sku: 'SKU-020', barcode: '7891002000', name: 'Bolo de Chocolate Fatia', price: 11.50, product_category_id: 3, product_category: { id: 3, name: 'Doces' } }, quantity: 1 },
-    { product: { id: 1, sku: 'SKU-001', barcode: '7891000100', name: 'Coca-Cola 350ml', price: 5.50, product_category_id: 1, product_category: { id: 1, name: 'Bebidas' } }, quantity: 2 },
-    { product: { id: 7, sku: 'SKU-011', barcode: '7891001100', name: 'Coxinha de Frango', price: 7.50, product_category_id: 2, product_category: { id: 2, name: 'Lanches' } }, quantity: 3 },
-    { product: { id: 9, sku: 'SKU-020', barcode: '7891002000', name: 'Bolo de Chocolate Fatia', price: 11.50, product_category_id: 3, product_category: { id: 3, name: 'Doces' } }, quantity: 1 },
-    { product: { id: 1, sku: 'SKU-001', barcode: '7891000100', name: 'Coca-Cola 350ml', price: 5.50, product_category_id: 1, product_category: { id: 1, name: 'Bebidas' } }, quantity: 2 },
-    { product: { id: 7, sku: 'SKU-011', barcode: '7891001100', name: 'Coxinha de Frango', price: 7.50, product_category_id: 2, product_category: { id: 2, name: 'Lanches' } }, quantity: 3 },
-    { product: { id: 9, sku: 'SKU-020', barcode: '7891002000', name: 'Bolo de Chocolate Fatia', price: 11.50, product_category_id: 3, product_category: { id: 3, name: 'Doces' } }, quantity: 1 },
+    { product: allProducts.value[0], quantity: 2 },
+    { product: allProducts.value[6], quantity: 3 },
+    { product: allProducts.value[8], quantity: 1 },
 ]);
-
-const searchResults = computed(() => {
-    const term = searchQuery.value.trim().toLowerCase();
-    if (!term) return [];
-    return allProducts.value.filter(
-        (p) => p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term)
-    );
-});
-
-const cartTotal = computed(() =>
-    cartItems.value.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
-);
-
-const totalItemsLabel = computed(() => {
-    const count = cartItems.value.reduce((sum, item) => sum + item.quantity, 0);
-    return count === 1 ? '1 item' : `${count} itens`;
-});
-
-function formatCurrency(value: number): string {
-    return 'R$ ' + value.toFixed(2).replace('.', ',');
-}
-
-function onSearchChange(): void {
-    // reactivity handles filtering
-}
-
-function addProduct(product: Product): void {
-    const existing = cartItems.value.find((c) => c.product.id === product.id);
-    if (existing) {
-        existing.quantity++;
-    } else {
-        cartItems.value.push({ product, quantity: 1 });
-    }
-    searchQuery.value = '';
-}
-
-function increaseQty(item: CartItem): void {
-    item.quantity++;
-}
-
-function decreaseQty(item: CartItem): void {
-    if (item.quantity > 1) {
-        item.quantity--;
-    } else {
-        const idx = cartItems.value.indexOf(item);
-        if (idx >= 0) cartItems.value.splice(idx, 1);
-    }
-}
 </script>
-
-<style scoped>
-.header {
-    background-color: #1e293b;
-    color: white;
-    padding: 16;
-}
-
-.header-title {
-    font-size: 18;
-    font-weight: bold;
-    vertical-align: center;
-    text-align: center;
-}
-
-.search-section {
-    padding: 12;
-    padding-bottom: 0;
-    background-color: #f1f5f9;
-}
-
-.search-field {
-    font-size: 15;
-    padding: 12;
-    background-color: white;
-    border-width: 1;
-    border-color: #e2e8f0;
-    border-radius: 8;
-}
-
-.search-results {
-    background-color: white;
-    border-width: 1;
-    border-color: #e2e8f0;
-    border-radius: 8;
-    margin-top: 4;
-}
-
-.search-item {
-    padding: 10;
-    border-bottom-width: 1;
-    border-bottom-color: #f1f5f9;
-}
-
-.search-item-name {
-    font-size: 14;
-    font-weight: 600;
-    color: #0f172a;
-}
-
-.search-item-detail {
-    font-size: 12;
-    color: #64748b;
-    margin-top: 2;
-}
-
-.search-item-price {
-    font-size: 14;
-    font-weight: 600;
-    color: #16a34a;
-    vertical-align: center;
-}
-
-.cart-list {
-    background-color: #f1f5f9;
-}
-
-.cart-item {
-    background-color: white;
-    border-radius: 10;
-    padding: 12;
-    margin: 6;
-    margin-left: 12;
-    margin-right: 12;
-    border-width: 1;
-    border-color: #e2e8f0;
-}
-
-.cart-item-name {
-    font-size: 15;
-    font-weight: 600;
-    color: #0f172a;
-}
-
-.cart-item-total {
-    font-size: 15;
-    font-weight: 700;
-    color: #16a34a;
-    text-align: right;
-    vertical-align: top;
-}
-
-.cart-item-detail {
-    font-size: 12;
-    color: #64748b;
-    margin-top: 2;
-}
-
-.cart-item-unit-price {
-    font-size: 12;
-    color: #94a3b8;
-    text-align: right;
-    vertical-align: center;
-}
-
-.qty-row {
-    margin-top: 8;
-    column-spacing: 8;
-}
-
-.btn-qty {
-    width: 36;
-    height: 36;
-    font-size: 18;
-    font-weight: bold;
-    color: white;
-    background-color: #3b82f6;
-    border-radius: 18;
-    padding: 0;
-}
-
-.qty-label {
-    font-size: 16;
-    font-weight: 600;
-    color: #0f172a;
-    vertical-align: center;
-    text-align: center;
-    min-width: 32;
-}
-
-.footer-totals {
-    background-color: white;
-    padding: 16;
-    border-top-width: 2;
-    border-top-color: #e2e8f0;
-}
-
-.footer-label {
-    font-size: 16;
-    font-weight: 600;
-    color: #0f172a;
-    vertical-align: center;
-}
-
-.footer-total {
-    font-size: 20;
-    font-weight: 700;
-    color: #16a34a;
-    text-align: right;
-    vertical-align: center;
-}
-</style>

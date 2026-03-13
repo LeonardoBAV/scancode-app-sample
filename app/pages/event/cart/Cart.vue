@@ -134,8 +134,7 @@ async function decreaseQty(item: CartItem): Promise<void> {
         cancelButtonText: t('pages.cart.removeConfirmCancel'),
     });
     if (confirmed) {
-        const idx = cartItems.value.indexOf(item);
-        if (idx >= 0) cartItems.value.splice(idx, 1);
+        cartItems.value = cartItems.value.filter((i) => i !== item);
     }
 }
 

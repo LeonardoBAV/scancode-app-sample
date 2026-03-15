@@ -8,7 +8,7 @@
 import { getCurrentInstance } from 'vue';
 import type { Client } from '../../../types/client';
 import ClientListComponent from '../../../components/ClientListComponent.vue';
-import OrderCreatePage from './OrderCreatePage.vue';
+import OrderShowPage from './OrderShowPage.vue';
 import {
     orderCreateSelectedClient,
     orderCreateClientFantasyName,
@@ -23,6 +23,6 @@ function onClientConfirmed(client: Client): void {
     orderCreateSelectedClient.value = client;
     orderCreateClientFantasyName.value = client.fantasy_name;
     orderCreateClientCpfCnpj.value = client.cpf_cnpj;
-    navigateTo?.(OrderCreatePage);
+    navigateTo?.(OrderShowPage);
 }
 </script>

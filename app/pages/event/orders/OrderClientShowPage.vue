@@ -56,25 +56,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, getCurrentInstance } from 'vue';
+import { ref, computed, getCurrentInstance } from 'vue';
 import type { Client } from '../../../types/client';
 import OrderClientListPage from './OrderClientListPage.vue';
+import { orderCreateSelectedClient, orderCreateBuyerName, orderCreateBuyerContact } from './order-create-state';
 
 const headerTitle: string = 'Client Details';
 
-/** Cliente hardcoded para exibição na página. */
-const client = ref<Client>({
-    id: 1,
-    cpf_cnpj: '12.345.678/0001-90',
-    corporate_name: 'Alpha2 Comércio Ltda',
-    fantasy_name: 'Alpha Store',
-    email: 'contato@alpha.com',
-    phone: '(11) 99999-0001',
-    carrier: 'Vivo',
-});
+const client = computed(() => orderCreateSelectedClient.value);
 
-const buyerName = ref('');
-const buyerContact = ref('');
+const buyerName = orderCreateBuyerName;
+const buyerContact = orderCreateBuyerContact;
 
 const instance = getCurrentInstance();
 const globals = instance?.appContext.config.globalProperties;

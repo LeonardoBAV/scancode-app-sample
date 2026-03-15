@@ -53,7 +53,7 @@ import type { Order, OrderStatus } from '../../../types/order';
 import { lucide } from '../../../utils/icons';
 import { formatCurrencyBR } from '../../../utils/format';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
-import OrderSelectClientPage from './OrderSelectClientPage.vue';
+import OrderShowPage from './OrderShowPage.vue';
 import OrderUpdatePage from './OrderUpdatePage.vue';
 
 const { t } = useTranslation();
@@ -113,6 +113,6 @@ function onOrderTap(order: Order): void {
 }
 
 function onAddNewOrder(): void {
-    navigateTo?.(OrderSelectClientPage, { backstackVisible: false });
+    navigateTo?.(OrderShowPage);
 }
 </script>

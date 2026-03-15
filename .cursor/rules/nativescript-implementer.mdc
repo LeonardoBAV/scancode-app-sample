@@ -60,7 +60,8 @@ NUNCA usar `any`. Para tipos desconhecidos: `unknown` + type guard.
 
 ### Ordem dos Imports
 
-- **Ordenação:** por número de caracteres da linha inteira, **decrescente** (linha mais longa primeiro).
+- **Grupos:** (1) imports com chaves `{ }` (named exports) primeiro; (2) imports sem chaves (default exports) depois.
+- **Dentro de cada grupo:** ordenação por número de caracteres da linha inteira, **decrescente** (linha mais longa primeiro).
 - **Separadores:** usar comentários de seção para isolar o bloco de imports do restante do código:
   - `// --- Imports ---` antes dos imports
   - `// --- Component logic ---` (ou equivalente) antes da lógica do componente
@@ -71,18 +72,40 @@ Exemplo:
 ```typescript
 <script setup lang="ts">
 // --- Imports ---
-import HeaderComponent from '../../../components/HeaderComponent.vue';
-import { useTranslation } from '../../../composables/useTranslation';
 import { ref, computed, type Ref, type ComputedRef } from 'vue';
+import { useTranslation } from '../../../composables/useTranslation';
 import { Dialogs, type TextField } from '@nativescript/core';
 import { vibrateSuccess } from '../../../utils/haptics';
-// ... (ordem decrescente por tamanho da linha)
+import HeaderComponent from '../../../components/HeaderComponent.vue';
 
 
 // --- Component logic ---
 const searchQuery = ref('');
 // ...
 </script>
+```
+
+### Ordem das declarações no setup
+
+No bloco de lógica do componente, declarar variáveis nesta ordem:
+
+1. **Variáveis sem reatividade** — constantes, valores derivados estáticos, `getCurrentInstance()`, globals, etc.
+2. **Refs** — `ref()` (estado reativo simples)
+3. **Computed** — `computed()` (valores derivados reativos)
+
+Exemplo:
+
+```typescript
+// --- Component logic ---
+const displayTotalItems: string = '5 itens';
+const instance = getCurrentInstance();
+const globals = instance?.appContext.config.globalProperties;
+const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void;
+
+const orderId: Ref<string> = ref('ORD-NEW');
+const observation: Ref<string> = ref('');
+
+const clientFantasyName: ComputedRef<string> = computed(() => orderCreateClientFantasyName.value);
 ```
 
 ## Internacionalização (i18n)

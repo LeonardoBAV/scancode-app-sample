@@ -102,6 +102,20 @@
       "removeConfirmOk": "Remove",
       "removeConfirmCancel": "Cancel"
     },
+    "orderShow": {
+      "orderValue": "Order value",
+      "totalItems": "Total items",
+      "client": "Client",
+      "buyer": "Buyer",
+      "paymentMethod": "Payment method",
+      "choosePayment": "Choose payment",
+      "observation": "Observation",
+      "observationHint": "Tap to add observation...",
+      "finish": "Finish",
+      "print": "Print",
+      "statusOpen": "Open",
+      "statusCompleted": "Completed"
+    },
     "eventHome": {
       "status": "Status",
       "date": "Date",

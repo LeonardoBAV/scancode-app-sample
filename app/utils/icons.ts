@@ -72,6 +72,7 @@ const codepoints: Record<string, number> = {
     'tags': 0xe35c,
     'hash': 0xe0ef,
     'at-sign': 0xe04e,
+    'printer': 0xe141,
 };
 
 export type LucideIcon = keyof typeof codepoints;

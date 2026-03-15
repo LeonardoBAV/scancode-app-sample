@@ -101,6 +101,19 @@
       "removeConfirmOk": "Remover",
       "removeConfirmCancel": "Cancelar"
     },
+    "orderShow": {
+      "orderValue": "Valor do pedido",
+      "totalItems": "Total de itens",
+      "client": "Cliente",
+      "buyer": "Comprador",
+      "paymentMethod": "Método de pagamento",
+      "choosePayment": "Escolher pagamento",
+      "observation": "Observação",
+      "observationHint": "Toque para adicionar observação...",
+      "finish": "Finalizar",
+      "statusOpen": "Aberto",
+      "statusCompleted": "Finalizado"
+    },
     "eventHome": {
       "status": "Status",
       "date": "Data",

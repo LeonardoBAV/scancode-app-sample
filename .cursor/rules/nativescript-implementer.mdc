@@ -43,6 +43,48 @@ Você é um Senior NativeScript Engineer especializado em Vue 3 e TypeScript.
 - Preferir `GridLayout` para layouts complexos (mais performático)
 - Usar `class` (não `className`) em templates Vue
 
+### Strict Type — Tipar tudo
+
+Tipagem explícita em **100%** do código. Nenhuma exceção.
+
+- **Parâmetros:** `function addProduct(product: Product): void`
+- **Retorno:** `function formatCurrency(value: number): string`
+- **Variáveis locais:** `const existing: CartItem | undefined = cartItems.value.find(...)`
+- **Constantes:** `const MAX_RETRIES: number = 3`
+- **Refs:** `const searchFieldRef = ref<{ nativeView?: TextField } | null>(null)`
+- **Computed:** `const total: ComputedRef<number> = computed(() => ...)`
+- **Props/emits:** `defineProps<{ id: number }>()`, `defineEmits<{ submit: [value: string] }>()`
+- **Callbacks:** `(item: CartItem) => void` em vez de deixar inferir
+
+NUNCA usar `any`. Para tipos desconhecidos: `unknown` + type guard.
+
+### Ordem dos Imports
+
+- **Ordenação:** por número de caracteres da linha inteira, **decrescente** (linha mais longa primeiro).
+- **Separadores:** usar comentários de seção para isolar o bloco de imports do restante do código:
+  - `// --- Imports ---` antes dos imports
+  - `// --- Component logic ---` (ou equivalente) antes da lógica do componente
+  - Duas linhas em branco entre o bloco de imports e a lógica
+
+Exemplo:
+
+```typescript
+<script setup lang="ts">
+// --- Imports ---
+import HeaderComponent from '../../../components/HeaderComponent.vue';
+import { useTranslation } from '../../../composables/useTranslation';
+import { ref, computed, type Ref, type ComputedRef } from 'vue';
+import { Dialogs, type TextField } from '@nativescript/core';
+import { vibrateSuccess } from '../../../utils/haptics';
+// ... (ordem decrescente por tamanho da linha)
+
+
+// --- Component logic ---
+const searchQuery = ref('');
+// ...
+</script>
+```
+
 ## Internacionalização (i18n)
 
 - **Biblioteca:** vue-i18n v11 (registrado em `app/bootstrap/app.ts`).
@@ -64,6 +106,7 @@ Você é um Senior NativeScript Engineer especializado em Vue 3 e TypeScript.
 5. `<style scoped>` → ÚLTIMO recurso, apenas para CSS que nenhuma opção acima cobre
 
 NUNCA use:
+
 - `@layer components` (quebrado no Tailwind v4)
 - Hex hardcoded no template ou `<style>`
 - `className` (é `class` no Vue)
@@ -81,15 +124,17 @@ Ao adicionar nova aba ou nova página dentro de um Frame do TabView, inclua o He
 ## Padrões de Navegação
 
 ```typescript
-import { getCurrentInstance } from 'vue';
+import { getCurrentInstance } from "vue";
 
 const nav = getCurrentInstance()?.appContext.config.globalProperties;
 
 nav?.$navigateTo(TargetPage, {
-  props: { /* props */ },
-  frame: 'root-frame',
+  props: {
+    /* props */
+  },
+  frame: "root-frame",
   clearHistory: false,
-  transition: { name: 'slideLeft', duration: 300 }, // opcional: slide lateral nativo
+  transition: { name: "slideLeft", duration: 300 }, // opcional: slide lateral nativo
 });
 
 nav?.$navigateBack();
@@ -99,14 +144,15 @@ nav?.$navigateBack();
 
 ## Helpers / Utilitários (`app/utils/`)
 
-| Arquivo | Funções | Uso |
-| ---- | ---- | ---- |
-| `format.ts` | `formatCurrencyBR(value, freeText?)` | Formata número em `R$ 1.234,56`. Se `value === 0` e `freeText` fornecido, retorna `freeText`. |
-| `format.ts` | `formatCPF(value)` | Aplica máscara `000.000.000-00`. Retorna `'—'` se nulo/vazio, ou o valor original se não tiver 11 dígitos. |
-| `format.ts` | `formatCNPJ(value)` | Aplica máscara `00.000.000/0000-00`. Retorna `'—'` se nulo/vazio, ou o valor original se não tiver 14 dígitos. |
-| `format.ts` | `formatCPFCNPJ(value)` | Auto-detecta CPF (11 dígitos) ou CNPJ (14 dígitos) e aplica a máscara correspondente. **Usar como padrão** ao exibir CPF/CNPJ. |
-| `icons.ts` | `lucide(name)` | Retorna caractere unicode do ícone Lucide. Usar com `class="lucide"`. |
-| `auth.ts` | `getAuth()`, `setAuth(profile)`, `clearAuth()` | Leitura/escrita do perfil autenticado em `ApplicationSettings`. |
+| Arquivo      | Funções                                        | Uso                                                                                                                            |
+| ------------ | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `format.ts`  | `formatCurrencyBR(value, freeText?)`           | Formata número em `R$ 1.234,56`. Se `value === 0` e `freeText` fornecido, retorna `freeText`.                                  |
+| `format.ts`  | `formatCPF(value)`                             | Aplica máscara `000.000.000-00`. Retorna `'—'` se nulo/vazio, ou o valor original se não tiver 11 dígitos.                     |
+| `format.ts`  | `formatCNPJ(value)`                            | Aplica máscara `00.000.000/0000-00`. Retorna `'—'` se nulo/vazio, ou o valor original se não tiver 14 dígitos.                 |
+| `format.ts`  | `formatCPFCNPJ(value)`                         | Auto-detecta CPF (11 dígitos) ou CNPJ (14 dígitos) e aplica a máscara correspondente. **Usar como padrão** ao exibir CPF/CNPJ. |
+| `icons.ts`   | `lucide(name)`                                 | Retorna caractere unicode do ícone Lucide. Usar com `class="lucide"`.                                                          |
+| `haptics.ts` | `vibrateSuccess()`                             | Feedback háptico de sucesso (vibração curta). Seguro em qualquer dispositivo.                                                  |
+| `auth.ts`    | `getAuth()`, `setAuth(profile)`, `clearAuth()` | Leitura/escrita do perfil autenticado em `ApplicationSettings`.                                                                |
 
 Ao criar novos helpers, adicione-os na tabela acima.
 
@@ -136,9 +182,9 @@ export interface Product {
 
 O `main` do `package.json` é `app/bootstrap/app.ts`. O `@nativescript/webpack` CopyPlugin usa o **diretório do `main`** como contexto. Assets estáticos devem ficar dentro de `app/bootstrap/`:
 
-| Tipo | Caminho correto | NÃO funciona |
-| ---- | ---- | ---- |
-| Fonts (.ttf) | `app/bootstrap/fonts/` | `app/fonts/` |
+| Tipo             | Caminho correto         | NÃO funciona  |
+| ---------------- | ----------------------- | ------------- |
+| Fonts (.ttf)     | `app/bootstrap/fonts/`  | `app/fonts/`  |
 | Assets (imagens) | `app/bootstrap/assets/` | `app/assets/` |
 
 ### HMR e assets nativos

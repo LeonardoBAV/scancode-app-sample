@@ -183,6 +183,18 @@ Ao criar novos helpers, adicione-os na tabela acima.
 
 Ao renderizar CPF ou CNPJ na UI, **sempre** usar `formatCPFCNPJ(value)` (ou `formatCPF` / `formatCNPJ` se o tipo for conhecido). Nunca exibir dígitos crus sem máscara.
 
+### Regra: Helpers diretos no template
+
+**Preferir** chamar helpers diretamente no template quando não há parsing ou lógica adicional. Evitar criar `computed`, variáveis ou propriedades intermediárias que apenas repassam o resultado do helper.
+
+| Situação | Preferir | Evitar |
+| -------- | -------- | ------ |
+| Formatar CPF/CNPJ | `:text="formatCPFCNPJ(client.cpf_cnpj)"` | `const formatted = computed(() => formatCPFCNPJ(...))` |
+| Formatar moeda | `:text="formatCurrencyBR(item.price)"` | `const priceLabel = computed(() => formatCurrencyBR(...))` |
+| Ícone Lucide | `:text="lucide('user')"` | `const icon = lucide('user')` em ref/const |
+
+**Quando usar computed:** quando há lógica adicional (condicionais, combinação de dados, transformação em múltiplos passos) ou quando o valor é reutilizado em vários pontos do template.
+
 ## Padrão de Tipos
 
 Definir interfaces em `app/types/`:

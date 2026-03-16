@@ -1,29 +1,60 @@
 <template>
-    <GridLayout rows="auto, *, auto" columns="*">
-        <GridLayout row="0" col="0" rows="auto" columns="auto, *" class="header">
-            <Label row="0" col="1" :text="title" class="header-title" />
-        </GridLayout>
-        <StackLayout row="1" col="0">
-            <TextField v-model="searchQuery" hint="Search by name or CPF/CNPJ..." class="search-field p-3 m-3 rounded-lg border border-gray-300 text-base" />
-            <ListView :items="filteredClients" separatorColor="transparent" class="list">
-                <template #default="{ item }">
+    <GridLayout v-if="contentOnly" rows="auto, *" class="bg-background">
+        <!-- Search -->
+        <StackLayout row="0" class="px-4 pt-4 pb-2">
+            <GridLayout columns="auto, *" class="input-search">
+                <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+                <TextField col="1" v-model="searchQuery" :hint="$t('pages.clientList.searchHint')" class="text-base text-foreground p-0" placeholderColor="#a1a1aa" />
+            </GridLayout>
+        </StackLayout>
+        <!-- List -->
+        <ListView row="1" :items="filteredClients" separatorColor="transparent">
+            <template #default="{ item }">
+                <StackLayout class="px-4 pt-2 pb-3" @tap="onSelectItem(item)">
                     <GridLayout
                         rows="auto, auto"
                         columns="*"
-                        :class="['client-item', 'p-3', 'm-2', 'rounded-lg', selectedClient?.id === item.id ? 'client-item-selected' : '']"
-                        @tap="onSelectItem(item)"
+                        :class="['card', 'm-0', selectedClient?.id === item.id ? 'bg-accent border-primary' : '']"
+                        androidElevation="2"
                     >
-                        <Label row="0" col="0" :text="item.corporate_name" class="text-base font-bold text-gray-900" textWrap="true" />
-                        <Label row="1" col="0" :text="item.cpf_cnpj" class="text-sm text-gray-600 mt-1" textWrap="true" />
+                        <Label row="0" col="0" :text="item.corporate_name" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                        <Label row="1" col="0" :text="formatCPFCNPJ(item.cpf_cnpj)" class="text-sm text-muted-foreground mt-1" textWrap="true" />
                     </GridLayout>
+                </StackLayout>
+            </template>
+        </ListView>
+    </GridLayout>
+
+    <GridLayout v-else rows="auto, *, auto" class="bg-background">
+        <HeaderComponent row="0" :title="title" :showAvatar="false" />
+        <StackLayout row="1">
+            <StackLayout class="px-4 pt-4 pb-2">
+                <GridLayout columns="auto, *" class="input-search">
+                    <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+                    <TextField col="1" v-model="searchQuery" :hint="$t('pages.clientList.searchHint')" class="text-base text-foreground p-0" placeholderColor="#a1a1aa" />
+                </GridLayout>
+            </StackLayout>
+            <ListView :items="filteredClients" separatorColor="transparent">
+                <template #default="{ item }">
+                    <StackLayout class="px-4 pt-2 pb-3" @tap="onSelectItem(item)">
+                        <GridLayout
+                            rows="auto, auto"
+                            columns="*"
+                            :class="['card', 'm-0', selectedClient?.id === item.id ? 'bg-accent border-primary' : '']"
+                            androidElevation="2"
+                        >
+                            <Label row="0" col="0" :text="item.corporate_name" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                            <Label row="1" col="0" :text="formatCPFCNPJ(item.cpf_cnpj)" class="text-sm text-muted-foreground mt-1" textWrap="true" />
+                        </GridLayout>
+                    </StackLayout>
                 </template>
             </ListView>
         </StackLayout>
-        <StackLayout row="2" col="0" class="footer-float" verticalAlignment="bottom">
+        <StackLayout row="2" class="footer-bar">
             <Button
-                text="Confirmar"
+                :text="$t('pages.orderSelectClient.confirm')"
+                :class="selectedClient ? 'btn-primary' : 'btn-primary opacity-50'"
                 :isEnabled="!!selectedClient"
-                :class="selectedClient ? 'btn-confirm' : 'btn-confirm-disabled'"
                 @tap="onConfirm"
             />
         </StackLayout>
@@ -31,17 +62,26 @@
 </template>
 
 <script setup lang="ts">
+// --- Imports ---
 import { ref, computed } from 'vue';
 import type { Client } from '../types/client';
+import { formatCPFCNPJ } from '../utils/format';
+import { lucide } from '../utils/icons';
+import HeaderComponent from './HeaderComponent.vue';
 
-const props = withDefaults(defineProps<{
-    title?: string;
-}>(), {
-    title: 'Escolher cliente',
-});
+
+// --- Component logic ---
+const props = withDefaults(
+    defineProps<{
+        title?: string;
+        contentOnly?: boolean;
+    }>(),
+    { title: 'Escolher cliente', contentOnly: false },
+);
 
 const emit = defineEmits<{
     (e: 'confirm', client: Client): void;
+    (e: 'update:selected', client: Client | null): void;
 }>();
 
 function likeMatch(value: string, term: string): boolean {
@@ -79,71 +119,22 @@ const filteredClients = computed(() => {
     const term = searchQuery.value.trim();
     if (!term) return clients.value;
     return clients.value.filter(
-        (c: Client) => likeMatch(c.corporate_name, term) || likeMatch(c.cpf_cnpj, term)
+        (c: Client) => likeMatch(c.corporate_name, term) || likeMatch(c.cpf_cnpj, term),
     );
 });
 
 function onSelectItem(client: Client): void {
     selectedClient.value = selectedClient.value?.id === client.id ? null : client;
+    emit('update:selected', selectedClient.value);
 }
 
 function onConfirm(): void {
     if (!selectedClient.value) return;
     emit('confirm', selectedClient.value);
 }
+
+defineExpose({
+    selectedClient,
+    onConfirm,
+});
 </script>
-
-<style scoped>
-.header {
-    background-color: #1e293b;
-    color: white;
-    padding: 16;
-}
-
-.header-title {
-    font-size: 18;
-    font-weight: bold;
-    vertical-align: center;
-}
-
-.search-field {
-    background-color: #f8fafc;
-}
-
-.client-item {
-    background-color: #fafafa;
-    border-width: 1;
-    border-color: #e2e8f0;
-}
-
-.client-item-selected {
-    background-color: #dbeafe;
-    border-color: #3b82f6;
-    border-width: 2;
-}
-
-.footer-float {
-    padding: 16;
-    background-color: white;
-    border-top-width: 1;
-    border-top-color: #e2e8f0;
-}
-
-.btn-confirm {
-    background-color: #3b82f6;
-    color: white;
-    border-radius: 10;
-    padding: 14;
-    font-size: 16;
-    font-weight: 600;
-}
-
-.btn-confirm-disabled {
-    background-color: #94a3b8;
-    color: white;
-    border-radius: 10;
-    padding: 14;
-    font-size: 16;
-    opacity: 0.7;
-}
-</style>

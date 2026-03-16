@@ -101,6 +101,22 @@
       "removeConfirmOk": "Remover",
       "removeConfirmCancel": "Cancelar"
     },
+    "orderSelectClient": {
+      "title": "Selecionar cliente",
+      "confirm": "Confirmar"
+    },
+    "orderClientShow": {
+      "title": "Detalhes do cliente",
+      "fantasyName": "Nome fantasia",
+      "corporateName": "Razão social",
+      "cpfCnpj": "CPF/CNPJ",
+      "email": "E-mail",
+      "phone": "Telefone",
+      "noClient": "Nenhum cliente selecionado.",
+      "changeClient": "Alterar cliente",
+      "buyerName": "Nome do comprador",
+      "buyerContact": "Contato do comprador"
+    },
     "orderShow": {
       "orderValue": "Valor do pedido",
       "totalItems": "Total de itens",

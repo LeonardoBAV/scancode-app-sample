@@ -49,7 +49,9 @@ const avatarInitials = (() => {
 })();
 
 function getNavFrame(): Frame | null {
-    return Frame.getFrameById('root-frame') ?? Frame.topmost();
+    const topmost = Frame.topmost();
+    if (topmost?.canGoBack()) return topmost;
+    return Frame.getFrameById('root-frame') ?? topmost;
 }
 
 onMounted(() => {

@@ -1,6 +1,6 @@
 <template>
     <Page actionBarHidden="true">
-        <ClientListComponent title="Escolher cliente" @confirm="onClientConfirmed" />
+        <ClientListComponent :title="$t('pages.orderSelectClient.title')" @confirm="onClientConfirmed" />
     </Page>
 </template>
 

@@ -17,7 +17,7 @@ export const orderCreatePaymentMethodName = ref<string>('');
 export const orderCreateClientFantasyName = ref<string>(defaultClient.fantasy_name);
 export const orderCreateClientCpfCnpj = ref<string>(defaultClient.cpf_cnpj);
 /** Full selected client for show page; kept in sync when user selects from list. */
-export const orderCreateSelectedClient = ref<Client | null>(defaultClient);
+export const orderCreateSelectedClient = ref<Client>(defaultClient);
 /** Buyer name and contact (English labels) on OrderClientShowPage. */
 export const orderCreateBuyerName = ref<string>('João Silva');
 export const orderCreateBuyerContact = ref<string>('');

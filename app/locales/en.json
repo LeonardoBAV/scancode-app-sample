@@ -71,11 +71,23 @@
       "empty": "No products found",
       "emptyHint": "Try a different search term"
     },
+    "productShow": {
+      "title": "Product details",
+      "name": "Name",
+      "sku": "SKU",
+      "barcode": "Barcode",
+      "category": "Category",
+      "price": "Price"
+    },
     "paymentMethodList": {
       "title": "Payment methods",
       "searchHint": "Search by name...",
       "empty": "No payment methods found",
       "emptyHint": "Try a different search term"
+    },
+    "paymentMethodShow": {
+      "title": "Payment method details",
+      "name": "Name"
     },
     "eventLayout": {
       "tabHome": "Event",

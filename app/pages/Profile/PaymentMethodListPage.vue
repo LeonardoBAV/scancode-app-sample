@@ -1,45 +1,46 @@
 <template>
     <Page actionBarHidden="true">
-        <GridLayout rows="auto, auto, *" class="bg-background">
-
+        <GridLayout :rows="selectedPaymentMethod ? 'auto, *, auto' : 'auto, *'" class="bg-background">
             <HeaderComponent row="0" :title="$t('pages.paymentMethodList.title')" :showAvatar="false" />
+            <PaymentMethodListComponent2 row="1" :payment-methods="paymentMethods" :selected-payment-method-id="selectedPaymentMethod?.id ?? null" @select="onSelectPaymentMethod" />
 
-            <!-- Search -->
-            <StackLayout row="1" class="px-4 pt-2 pb-2 bg-accent-foreground">
-                <GridLayout columns="auto, *" class="input-search">
-                    <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
-                    <TextField col="1" v-model="searchQuery" :hint="$t('pages.paymentMethodList.searchHint')" class="text-base text-foreground p-0" placeholderColor="#a1a1aa" />
-                </GridLayout>
+            <StackLayout v-if="selectedPaymentMethod" row="2" class="footer-bar">
+                <Button :text="lucide('eye')" class="btn-icon lucide" @tap="onViewTap" />
             </StackLayout>
-
-            <!-- List -->
-            <ListView row="2" :items="filteredPaymentMethods" separatorColor="transparent">
-                <template #default="{ item }">
-                    <GridLayout columns="auto, *" class="p-4 mx-4 mb-2 bg-card border border-border rounded-lg">
-                        <Label col="0" :text="lucide('credit-card')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
-                        <Label col="1" :text="item.name" class="text-base font-medium text-card-foreground" verticalAlignment="center" />
-                    </GridLayout>
-                </template>
-            </ListView>
-
-            <!-- Empty state -->
-            <StackLayout v-if="filteredPaymentMethods.length === 0" row="2" class="p-8" verticalAlignment="center" horizontalAlignment="center">
-                <Label :text="lucide('credit-card')" class="lucide text-muted-foreground text-4xl text-center mb-4" />
-                <Label :text="$t('pages.paymentMethodList.empty')" class="text-lg font-semibold text-foreground text-center mb-2" />
-                <Label :text="$t('pages.paymentMethodList.emptyHint')" class="text-sm text-muted-foreground text-center" textWrap="true" />
-            </StackLayout>
-
         </GridLayout>
     </Page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+// --- Imports ---
+import { ref, getCurrentInstance } from 'vue';
 import type { PaymentMethod } from '../../types/payment-method';
 import { lucide } from '../../utils/icons';
+import PaymentMethodListComponent2 from '../../components/PaymentMethodListComponent2.vue';
+import PaymentMethodShowPage from './PaymentMethodShowPage.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
-const searchQuery = ref('');
+
+// --- Component logic ---
+const instance = getCurrentInstance();
+const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
+    target: unknown,
+    options?: Record<string, unknown>
+) => void;
+
+const selectedPaymentMethod = ref<PaymentMethod | null>(null);
+
+function onSelectPaymentMethod(paymentMethod: PaymentMethod): void {
+    selectedPaymentMethod.value = selectedPaymentMethod.value?.id === paymentMethod.id ? null : paymentMethod;
+}
+
+function onViewTap(): void {
+    if (!selectedPaymentMethod.value) return;
+    navigateTo?.(PaymentMethodShowPage, {
+        props: { paymentMethod: selectedPaymentMethod.value },
+        transition: { name: 'slideLeft', duration: 300 },
+    });
+}
 
 const paymentMethods = ref<PaymentMethod[]>([
     { id: 1, name: 'Credit card' },
@@ -63,10 +64,4 @@ const paymentMethods = ref<PaymentMethod[]>([
     { id: 19, name: 'Split payment' },
     { id: 20, name: 'Trade-in' },
 ]);
-
-const filteredPaymentMethods = computed(() => {
-    const term = searchQuery.value.trim().toLowerCase();
-    if (!term) return paymentMethods.value;
-    return paymentMethods.value.filter((p: PaymentMethod) => p.name.toLowerCase().includes(term));
-});
 </script>

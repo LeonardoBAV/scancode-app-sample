@@ -70,11 +70,23 @@
       "empty": "Nenhum produto encontrado",
       "emptyHint": "Tente buscar com outro termo"
     },
+    "productShow": {
+      "title": "Detalhes do produto",
+      "name": "Nome",
+      "sku": "SKU",
+      "barcode": "Código de barras",
+      "category": "Categoria",
+      "price": "Preço"
+    },
     "paymentMethodList": {
       "title": "Formas de pagamento",
       "searchHint": "Buscar por nome...",
       "empty": "Nenhuma forma de pagamento encontrada",
       "emptyHint": "Tente buscar com outro termo"
+    },
+    "paymentMethodShow": {
+      "title": "Detalhes da forma de pagamento",
+      "name": "Nome"
     },
     "eventLayout": {
       "tabHome": "Evento",

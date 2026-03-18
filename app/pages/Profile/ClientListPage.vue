@@ -5,7 +5,7 @@
             <ClientListComponent2 row="1" :clients="clients" :selected-client-id="selectedClient?.id ?? null" @select="onSelectClient" />
 
             <StackLayout v-if="selectedClient" row="2" class="footer-bar">
-                <Button :text="$t('pages.clientList.actions')" class="btn-primary" @tap="onActionsTap" />
+                <Button :text="lucide('eye')" class="btn-icon lucide" @tap="onViewTap" />
             </StackLayout>
         </GridLayout>
     </Page>
@@ -15,15 +15,13 @@
 // --- Imports ---
 import { ref, getCurrentInstance } from 'vue';
 import type { Client } from '../../types/client';
-import { Dialogs } from '@nativescript/core';
-import { useTranslation } from '../../composables/useTranslation';
+import { lucide } from '../../utils/icons';
 import ClientListComponent2 from '../../components/ClientListComponent2.vue';
 import ClientShowPage from './ClientShowPage.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
 
 // --- Component logic ---
-const { t } = useTranslation();
 const instance = getCurrentInstance();
 const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
     target: unknown,
@@ -36,19 +34,12 @@ function onSelectClient(client: Client): void {
     selectedClient.value = selectedClient.value?.id === client.id ? null : client;
 }
 
-async function onActionsTap(): Promise<void> {
+function onViewTap(): void {
     if (!selectedClient.value) return;
-    const action = await Dialogs.action({
-        title: t('pages.clientList.actions'),
-        cancelButtonText: t('common.cancel'),
-        actions: [t('pages.clientList.view')],
+    navigateTo?.(ClientShowPage, {
+        props: { client: selectedClient.value },
+        transition: { name: 'slideLeft', duration: 300 },
     });
-    if (action === t('pages.clientList.view')) {
-        navigateTo?.(ClientShowPage, {
-            props: { client: selectedClient.value },
-            transition: { name: 'slideLeft', duration: 300 },
-        });
-    }
 }
 
 const clients = ref<Client[]>([

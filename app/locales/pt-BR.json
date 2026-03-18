@@ -57,7 +57,12 @@
       "title": "Clientes",
       "searchHint": "Buscar por nome ou CPF/CNPJ...",
       "empty": "Nenhum cliente encontrado",
-      "emptyHint": "Tente buscar com outro termo"
+      "emptyHint": "Tente buscar com outro termo",
+      "actions": "Ações",
+      "view": "Visualizar"
+    },
+    "clientShow": {
+      "title": "Detalhes do cliente"
     },
     "productList": {
       "title": "Produtos",

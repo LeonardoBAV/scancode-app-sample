@@ -1,62 +1,35 @@
 <template>
-    <GridLayout v-if="contentOnly" rows="auto, *" class="bg-background">
+    <GridLayout rows="auto, *" class="bg-background">
         <!-- Search -->
-        <StackLayout row="0" class="px-4 pt-4 pb-2">
+        <StackLayout row="0" class="px-4 pt-2 pb-2">
             <GridLayout columns="auto, *" class="input-search">
                 <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
                 <TextField col="1" v-model="searchQuery" :hint="$t('pages.clientList.searchHint')" class="text-base text-foreground p-0" placeholderColor="#a1a1aa" />
             </GridLayout>
         </StackLayout>
+
         <!-- List -->
-        <ListView row="1" :items="filteredClients" separatorColor="transparent">
+        <ListView v-if="filteredClients.length > 0" row="1" :items="filteredClients" separatorColor="transparent">
             <template #default="{ item }">
-                <StackLayout class="px-4 pt-2 pb-3" @tap="onSelectItem(item)">
-                    <GridLayout
-                        rows="auto, auto"
-                        columns="*"
-                        :class="['card', 'm-0', selectedClient?.id === item.id ? 'bg-accent border-primary' : '']"
-                        androidElevation="2"
-                    >
-                        <Label row="0" col="0" :text="item.corporate_name" class="text-base font-semibold text-card-foreground" textWrap="true" />
-                        <Label row="1" col="0" :text="formatCPFCNPJ(item.cpf_cnpj)" class="text-sm text-muted-foreground mt-1" textWrap="true" />
-                    </GridLayout>
-                </StackLayout>
+                <GridLayout
+                    rows="auto, auto, auto"
+                    columns="auto, *"
+                    :class="['p-4 mx-4 mb-2 border rounded-lg', selectedClientId === item.id ? 'bg-primary border-primary' : 'bg-card border-border']"
+                    @tap="$emit('select', item)"
+                >
+                    <Label row="0" col="0" rowSpan="3" :text="lucide('users')" :class="['lucide mr-4', selectedClientId === item.id ? 'text-primary-foreground' : 'text-muted-foreground']" verticalAlignment="top" />
+                    <Label row="0" col="1" :text="item.fantasy_name" :class="['text-base font-semibold', selectedClientId === item.id ? 'text-primary-foreground' : 'text-card-foreground']" textWrap="true" verticalAlignment="top" />
+                    <Label row="1" col="1" :text="formatCPFCNPJ(item.cpf_cnpj)" :class="['text-sm mt-1', selectedClientId === item.id ? 'text-primary-foreground opacity-70' : 'text-muted-foreground']" />
+                    <Label row="2" col="1" :text="item.phone" :class="['text-xs mt-1', selectedClientId === item.id ? 'text-primary-foreground opacity-70' : 'text-muted-foreground']" />
+                </GridLayout>
             </template>
         </ListView>
-    </GridLayout>
 
-    <GridLayout v-else rows="auto, *, auto" class="bg-background">
-        <HeaderComponent row="0" :title="title" :showAvatar="false" />
-        <StackLayout row="1">
-            <StackLayout class="px-4 pt-4 pb-2">
-                <GridLayout columns="auto, *" class="input-search">
-                    <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
-                    <TextField col="1" v-model="searchQuery" :hint="$t('pages.clientList.searchHint')" class="text-base text-foreground p-0" placeholderColor="#a1a1aa" />
-                </GridLayout>
-            </StackLayout>
-            <ListView :items="filteredClients" separatorColor="transparent">
-                <template #default="{ item }">
-                    <StackLayout class="px-4 pt-2 pb-3" @tap="onSelectItem(item)">
-                        <GridLayout
-                            rows="auto, auto"
-                            columns="*"
-                            :class="['card', 'm-0', selectedClient?.id === item.id ? 'bg-accent border-primary' : '']"
-                            androidElevation="2"
-                        >
-                            <Label row="0" col="0" :text="item.corporate_name" class="text-base font-semibold text-card-foreground" textWrap="true" />
-                            <Label row="1" col="0" :text="formatCPFCNPJ(item.cpf_cnpj)" class="text-sm text-muted-foreground mt-1" textWrap="true" />
-                        </GridLayout>
-                    </StackLayout>
-                </template>
-            </ListView>
-        </StackLayout>
-        <StackLayout row="2" class="footer-bar">
-            <Button
-                :text="$t('pages.orderSelectClient.confirm')"
-                :class="selectedClient ? 'btn-primary' : 'btn-primary opacity-50'"
-                :isEnabled="!!selectedClient"
-                @tap="onConfirm"
-            />
+        <!-- Empty state -->
+        <StackLayout v-else row="1" class="p-8" verticalAlignment="center" horizontalAlignment="center">
+            <Label :text="lucide('users')" class="lucide text-muted-foreground text-4xl text-center mb-4" />
+            <Label :text="$t('pages.clientList.empty')" class="text-lg font-semibold text-foreground text-center mb-2" />
+            <Label :text="$t('pages.clientList.emptyHint')" class="text-sm text-muted-foreground text-center" textWrap="true" />
         </StackLayout>
     </GridLayout>
 </template>
@@ -67,74 +40,25 @@ import { ref, computed } from 'vue';
 import type { Client } from '../types/client';
 import { formatCPFCNPJ } from '../utils/format';
 import { lucide } from '../utils/icons';
-import HeaderComponent from './HeaderComponent.vue';
 
 
 // --- Component logic ---
-const props = withDefaults(
-    defineProps<{
-        title?: string;
-        contentOnly?: boolean;
-    }>(),
-    { title: 'Escolher cliente', contentOnly: false },
-);
-
-const emit = defineEmits<{
-    (e: 'confirm', client: Client): void;
-    (e: 'update:selected', client: Client | null): void;
+const props = defineProps<{
+    clients: Client[];
+    selectedClientId: number | null;
 }>();
 
-function likeMatch(value: string, term: string): boolean {
-    if (!term) return true;
-    return value.toLowerCase().includes(term.toLowerCase());
-}
+defineEmits<{
+    (e: 'select', client: Client): void;
+}>();
 
 const searchQuery = ref('');
-const selectedClient = ref<Client | null>(null);
-
-const clients = ref<Client[]>([
-    { id: 1, cpf_cnpj: '12.345.678/0001-90', corporate_name: 'Alpha Comércio Ltda', fantasy_name: 'Alpha Store', email: 'contato@alpha.com', phone: '(11) 99999-0001', carrier: 'Vivo' },
-    { id: 2, cpf_cnpj: '98.765.432/0001-10', corporate_name: 'Beta Serviços S.A.', fantasy_name: 'Beta Solutions', email: 'contato@beta.com', phone: '(21) 98888-0002', carrier: 'Claro' },
-    { id: 3, cpf_cnpj: '11.222.333/0001-44', corporate_name: 'Gamma Indústria ME', fantasy_name: 'Gamma Factory', email: 'contato@gamma.com', phone: '(31) 97777-0003', carrier: 'Tim' },
-    { id: 4, cpf_cnpj: '55.666.777/0001-88', corporate_name: 'Delta Distribuidora Ltda', fantasy_name: 'Delta Dist', email: 'contato@delta.com', phone: '(41) 96666-0004', carrier: 'Oi' },
-    { id: 5, cpf_cnpj: '22.333.444/0001-11', corporate_name: 'Epsilon Tech Ltda', fantasy_name: 'Epsilon Tech', email: 'contato@epsilon.com', phone: '(11) 95555-0005', carrier: 'Vivo' },
-    { id: 6, cpf_cnpj: '33.444.555/0001-22', corporate_name: 'Zeta Alimentos ME', fantasy_name: 'Zeta Food', email: 'contato@zeta.com', phone: '(21) 94444-0006', carrier: 'Claro' },
-    { id: 7, cpf_cnpj: '44.555.666/0001-33', corporate_name: 'Eta Logística S.A.', fantasy_name: 'Eta Log', email: 'contato@eta.com', phone: '(31) 93333-0007', carrier: 'Tim' },
-    { id: 8, cpf_cnpj: '66.777.888/0001-55', corporate_name: 'Theta Comércio Ltda', fantasy_name: 'Theta Shop', email: 'contato@theta.com', phone: '(41) 92222-0008', carrier: 'Oi' },
-    { id: 9, cpf_cnpj: '77.888.999/0001-66', corporate_name: 'Iota Construção ME', fantasy_name: 'Iota Build', email: 'contato@iota.com', phone: '(51) 91111-0009', carrier: 'Vivo' },
-    { id: 10, cpf_cnpj: '88.999.000/0001-77', corporate_name: 'Kappa Consultoria Ltda', fantasy_name: 'Kappa Consult', email: 'contato@kappa.com', phone: '(61) 90000-0010', carrier: 'Claro' },
-    { id: 11, cpf_cnpj: '99.000.111/0001-88', corporate_name: 'Lambda Indústria S.A.', fantasy_name: 'Lambda Ind', email: 'contato@lambda.com', phone: '(71) 89999-0011', carrier: 'Tim' },
-    { id: 12, cpf_cnpj: '10.111.222/0001-99', corporate_name: 'Mu Serviços ME', fantasy_name: 'Mu Services', email: 'contato@mu.com', phone: '(81) 88888-0012', carrier: 'Oi' },
-    { id: 13, cpf_cnpj: '21.222.333/0001-00', corporate_name: 'Nu Distribuição Ltda', fantasy_name: 'Nu Dist', email: 'contato@nu.com', phone: '(85) 87777-0013', carrier: 'Vivo' },
-    { id: 14, cpf_cnpj: '32.333.444/0001-11', corporate_name: 'Xi Comércio ME', fantasy_name: 'Xi Store', email: 'contato@xi.com', phone: '(62) 86666-0014', carrier: 'Claro' },
-    { id: 15, cpf_cnpj: '43.444.555/0001-22', corporate_name: 'Omicron Tech Ltda', fantasy_name: 'Omicron Tech', email: 'contato@omicron.com', phone: '(48) 85555-0015', carrier: 'Tim' },
-    { id: 16, cpf_cnpj: '54.555.666/0001-33', corporate_name: 'Pi Alimentos S.A.', fantasy_name: 'Pi Food', email: 'contato@pi.com', phone: '(27) 84444-0016', carrier: 'Oi' },
-    { id: 17, cpf_cnpj: '65.666.777/0001-44', corporate_name: 'Rho Logística ME', fantasy_name: 'Rho Log', email: 'contato@rho.com', phone: '(31) 83333-0017', carrier: 'Vivo' },
-    { id: 18, cpf_cnpj: '76.777.888/0001-55', corporate_name: 'Sigma Construção Ltda', fantasy_name: 'Sigma Build', email: 'contato@sigma.com', phone: '(21) 82222-0018', carrier: 'Claro' },
-    { id: 19, cpf_cnpj: '87.888.999/0001-66', corporate_name: 'Tau Consultoria ME', fantasy_name: 'Tau Consult', email: 'contato@tau.com', phone: '(11) 81111-0019', carrier: 'Tim' },
-    { id: 20, cpf_cnpj: '98.999.000/0001-77', corporate_name: 'Upsilon Serviços Ltda', fantasy_name: 'Upsilon Serv', email: 'contato@upsilon.com', phone: '(41) 80000-0020', carrier: 'Oi' },
-]);
 
 const filteredClients = computed(() => {
-    const term = searchQuery.value.trim();
-    if (!term) return clients.value;
-    return clients.value.filter(
-        (c: Client) => likeMatch(c.corporate_name, term) || likeMatch(c.cpf_cnpj, term),
+    const term = searchQuery.value.trim().toLowerCase();
+    if (!term) return props.clients;
+    return props.clients.filter(
+        (c: Client) => c.fantasy_name.toLowerCase().includes(term) || c.cpf_cnpj.includes(term),
     );
-});
-
-function onSelectItem(client: Client): void {
-    selectedClient.value = selectedClient.value?.id === client.id ? null : client;
-    emit('update:selected', selectedClient.value);
-}
-
-function onConfirm(): void {
-    if (!selectedClient.value) return;
-    emit('confirm', selectedClient.value);
-}
-
-defineExpose({
-    selectedClient,
-    onConfirm,
 });
 </script>

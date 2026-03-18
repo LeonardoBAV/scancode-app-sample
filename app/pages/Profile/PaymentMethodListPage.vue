@@ -2,7 +2,7 @@
     <Page actionBarHidden="true">
         <GridLayout :rows="selectedPaymentMethod ? 'auto, *, auto' : 'auto, *'" class="bg-background">
             <HeaderComponent row="0" :title="$t('pages.paymentMethodList.title')" :showAvatar="false" />
-            <PaymentMethodListComponent2 row="1" :payment-methods="paymentMethods" :selected-payment-method-id="selectedPaymentMethod?.id ?? null" @select="onSelectPaymentMethod" />
+            <PaymentMethodListComponent row="1" :payment-methods="paymentMethods" :selected-payment-method-id="selectedPaymentMethod?.id ?? null" @select="onSelectPaymentMethod" />
 
             <StackLayout v-if="selectedPaymentMethod" row="2" class="footer-bar">
                 <Button :text="lucide('eye')" class="btn-icon lucide" @tap="onViewTap" />
@@ -16,7 +16,7 @@
 import { ref, getCurrentInstance } from 'vue';
 import type { PaymentMethod } from '../../types/payment-method';
 import { lucide } from '../../utils/icons';
-import PaymentMethodListComponent2 from '../../components/PaymentMethodListComponent2.vue';
+import PaymentMethodListComponent from '../../components/PaymentMethodListComponent.vue';
 import PaymentMethodShowPage from './PaymentMethodShowPage.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 

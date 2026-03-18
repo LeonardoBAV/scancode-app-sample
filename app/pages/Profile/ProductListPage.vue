@@ -2,7 +2,7 @@
     <Page actionBarHidden="true">
         <GridLayout :rows="selectedProduct ? 'auto, *, auto' : 'auto, *'" class="bg-background">
             <HeaderComponent row="0" :title="$t('pages.productList.title')" :showAvatar="false" />
-            <ProductListComponent2 row="1" :products="products" :selected-product-id="selectedProduct?.id ?? null" @select="onSelectProduct" />
+            <ProductListComponent row="1" :products="products" :selected-product-id="selectedProduct?.id ?? null" @select="onSelectProduct" />
 
             <StackLayout v-if="selectedProduct" row="2" class="footer-bar">
                 <Button :text="lucide('eye')" class="btn-icon lucide" @tap="onViewTap" />
@@ -17,7 +17,7 @@ import { ref, getCurrentInstance } from 'vue';
 import type { Product } from '../../types/product';
 import type { ProductCategory } from '../../types/product-category';
 import { lucide } from '../../utils/icons';
-import ProductListComponent2 from '../../components/ProductListComponent2.vue';
+import ProductListComponent from '../../components/ProductListComponent.vue';
 import ProductShowPage from './ProductShowPage.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 

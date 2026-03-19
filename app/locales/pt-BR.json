@@ -122,6 +122,10 @@
       "title": "Selecionar cliente",
       "confirm": "Confirmar"
     },
+    "orderPayment": {
+      "title": "Pagamento",
+      "confirm": "Confirmar"
+    },
     "orderClientShow": {
       "title": "Detalhes do cliente",
       "fantasyName": "Nome fantasia",
@@ -144,8 +148,14 @@
       "observation": "Observação",
       "observationHint": "Toque para adicionar observação...",
       "finish": "Finalizar",
+      "signature": "Assinatura",
       "statusOpen": "Aberto",
       "statusCompleted": "Finalizado"
+    },
+    "orderSign": {
+      "title": "Assinatura",
+      "clear": "Limpar",
+      "confirm": "Confirmar"
     },
     "eventHome": {
       "status": "Status",

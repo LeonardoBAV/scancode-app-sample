@@ -123,6 +123,10 @@
       "title": "Select client",
       "confirm": "Confirm"
     },
+    "orderPayment": {
+      "title": "Payment",
+      "confirm": "Confirm"
+    },
     "orderClientShow": {
       "title": "Client details",
       "fantasyName": "Trade name",
@@ -145,9 +149,15 @@
       "observation": "Observation",
       "observationHint": "Tap to add observation...",
       "finish": "Finish",
+      "signature": "Signature",
       "print": "Print",
       "statusOpen": "Open",
       "statusCompleted": "Completed"
+    },
+    "orderSign": {
+      "title": "Signature",
+      "clear": "Clear",
+      "confirm": "Confirm"
     },
     "eventHome": {
       "status": "Status",

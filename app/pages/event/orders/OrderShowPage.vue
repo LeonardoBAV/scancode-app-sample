@@ -65,7 +65,7 @@
                     </GridLayout>
                 </GridLayout>
                 <GridLayout v-if="orderStatus === 'Open'" rows="auto" columns="*, *" columnSpacing="12">
-                    <Button row="0" col="0" :text="$t('pages.orderShow.finish')" class="btn-primary" @tap="onFinish" />
+                    <Button row="0" col="0" :text="$t('pages.orderShow.signature')" class="btn-primary" @tap="onFinish" />
                     <Button row="0" col="1" :text="lucide('printer')" class="lucide btn-secondary" @tap="onPrint" />
                 </GridLayout>
                 <GridLayout v-else rows="auto" columns="*, auto">

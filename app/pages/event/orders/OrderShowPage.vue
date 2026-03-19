@@ -89,13 +89,20 @@ import OrderSignPage from './OrderSignPage.vue';
 
 
 // --- Component logic ---
+const props = withDefaults(
+    defineProps<{
+        orderId?: string;
+    }>(),
+    { orderId: undefined },
+);
+
 const displayOrderValue: string = formatCurrencyBR(1250);
 const displayTotalItems: string = '5 itens';
 const instance: ComponentInternalInstance | null = getCurrentInstance();
 const globals: Record<string, unknown> | undefined = instance?.appContext.config.globalProperties;
 const navigateTo: ((target: unknown, options?: Record<string, unknown>) => void) | undefined = globals?.$navigateTo as ((target: unknown, options?: Record<string, unknown>) => void) | undefined;
 
-const orderId: Ref<string> = ref('ORD-NEW');
+const orderId: Ref<string> = ref(props.orderId ?? 'ORD-NEW');
 const observation: Ref<string> = ref('');
 const orderStatus: Ref<'Open' | 'Completed'> = ref('Open');
 const synced: Ref<boolean> = ref(false);

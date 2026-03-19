@@ -31,8 +31,9 @@ import OrderShowPage from './OrderShowPage.vue';
 const props = withDefaults(
     defineProps<{
         targetPage: 'back' | 'OrderShowPage';
+        orderId?: string;
     }>(),
-    { targetPage: 'OrderShowPage' },
+    { targetPage: 'OrderShowPage', orderId: undefined },
 );
 
 const selectedClient: Ref<Client | null> = ref(null);
@@ -77,7 +78,7 @@ function onClientConfirmed(client: Client): void {
     if (props.targetPage === 'back') {
         navigateBack?.();
     } else {
-        navigateTo?.(OrderShowPage);
+        navigateTo?.(OrderShowPage, props.orderId ? { props: { orderId: props.orderId } } : undefined);
     }
 }
 

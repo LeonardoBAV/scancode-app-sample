@@ -111,6 +111,7 @@ function statusBadgeClass(status: OrderStatus): string {
 function onOrderTap(order: Order): void {
     navigateTo?.(OrderSelectClientPage, {
         props: { targetPage: 'OrderShowPage' as const, orderId: order.id },
+        backstackVisible: false,
     });
 }
 

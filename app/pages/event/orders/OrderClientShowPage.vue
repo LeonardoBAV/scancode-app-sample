@@ -77,6 +77,7 @@ const buyerContact = orderCreateBuyerContact;
 function goToClientList(): void {
     navigateTo?.(OrderSelectClientPage, {
         props: { targetPage: 'back' },
+        backstackVisible: false,
     });
 }
 </script>

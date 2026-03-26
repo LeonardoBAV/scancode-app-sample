@@ -5,8 +5,6 @@
             <ScrollView row="1">
                 <StackLayout class="p-4 pb-8">
 
-                    <!-- Back to events -->
-                    <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary mb-4" @tap="goToEvents" />
 
                     <!-- Summary Card -->
                     <StackLayout class="card p-0">
@@ -65,6 +63,8 @@
                         </GridLayout>
 
                     </StackLayout>
+                    <!-- Back to events -->
+                    <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary mt-4" @tap="goToEvents" />
 
                 </StackLayout>
             </ScrollView>

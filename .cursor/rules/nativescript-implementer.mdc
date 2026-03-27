@@ -175,7 +175,8 @@ nav?.$navigateBack();
 | `format.ts`  | `formatCPFCNPJ(value)`                         | Auto-detecta CPF (11 dígitos) ou CNPJ (14 dígitos) e aplica a máscara correspondente. **Usar como padrão** ao exibir CPF/CNPJ. |
 | `icons.ts`   | `lucide(name)`                                 | Retorna caractere unicode do ícone Lucide. Usar com `class="lucide"`.                                                          |
 | `haptics.ts` | `vibrateSuccess()`                             | Feedback háptico de sucesso (vibração curta). Seguro em qualquer dispositivo.                                                  |
-| `auth.ts`    | `getAuth()`, `setAuth(profile)`, `clearAuth()` | Leitura/escrita do perfil autenticado em `ApplicationSettings`.                                                                |
+| `persistence/auth-session.ts` | `getAuth()`, `setAuth(session)`, `clearAuth()`, `getToken()`, `getSalesRepresentative()` | Sessão: `{ token, sales_representative }` (igual ao JSON do login Laravel).                                                |
+| `device.ts`  | `isEmulator()`                               | Indica emulador/simulador (URLs locais em dev).                                                                                |
 
 Ao criar novos helpers, adicione-os na tabela acima.
 

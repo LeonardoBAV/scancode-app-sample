@@ -102,7 +102,7 @@ import { ref, computed, onMounted, getCurrentInstance } from 'vue';
 import { Dialogs } from '@nativescript/core';
 import { useTranslation } from '../../composables/useTranslation';
 import { useAppVersion } from '../../composables/useAppVersion';
-import { getAuth, clearAuth } from '../../utils/auth';
+import { getAuth, clearAuth } from '../../persistence/auth-session';
 import { lucide } from '../../utils/icons';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 import ProfileDetails from './ProfileDetails.vue';
@@ -115,9 +115,12 @@ const { t } = useTranslation();
 const appVersion = useAppVersion();
 
 const profile = ref<ReturnType<typeof getAuth>>(null);
-const userName = computed(() => profile.value?.name ?? profile.value?.nick ?? 'User');
-const userEmail = computed(() => profile.value?.email ?? '');
-const distributorName = computed(() => profile.value?.distribuidora ?? '—');
+const userName = computed(() => profile.value?.sales_representative?.name ?? 'User');
+const userEmail = computed(() => profile.value?.sales_representative?.email ?? '');
+const distributorName = computed(() => {
+    const id: number | undefined = profile.value?.sales_representative?.distributor_id;
+    return id != null ? String(id) : '—';
+});
 const userInitials = computed(() => {
     const name = userName.value;
     const parts = name.trim().split(/\s+/);

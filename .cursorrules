@@ -35,8 +35,9 @@ app/
 │   ├── Profile/         # Perfil e configurações
 │   ├── LoginPage.vue    # Autenticação
 │   └── Events.vue       # Lista de eventos
+├── persistence/         # Persistência local (sessão em ApplicationSettings, etc.)
 ├── types/               # Interfaces TypeScript
-└── utils/               # Utilitários (auth, helpers)
+└── utils/               # Utilitários (format, icons, device — sem estado de sessão)
 ```
 
 ### Diretório-base do webpack (IMPORTANTE)

@@ -15,13 +15,15 @@
     "login": {
       "title": "myCoolApp",
       "subtitle": "Sign in to continue",
-      "username": "Username",
-      "usernamePlaceholder": "your username",
+      "cpf": "CPF",
+      "cpfPlaceholder": "enter your CPF",
       "password": "Password",
       "passwordPlaceholder": "your password",
       "submit": "Sign in",
-      "forgotPassword": "Forgot password?",
-      "errorInvalid": "Invalid username or password."
+      "submitting": "Signing in...",
+      "errorInvalid": "Invalid CPF or password.",
+      "errorNetwork": "Connection error. Check your internet.",
+      "errorUnknown": "An unexpected error occurred."
     },
     "events": {
       "title": "Events",

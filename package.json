@@ -4,12 +4,17 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "dev": "ns run android --env.appEnv=development",
+    "dev:ios": "ns run ios --env.appEnv=development",
+    "build:staging": "ns build android --env.appEnv=staging --release",
+    "build:production": "ns build android --env.appEnv=production --release",
     "generate-tab-icons": "node scripts/generate-tab-icons.js"
   },
   "dependencies": {
     "@nativescript-community/drawingpad": "^4.1.0",
     "@nativescript/core": "~9.0.0",
     "@nativescript/haptics": "^3.1.0",
+    "axios": "^1.13.6",
     "lucide-static": "^0.577.0",
     "nativescript-vue": "^3.0.0",
     "vue-i18n": "^11.2.8"
@@ -21,6 +26,7 @@
     "@nativescript/types": "~9.0.0",
     "@nativescript/webpack": "~5.0.31",
     "@types/node": "^20.0.0",
+    "dotenv": "^17.3.1",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.0.0",
     "typescript": "~5.4.0"

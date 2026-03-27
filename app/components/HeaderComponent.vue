@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import { ref, onMounted, getCurrentInstance, nextTick } from 'vue';
 import { Frame } from '@nativescript/core';
-import { getAuth } from '../utils/auth';
+import { getAuth } from '../persistence/auth-session';
 import { lucide } from '../utils/icons';
 import Profile from '../pages/Profile/Profile.vue';
 
@@ -40,7 +40,7 @@ const canGoBack = ref(false);
 const avatarInitials = (() => {
     if (!props.showAvatar) return '';
     const auth = getAuth();
-    const name = auth?.name ?? auth?.nick ?? '';
+    const name = auth?.sales_representative?.name ?? '';
     const parts = name.trim().split(/\s+/);
     if (parts.length >= 2) {
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();

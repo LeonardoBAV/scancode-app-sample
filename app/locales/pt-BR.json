@@ -15,12 +15,15 @@
     "login": {
       "title": "Ordy",
       "subtitle": "Faça login para continuar",
-      "username": "Usuário",
-      "usernamePlaceholder": "seu usuário",
+      "cpf": "CPF",
+      "cpfPlaceholder": "digite seu CPF",
       "password": "Senha",
       "passwordPlaceholder": "sua senha",
       "submit": "Entrar",
-      "errorInvalid": "Usuário ou senha inválidos."
+      "submitting": "Entrando...",
+      "errorInvalid": "CPF ou senha inválidos.",
+      "errorNetwork": "Erro de conexão. Verifique sua internet.",
+      "errorUnknown": "Ocorreu um erro inesperado."
     },
     "events": {
       "title": "Eventos",

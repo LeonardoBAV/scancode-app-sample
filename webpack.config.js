@@ -1,10 +1,24 @@
-const webpack = require("@nativescript/webpack");
+const path = require("path");
+const webpack = require("webpack");
+const nsWebpack = require("@nativescript/webpack");
 
 module.exports = (env) => {
-	webpack.init(env);
+	const envFile = `.env.${env.appEnv || "development"}`;
+	require("dotenv").config({ path: path.resolve(__dirname, envFile) });
+	nsWebpack.init(env);
 
-	// Learn how to customize:
-	// https://docs.nativescript.org/webpack
+	nsWebpack.chainWebpack((config) => {
+		config.plugin("define-ns-env").use(webpack.DefinePlugin, [
+			{
+				"process.env.NS_CURRENT_ENV": JSON.stringify(
+					process.env.NS_CURRENT_ENV ?? "development",
+				),
+				"process.env.SCANCODE_API_URL": JSON.stringify(
+					process.env.SCANCODE_API_URL ?? "",
+				),
+			},
+		]);
+	});
 
-	return webpack.resolveConfig();
+	return nsWebpack.resolveConfig();
 };

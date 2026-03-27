@@ -12,18 +12,18 @@
             <!-- Form -->
             <StackLayout row="1">
                 <StackLayout class="mb-4">
-                    <Label :text="$t('pages.login.username')" class="text-sm font-medium text-foreground mb-1" />
-                    <TextField v-model="username" :hint="$t('pages.login.usernamePlaceholder')" class="input-field" placeholderColor="#a1a1aa" autocorrect="false" autocapitalizationType="none" />
+                    <Label :text="$t('pages.login.cpf')" class="text-sm font-medium text-foreground mb-1" />
+                    <TextField v-model="cpf" :hint="$t('pages.login.cpfPlaceholder')" keyboardType="number" class="input-field" placeholderColor="#a1a1aa" autocorrect="false" autocapitalizationType="none" :isEnabled="!isLoading" />
                 </StackLayout>
 
                 <StackLayout class="mb-5">
                     <Label :text="$t('pages.login.password')" class="text-sm font-medium text-foreground mb-1" />
-                    <TextField v-model="password" :hint="$t('pages.login.passwordPlaceholder')" :secure="true" class="input-field" placeholderColor="#a1a1aa" />
+                    <TextField v-model="password" :hint="$t('pages.login.passwordPlaceholder')" :secure="true" class="input-field" placeholderColor="#a1a1aa" :isEnabled="!isLoading" />
                 </StackLayout>
 
                 <Label v-if="errorMessage" :text="errorMessage" class="text-sm text-destructive text-center mb-3" textWrap="true" />
 
-                <Button :text="$t('pages.login.submit')" class="btn-primary text-lg p-4" @tap="onLogin" />
+                <Button :text="isLoading ? $t('pages.login.submitting') : $t('pages.login.submit')" :class="isLoading ? 'btn-primary text-lg p-4 opacity-50' : 'btn-primary text-lg p-4'" :isEnabled="!isLoading" @tap="onLogin" />
             </StackLayout>
 
             <!-- Footer -->
@@ -37,44 +37,55 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, getCurrentInstance } from 'vue';
-import EventsPage from './EventsPage.vue';
-import { getAuth, setAuth } from '../utils/auth';
+// --- Imports ---
+import { ref, onMounted, getCurrentInstance, type Ref } from 'vue';
+import { login } from '../integrations/adapters/scancode-adapter';
+import { getAuth, setAuth } from '../persistence/auth-session';
 import { useTranslation } from '../composables/useTranslation';
 import { useAppVersion } from '../composables/useAppVersion';
+import { ApiException } from '../types/exceptions/api-exception';
+import EventsPage from './EventsPage.vue';
 
+
+// --- Component logic ---
 const { t } = useTranslation();
-const appVersion = useAppVersion();
-
-const username = ref('');
-const password = ref('');
-const errorMessage = ref('');
-
+const appVersion: string = useAppVersion();
 
 const instance = getCurrentInstance();
 const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
     target: unknown,
-    options?: Record<string, unknown>
+    options?: Record<string, unknown>,
 ) => void;
 
-function onLogin(): void {
-    errorMessage.value = '';
-    const user = username.value.trim();
-    const pass = password.value;
+const cpf: Ref<string> = ref('');
+const password: Ref<string> = ref('');
+const errorMessage: Ref<string> = ref('');
+const isLoading: Ref<boolean> = ref(false);
 
-    if (user === HARDCODED_USER && pass === HARDCODED_PASS) {
-        setAuth({
-            nick: user,
-            name: HARDCODED_NAME,
-            cpf: HARDCODED_CPF,
-            email: HARDCODED_EMAIL,
-            senha: pass,
-            distribuidora: HARDCODED_DISTRIBUIDORA,
-        });
-        goToEvents();
-    } else {
+async function onLogin(): Promise<void> {
+    errorMessage.value = '';
+    const cpfValue: string = cpf.value.trim();
+    const passValue: string = password.value;
+
+    if (!cpfValue || !passValue) {
         errorMessage.value = t('pages.login.errorInvalid');
+        return;
     }
+
+    isLoading.value = true;
+
+    try {
+        const response = await login(cpfValue, passValue);
+
+        setAuth(response);
+
+        goToEvents();
+    } catch (err: unknown) {
+        errorMessage.value = (err as ApiException).message;
+    } finally {
+        isLoading.value = false;
+    }
+
 }
 
 function goToEvents(): void {
@@ -86,11 +97,4 @@ onMounted(() => {
         setTimeout(() => goToEvents(), 0);
     }
 });
-
-const HARDCODED_USER = 'leo';
-const HARDCODED_PASS = '123';
-const HARDCODED_NAME = 'Leonardo Vasconcelos';
-const HARDCODED_CPF = '12345678901';
-const HARDCODED_EMAIL = 'leo@example.com';
-const HARDCODED_DISTRIBUIDORA = 'Distribuidora Exemplo';
 </script>

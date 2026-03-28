@@ -1,21 +1,20 @@
-import type { InternalAxiosRequestConfig } from 'axios';
 import { SCANCODE_API_URL, SCANCODE_API_VERSION } from '../../configs/scancode-config';
-import { getToken } from '../../persistence/auth-session';
 import type { LoginResponseDTO } from '../../types/dtos/scancode-response';
 import type { LoginRequestDTO } from '../../types/dtos/scancode-request';
-import { createHttpClient } from '../http-client';
+import { createHttpClient, type HttpClient } from '../http-client';
+import { getToken } from '../../persistence/auth-session';
 import { Device } from '@nativescript/core';
 
-const http = createHttpClient({
+const http: HttpClient = createHttpClient({
     baseURL: `${SCANCODE_API_URL}${SCANCODE_API_VERSION}`,
 });
 
-http.interceptors.request.use((config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+http.addRequestInterceptor((headers: Record<string, string>): Record<string, string> => {
     const token: string | null = getToken();
     if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+        headers['Authorization'] = `Bearer ${token}`;
     }
-    return config;
+    return headers;
 });
 
 export async function login(cpf: string, password: string): Promise<LoginResponseDTO> {

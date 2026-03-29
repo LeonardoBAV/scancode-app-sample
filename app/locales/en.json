@@ -7,6 +7,7 @@
     "done": "Done",
     "search": "Search",
     "loading": "Loading...",
+    "networkError": "Connection error. Check your internet.",
     "error": "Error",
     "free": "Free",
     "orders": "orders"

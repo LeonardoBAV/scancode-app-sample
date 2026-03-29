@@ -1,28 +1,9 @@
 import { Http, type HttpResponse } from '@nativescript/core';
 
-export interface HttpClientOptions {
-    baseURL: string;
-    timeoutMs?: number;
-}
+import { HttpError, type HttpClientOptions, type HttpClientResponse, type RequestInterceptor } from '../types/http/http-types';
 
-export interface HttpClientResponse<T = unknown> {
-    data: T;
-    statusCode: number;
-}
-
-type RequestInterceptor = (headers: Record<string, string>) => Record<string, string>;
-
-export class HttpError extends Error {
-    public readonly statusCode: number;
-    public readonly body: unknown;
-
-    constructor(statusCode: number, body: unknown) {
-        super(`HTTP ${statusCode}`);
-        this.name = 'HttpError';
-        this.statusCode = statusCode;
-        this.body = body;
-    }
-}
+export { HttpError };
+export type { HttpClientOptions, HttpClientResponse };
 
 export class HttpClient {
     private readonly baseURL: string;
@@ -76,6 +57,10 @@ export class HttpClient {
             content: body !== undefined ? JSON.stringify(body) : undefined,
             timeout: this.timeoutMs,
         });
+
+        if (response.content === undefined) {
+            throw new HttpError(response.statusCode, undefined);
+        }
 
         const data: T = response.content.toJSON() as T;
 

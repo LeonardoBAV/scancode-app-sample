@@ -7,6 +7,7 @@
     "done": "Concluir",
     "search": "Buscar",
     "loading": "Carregando...",
+    "networkError": "Erro de conexão. Verifique sua internet.",
     "error": "Erro",
     "free": "Grátis",
     "orders": "pedidos"

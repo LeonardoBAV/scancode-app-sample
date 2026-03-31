@@ -17,3 +17,16 @@ export interface LoginResponseDTO {
     token: string;
     sales_representative: ProfileDTO;
 }
+
+export interface EventDTO {
+    id: number;
+    name: string;
+    start: string;
+    end: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface EventsResponseDTO {
+    data: EventDTO[];
+}

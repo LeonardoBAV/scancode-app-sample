@@ -22,6 +22,8 @@
       "passwordPlaceholder": "sua senha",
       "submit": "Entrar",
       "submitting": "Entrando...",
+      "syncing": "Sincronizando...",
+      "syncingEvents": "Sincronizando eventos...",
       "errorInvalid": "CPF ou senha inválidos.",
       "errorNetwork": "Erro de conexão. Verifique sua internet.",
       "errorUnknown": "Ocorreu um erro inesperado."

@@ -22,6 +22,8 @@
       "passwordPlaceholder": "your password",
       "submit": "Sign in",
       "submitting": "Signing in...",
+      "syncing": "Syncing...",
+      "syncingEvents": "Syncing events...",
       "errorInvalid": "Invalid CPF or password.",
       "errorNetwork": "Connection error. Check your internet.",
       "errorUnknown": "An unexpected error occurred."

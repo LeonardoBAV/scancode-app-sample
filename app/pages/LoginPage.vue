@@ -22,8 +22,9 @@
                 </StackLayout>
 
                 <Label v-if="errorMessage" :text="errorMessage" class="text-sm text-destructive text-center mb-3" textWrap="true" />
+                <Label v-if="syncStatus" :text="syncStatus" class="text-sm text-muted-foreground text-center mb-3" textWrap="true" />
 
-                <Button :text="isLoading ? $t('pages.login.submitting') : $t('pages.login.submit')" :class="isLoading ? 'btn-primary text-lg p-4 opacity-50' : 'btn-primary text-lg p-4'" :isEnabled="!isLoading" @tap="onLogin" />
+                <Button :text="buttonLabel" :class="isLoading ? 'btn-primary text-lg p-4 opacity-50' : 'btn-primary text-lg p-4'" :isEnabled="!isLoading" @tap="onLogin" />
             </StackLayout>
 
             <!-- Footer -->
@@ -40,6 +41,7 @@
 // --- Imports ---
 import { ref, onMounted, getCurrentInstance, type Ref } from 'vue';
 import { login } from '../integrations/adapters/scancode-adapter';
+import { syncAfterLogin } from '../sync/sync-service';
 import { getAuth, setAuth } from '../persistence/auth-session';
 import { useTranslation } from '../composables/useTranslation';
 import { useAppVersion } from '../composables/useAppVersion';
@@ -60,10 +62,15 @@ const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
 const cpf: Ref<string> = ref('');
 const password: Ref<string> = ref('');
 const errorMessage: Ref<string> = ref('');
+const syncStatus: Ref<string> = ref('');
 const isLoading: Ref<boolean> = ref(false);
+const isSyncing: Ref<boolean> = ref(false);
+
+const buttonLabel: Ref<string> = ref(t('pages.login.submit'));
 
 async function onLogin(): Promise<void> {
     errorMessage.value = '';
+    syncStatus.value = '';
     const cpfValue: string = cpf.value.trim();
     const passValue: string = password.value;
 
@@ -73,19 +80,32 @@ async function onLogin(): Promise<void> {
     }
 
     isLoading.value = true;
+    buttonLabel.value = t('pages.login.submitting');
 
     try {
         const response = await login(cpfValue, passValue);
-
         setAuth(response);
 
+        isSyncing.value = true;
+        buttonLabel.value = t('pages.login.syncing');
+        syncStatus.value = t('pages.login.syncingEvents');
+
+        await syncAfterLogin();
+
+        syncStatus.value = '';
         goToEvents();
     } catch (err: unknown) {
-        errorMessage.value = (err as ApiException).message;
+        if (isSyncing.value) {
+            syncStatus.value = '';
+            goToEvents();
+        } else {
+            errorMessage.value = (err as ApiException).message;
+        }
     } finally {
         isLoading.value = false;
+        isSyncing.value = false;
+        buttonLabel.value = t('pages.login.submit');
     }
-
 }
 
 function goToEvents(): void {

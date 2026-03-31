@@ -1,0 +1,50 @@
+---
+description: offline-first, SQLite, sync, repositories, composables, pull, push, database, db, migrations, order, orders, pedido, pedidos, evento, eventos, clientes, produtos, sincronizacao
+---
+
+# Arquitetura Offline-First
+
+Antes de implementar qualquer camada offline, leia a spec correspondente em `specs/`.
+
+## Índice de Specs
+
+| Trabalhando em | Ler |
+|---|---|
+| Visão geral, camadas, fases de implementação | `specs/00-architecture.md` |
+| `app/db/database.ts`, `app/db/migrations.ts`, schema SQLite | `specs/01-db-schema.md` |
+| `app/db/repositories/` | `specs/02-repositories.md` |
+| `app/sync/pull.ts` | `specs/03-sync-pull.md` |
+| `app/sync/push.ts`, `app/sync/sync-service.ts` | `specs/04-sync-push.md` |
+| `app/composables/use*.ts` (dados — events, products, clients, orders) | `specs/05-composables.md` |
+
+## Resumo das Regras de Ouro
+
+1. **Composable nunca chama API diretamente** — lê do SQLite via repositório; escrita em servidor é responsabilidade do sync.
+2. **Repositório nunca conhece Vue** — sem `ref`, `reactive` ou qualquer import do Vue.
+3. **SQL só existe em repositórios** — nenhuma outra camada escreve SQL.
+4. **`synced_at IS NULL` = pendente de sync** — única fonte de verdade sobre estado offline de orders.
+5. **Preço do item é imutável após criação local** — snapshot; não re-consultado no push.
+6. **Pull não bloqueia uso** — falha no pull do Profile mantém catálogo anterior; wipe + pull completo só no login (após backup).
+7. **Logout não apaga SQLite** — só sessão/token; dados ficam até o próximo login.
+8. **Login (pós-auth):** se existir pedido com `synced_at IS NULL` → backup em `orders_backup` / `order_items_backup` (qualquer seller) → wipe operacional → **pull completo** (events … orders … order_items). **Sem push automático** na V1.
+9. **Profile “Sincronizar”:** só pull parcial de catálogo (`product_categories`, `products`, `clients`, `payment_methods`).
+10. **Pedidos:** `id` INTEGER — autoincrement offline; no pull, `id` = id da API; após push, **realinhar** `id` = `remote_id` = id da API. Conflito de id na **restauração** de backup: novo autoincrement + atualizar `order_items.order_id` (backlog).
+11. **Backup:** V1 só armazenar; **sem push** antes do backup. Backlog: botão Restaurar pedidos assíncronos **por seller** (`sales_representative_id`).
+
+## Pacotes necessários (instalar antes da Fase 1)
+
+```bash
+npm install @nativescript/sqlite
+npm install @nativescript/connectivity
+```
+
+## Fases de Implementação
+
+| Fase | O que implementar |
+|---|---|
+| 1 | Pacotes + `db/database.ts` + `db/migrations.ts` |
+| 2 | Todos os repositórios em `db/repositories/` |
+| 3 | Endpoints na API + funções no adapter para pull |
+| 4 | `sync/pull.ts` + `sync/sync-service.ts` |
+| 5 | Composables (leitura do SQLite para UI) |
+| 6 | `sync/push.ts` + listener de conectividade |

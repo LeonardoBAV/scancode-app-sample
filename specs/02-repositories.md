@@ -1,0 +1,376 @@
+# Repositórios — Contratos e Interfaces
+
+**Camada:** `app/db/repositories/`
+**Responsabilidade:** único lugar com SQL no projeto. Conhece apenas SQLite e tipos de domínio.
+
+---
+
+## Regras da Camada
+
+1. **Sem imports do Vue** — nenhum `ref`, `reactive`, `computed`.
+2. **Sem lógica de negócio** — não decide se deve sincronizar, não valida regras de domínio.
+3. **Sem conhecimento da API** — não sabe o que é um DTO, não conhece endpoints.
+4. **Retorna tipos de domínio** — não retorna rows cruas do SQLite; mapeia para interfaces TypeScript.
+5. **Operações atômicas** — cada método faz uma coisa. Transações são explícitas quando necessário.
+
+---
+
+## Tipos de Input (NewOrder, NewOrderItem)
+
+Definir em `app/types/` junto com os demais tipos de domínio.
+
+```typescript
+// app/types/order.ts — modelo persistido (pull + pós-push)
+export interface Order {
+    id: number;
+    remote_id: number | null;
+    event_id: number;
+    status: OrderStatus;
+    notes: string | null;
+    client_id: number;
+    sales_representative_id: number;
+    payment_method_id: number;
+    synced_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+// Inserção local (sem id — SQLite autoincrement)
+export interface NewOrder {
+    eventId: number;
+    status: OrderStatus;
+    notes: string | null;
+    clientId: number;
+    salesRepresentativeId: number;
+    paymentMethodId: number;
+    createdAt: string;
+    updatedAt: string;
+}
+
+// app/types/order-item.ts
+export interface OrderItem {
+    id: number;
+    orderId: number;
+    productId: number;
+    price: number;
+    qty: number;
+    notes: string | null;
+}
+
+export interface NewOrderItem {
+    orderId: number;
+    productId: number;
+    price: number;
+    qty: number;
+    notes: string | null;
+}
+```
+
+---
+
+## Interfaces dos Repositórios
+
+### `EventsRepository`
+
+Arquivo: `app/db/repositories/events.repo.ts`
+
+Tipo de domínio: `Event` — ver `app/types/event.ts` e `specs/01-db-schema.md` (colunas `id`, `name`, `start`, `end`, `created_at`, `updated_at`).
+
+```typescript
+interface EventsRepository {
+    /**
+     * Retorna todos os eventos, ordenados por start ASC (cronológico).
+     */
+    findAll(): Promise<Event[]>;
+
+    /**
+     * Retorna um evento pelo ID da API, ou null se não existir localmente.
+     */
+    findById(id: number): Promise<Event | null>;
+
+    /**
+     * Insere ou substitui múltiplos eventos (INSERT OR REPLACE).
+     * Usado pelo pull.ts após receber dados da API.
+     */
+    upsertMany(events: Event[]): Promise<void>;
+}
+```
+
+---
+
+### `ProductCategoriesRepository`
+
+Arquivo: `app/db/repositories/product-categories.repo.ts`
+
+```typescript
+interface ProductCategoriesRepository {
+    /**
+     * Retorna todas as categorias, ordenadas por name ASC.
+     */
+    findAll(): Promise<ProductCategory[]>;
+
+    /**
+     * Insere ou substitui múltiplas categorias (INSERT OR REPLACE).
+     */
+    upsertMany(categories: ProductCategory[]): Promise<void>;
+}
+```
+
+---
+
+### `ProductsRepository`
+
+Arquivo: `app/db/repositories/products.repo.ts`
+
+```typescript
+interface ProductsRepository {
+    /**
+     * Retorna todos os produtos com sua categoria, ordenados por name ASC.
+     * Faz JOIN com product_categories para popular o campo product_category.
+     */
+    findAll(): Promise<Product[]>;
+
+    /**
+     * Busca produto pelo barcode exato. Usado no scan de código de barras.
+     * Retorna null se não encontrado.
+     */
+    findByBarcode(barcode: string): Promise<Product | null>;
+
+    /**
+     * Busca produtos por query de texto (LIKE %query%) em name e sku.
+     * Retorna no máximo 50 resultados, ordenados por name ASC.
+     */
+    search(query: string): Promise<Product[]>;
+
+    /**
+     * Insere ou substitui múltiplos produtos (INSERT OR REPLACE).
+     * Usado pelo pull.ts após receber dados da API.
+     */
+    upsertMany(products: Product[]): Promise<void>;
+}
+```
+
+---
+
+### `ClientsRepository`
+
+Arquivo: `app/db/repositories/clients.repo.ts`
+
+```typescript
+interface ClientsRepository {
+    /**
+     * Retorna todos os clientes, ordenados por corporate_name ASC.
+     */
+    findAll(): Promise<Client[]>;
+
+    /**
+     * Retorna um cliente pelo ID, ou null se não existir.
+     */
+    findById(id: number): Promise<Client | null>;
+
+    /**
+     * Busca clientes por query de texto (LIKE %query%) em:
+     * corporate_name, fantasy_name e cpf_cnpj.
+     * Retorna no máximo 50 resultados, ordenados por corporate_name ASC.
+     */
+    search(query: string): Promise<Client[]>;
+
+    /**
+     * Insere ou substitui múltiplos clientes (INSERT OR REPLACE).
+     * Usado pelo pull.ts após receber dados da API.
+     */
+    upsertMany(clients: Client[]): Promise<void>;
+}
+```
+
+---
+
+### `PaymentMethodsRepository`
+
+Arquivo: `app/db/repositories/payment-methods.repo.ts`
+
+```typescript
+interface PaymentMethodsRepository {
+    /**
+     * Retorna todos os métodos de pagamento, ordenados por name ASC.
+     */
+    findAll(): Promise<PaymentMethod[]>;
+
+    /**
+     * Insere ou substitui múltiplos métodos de pagamento (INSERT OR REPLACE).
+     * Usado pelo pull.ts após receber dados da API.
+     */
+    upsertMany(methods: PaymentMethod[]): Promise<void>;
+}
+```
+
+---
+
+### `OrdersRepository`
+
+Arquivo: `app/db/repositories/orders.repo.ts`
+
+```typescript
+interface OrdersRepository {
+    findByEvent(eventId: number): Promise<Order[]>;
+
+    findUnsynced(): Promise<Order[]>;
+
+    /**
+     * Insere pedido com synced_at = NULL; id gerado por autoincrement.
+     * Retorna o id local (number).
+     */
+    insert(order: NewOrder): Promise<number>;
+
+    /**
+     * Upsert em massa vindo do pull da API (id explícito, remote_id = id, synced_at preenchido).
+     */
+    upsertManyFromApi(rows: Order[]): Promise<void>;
+
+    updateStatus(orderId: number, status: OrderStatus): Promise<void>;
+
+    /**
+     * Após push: migrar PK local → apiId; remote_id = apiId; synced_at = now.
+     * Atualiza order_items.order_id na mesma transação.
+     */
+    markAsSynced(localOrderId: number, apiId: number): Promise<void>;
+
+    /** Só para pedidos locais não enviados (remote_id IS NULL). */
+    delete(orderId: number): Promise<void>;
+}
+```
+
+---
+
+### `OrderItemsRepository`
+
+Arquivo: `app/db/repositories/order-items.repo.ts`
+
+```typescript
+interface OrderItemsRepository {
+    findByOrder(orderId: number): Promise<OrderItem[]>;
+
+    insertMany(items: NewOrderItem[]): Promise<void>;
+
+    upsertManyFromApi(rows: OrderItem[]): Promise<void>;
+
+    deleteByOrder(orderId: number): Promise<void>;
+}
+```
+
+---
+
+### `SyncLogRepository`
+
+Arquivo: `app/db/repositories/sync-log.repo.ts`
+
+```typescript
+interface SyncLogRepository {
+    /**
+     * Retorna o ISO 8601 do último pull bem-sucedido para a entidade.
+     * Retorna null se nunca houve pull para esta entidade.
+     * Na V1 pode não ser lido para montar URL (pull sempre full); na V2 (backlog) usar para sync incremental.
+     *
+     * @param entity - inclui 'orders' | 'order_items' no pull completo
+     */
+    getLastPulledAt(entity: string): Promise<string | null>;
+
+    /**
+     * Grava ou atualiza o timestamp do último pull bem-sucedido.
+     * Chamado pelo pull.ts APENAS após pull completo e sem erros.
+     *
+     * @param entity   - nome da entidade
+     * @param pulledAt - ISO 8601 do momento do pull
+     */
+    setLastPulledAt(entity: string, pulledAt: string): Promise<void>;
+}
+```
+
+---
+
+### `OrdersBackupRepository` (ou módulo `orders-backup.repo.ts`)
+
+Responsável por copiar assíncronos e pelo wipe operacional no login — **sem** lógica de restauração na V1.
+
+```typescript
+interface OrdersBackupRepository {
+    /**
+     * Se existir algum pedido com synced_at IS NULL, copia todos esses pedidos + itens para *_backup
+     * com backed_up_at = now. Independente de sales_representative_id.
+     */
+    archiveUnsyncedOrdersIfAny(): Promise<void>;
+
+    /**
+     * Apaga dados operacionais para novo login: events, categories, products, clients,
+     * payment_methods, orders, order_items, sync_log (linhas operacionais).
+     * NÃO apaga orders_backup nem order_items_backup.
+     */
+    wipeOperationalData(): Promise<void>;
+}
+```
+
+---
+
+## Padrão de Implementação
+
+Cada repositório segue esta estrutura:
+
+```typescript
+// app/db/repositories/clients.repo.ts
+import { getDatabase } from '../database';
+import type { Client } from '../../types/client';
+
+export async function findAll(): Promise<Client[]> {
+    const db = await getDatabase();
+    const result = await db.all<Client>(
+        'SELECT * FROM clients ORDER BY corporate_name ASC'
+    );
+    return result;
+}
+
+export async function upsertMany(clients: Client[]): Promise<void> {
+    const db = await getDatabase();
+    await db.transaction(async () => {
+        for (const client of clients) {
+            await db.run(
+                `INSERT OR REPLACE INTO clients
+                 (id, cpf_cnpj, corporate_name, fantasy_name, email, phone, carrier, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                [client.id, client.cpf_cnpj, client.corporate_name,
+                 client.fantasy_name, client.email, client.phone,
+                 client.carrier, client.updated_at]
+            );
+        }
+    });
+}
+
+// ... demais métodos
+```
+
+> O `getDatabase()` é o singleton de `app/db/database.ts` — garante que a conexão é aberta uma única vez e reusada.
+
+---
+
+## Transação Criação de Pedido
+
+A criação de um pedido deve ser **atômica** — order + order_items em uma única transação:
+
+```typescript
+// Chamado pelo useOrders.ts (composable)
+async function createOrderWithItems(
+    order: NewOrder,
+    items: Omit<NewOrderItem, 'orderId'>[]
+): Promise<number> {
+    const db = await getDatabase();
+    let newId: number = 0;
+    await db.transaction(async () => {
+        newId = await ordersRepo.insert(order);
+        await orderItemsRepo.insertMany(
+            items.map((item) => ({ ...item, orderId: newId }))
+        );
+    });
+    return newId;
+}
+```
+
+Este helper deve viver em `app/db/transactions.ts` (export usado pelo `useOrders`).

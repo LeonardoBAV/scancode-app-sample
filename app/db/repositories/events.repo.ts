@@ -1,31 +1,39 @@
+// --- Imports ---
 import type { SQLiteDatabase } from '@nativescript-community/sqlite';
 
 import type { Event } from '../../types/schema/event';
+import {
+    insertOrReplaceMany,
+    queryAll,
+    queryOne,
+} from '../repository-base';
 import { getDatabase } from '../database';
+
+
+/** Column order must match `INSERT OR REPLACE` in migrations (`events` table). */
+const EVENT_COLUMNS: readonly (keyof Event)[] = [
+    'id',
+    'name',
+    'start',
+    'end',
+    'created_at',
+    'updated_at',
+];
 
 function db(): SQLiteDatabase {
     return getDatabase();
 }
 
 export async function upsertMany(events: Event[]): Promise<void> {
-    await db().transaction(async () => {
-        for (const event of events) {
-            await db().execute(
-                `INSERT OR REPLACE INTO events (id, name, start, end, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?)`,
-                [event.id, event.name, event.start, event.end, event.created_at, event.updated_at],
-            );
-        }
-    });
+    await insertOrReplaceMany(db(), 'events', EVENT_COLUMNS, events);
 }
 
 export async function findAll(): Promise<Event[]> {
-    return await db().select('SELECT * FROM events ORDER BY start ASC') as Event[];
+    return await queryAll<Event>(db(), 'SELECT * FROM events ORDER BY start ASC');
 }
 
 export async function findById(id: number): Promise<Event | null> {
-    const row: Event | null = await db().get('SELECT * FROM events WHERE id = ?', [id]) as Event | null;
-    return row ?? null;
+    return await queryOne<Event>(db(), 'SELECT * FROM events WHERE id = ?', [id]);
 }
 
 export async function deleteAll(): Promise<void> {
@@ -33,6 +41,9 @@ export async function deleteAll(): Promise<void> {
 }
 
 export async function count(): Promise<number> {
-    const row = await db().get('SELECT COUNT(*) as total FROM events') as { total: number } | null;
+    const row: { total: number } | null = await queryOne<{ total: number }>(
+        db(),
+        'SELECT COUNT(*) as total FROM events',
+    );
     return row?.total ?? 0;
 }

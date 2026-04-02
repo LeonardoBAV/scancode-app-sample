@@ -351,6 +351,45 @@ export async function upsertMany(clients: Client[]): Promise<void> {
 
 ---
 
+## Helpers compartilhados (`app/db/repository-base.ts`)
+
+Utilitários **genéricos** para reduzir repetição de `INSERT OR REPLACE` e de wrappers em `select`/`get`. **Migrations** (`migrations.ts`) e **interfaces TypeScript** (`app/types/`, `app/types/schema/`) continuam sendo fontes de verdade **independentes** — o repositório só precisa manter a lista de colunas do upsert **consistente** com o DDL e com o tipo usado no código.
+
+| Função | Responsabilidade |
+| --- | --- |
+| `assertSafeSqlIdentifier` | Valida identificadores SQL (tabela/coluna): `[a-zA-Z_][a-zA-Z0-9_]*`. |
+| `buildInsertOrReplaceSql` | Monta `INSERT OR REPLACE INTO t (c1,…) VALUES (?,…)`. |
+| `rowParamsForColumns` | Objeto → parâmetros posicionais na ordem das colunas (`undefined` → `null`). |
+| `insertOrReplaceMany` | Uma transação; um `INSERT OR REPLACE` por linha. |
+| `insertOrReplaceOne` | Atalho para uma única linha. |
+| `queryAll` / `queryOne` | Wrappers tipados sobre `db.select` / `db.get` (uma linha ou `null`). |
+
+**Regras:** (1) Colunas do upsert devem ser um `readonly` array literal alinhado ao schema local. (2) Não passar strings do usuário como nome de tabela/coluna — só literais do código. (3) Queries com `WHERE` dinâmico continuam escritas no repositório com parâmetros ligados (`?`).
+
+Exemplo para novos repositórios (colunas na **mesma ordem** do `CREATE TABLE` em `migrations.ts`; o tipo em TypeScript deve cobrir todas as colunas persistidas — ver `events.repo.ts`):
+
+```typescript
+import { insertOrReplaceMany, queryAll } from '../repository-base';
+import { getDatabase } from '../database';
+import type { SomeEntity } from '../../types/some-entity';
+
+const SOME_TABLE_COLUMNS: readonly (keyof SomeEntity)[] = [
+    'id',
+    'name',
+    /* …demais colunas na ordem do DDL */
+];
+
+export async function upsertMany(rows: SomeEntity[]): Promise<void> {
+    await insertOrReplaceMany(getDatabase(), 'some_table', SOME_TABLE_COLUMNS, rows);
+}
+
+export async function findAll(): Promise<SomeEntity[]> {
+    return await queryAll<SomeEntity>(getDatabase(), 'SELECT * FROM some_table ORDER BY name ASC');
+}
+```
+
+---
+
 ## Transação Criação de Pedido
 
 A criação de um pedido deve ser **atômica** — order + order_items em uma única transação:

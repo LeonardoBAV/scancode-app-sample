@@ -27,7 +27,7 @@
                         <GridLayout columns="auto, *, auto" class="p-4">
                             <Label col="0" :text="lucide('wallet')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                             <Label col="1" :text="$t('pages.eventHome.totalValue')" class="text-base text-card-foreground" verticalAlignment="center" />
-                            <Label col="2" :text="formatCurrencyBR(event.totalValue, $t('common.free'))" class="text-lg font-bold text-success" verticalAlignment="center" />
+                            <Label col="2" :text="formatCurrencyBR(event.totalValue)" class="text-lg font-bold text-success" verticalAlignment="center" />
                         </GridLayout>
 
                     </StackLayout>

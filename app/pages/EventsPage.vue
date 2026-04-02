@@ -32,7 +32,7 @@
 
                                 <!-- Row 2: Orders + Value -->
                                 <Label row="2" col="0" :text="item.orderCount + ' ' + $t('common.orders')" class="text-sm text-muted-foreground mt-2" />
-                                <Label row="2" col="1" :text="formatCurrencyBR(item.totalValue, $t('common.free'))" class="text-base font-bold text-success mt-2" horizontalAlignment="right" />
+                                <Label row="2" col="1" :text="formatCurrencyBR(item.totalValue)" class="text-base font-bold text-success mt-2" horizontalAlignment="right" />
 
                             </GridLayout>
                         </StackLayout>

@@ -10,13 +10,9 @@ export function formatIsoDateToBR(isoDate: string): string {
 }
 
 /**
- * @param value Valor em reais (número).
- * @param freeText Se informado e value === 0, retorna este texto em vez de "R$ 0,00" (ex.: "Grátis").
+ * Formata valor em reais para exibição (ex.: R$ 1.234,56; zero → R$ 0,00).
  */
-export function formatCurrencyBR(value: number, freeText?: string): string {
-    if (value === 0 && freeText !== undefined) {
-        return freeText;
-    }
+export function formatCurrencyBR(value: number): string {
     const fixed = value.toFixed(2);
     const [intPart, decPart] = fixed.split('.');
     const withThousands = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');

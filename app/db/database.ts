@@ -8,12 +8,18 @@ let instance: SQLiteDatabase | null = null;
 let initialized: boolean = false;
 
 export async function initDatabase(): Promise<void> {
-    if (initialized) {
+    if (initialized && instance?.isOpen) {
         return;
     }
 
+    if (instance && !instance.isOpen) {
+        instance = null;
+        initialized = false;
+    }
+
     const db: SQLiteDatabase = openOrCreate(DB_NAME);
-    await db.execute('PRAGMA journal_mode = WAL;');
+    // Android: SQLiteDatabase.execSQL (used by db.execute) cannot run PRAGMAs that return rows
+    // (e.g. journal_mode). That throws: "Queries can be performed using ... rawQuery only."
     await db.execute('PRAGMA foreign_keys = ON;');
     await runMigrations(db);
 

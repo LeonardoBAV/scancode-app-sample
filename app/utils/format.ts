@@ -1,4 +1,15 @@
 /**
+ * Converte data no formato API/SQLite `YYYY-MM-DD` para exibição `DD/MM/YYYY`.
+ */
+export function formatIsoDateToBR(isoDate: string): string {
+    const m: RegExpExecArray | null = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate.trim());
+    if (!m) {
+        return isoDate;
+    }
+    return `${m[3]}/${m[2]}/${m[1]}`;
+}
+
+/**
  * @param value Valor em reais (número).
  * @param freeText Se informado e value === 0, retorna este texto em vez de "R$ 0,00" (ex.: "Grátis").
  */

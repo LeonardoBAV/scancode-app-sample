@@ -98,9 +98,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, getCurrentInstance } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { Dialogs } from '@nativescript/core';
 import { useTranslation } from '../../composables/useTranslation';
+import { useNavigation } from '../../composables/useNavigation';
 import { useAppVersion } from '../../composables/useAppVersion';
 import { getAuth, clearAuth } from '../../persistence/auth-session';
 import { lucide } from '../../utils/icons';
@@ -112,6 +113,7 @@ import PaymentMethodListPage from './PaymentMethodListPage.vue';
 import LoginPage from '../LoginPage.vue';
 
 const { t } = useTranslation();
+const { navigateTo } = useNavigation();
 const appVersion = useAppVersion();
 
 const profile = ref<ReturnType<typeof getAuth>>(null);
@@ -134,14 +136,8 @@ onMounted(() => {
     profile.value = getAuth();
 });
 
-const instance = getCurrentInstance();
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
-    target: unknown,
-    options?: Record<string, unknown>
-) => void;
-
 function goToProfileDetails(): void {
-    navigateTo?.(ProfileDetails);
+    navigateTo(ProfileDetails);
 }
 
 function onSync(): void {
@@ -149,19 +145,19 @@ function onSync(): void {
 }
 
 function onClientList(): void {
-    navigateTo?.(ClientListPage);
+    navigateTo(ClientListPage);
 }
 
 function onProductList(): void {
-    navigateTo?.(ProductListPage);
+    navigateTo(ProductListPage);
 }
 
 function onPaymentMethodList(): void {
-    navigateTo?.(PaymentMethodListPage);
+    navigateTo(PaymentMethodListPage);
 }
 
 function logout(): void {
     clearAuth();
-    navigateTo?.(LoginPage, { frame: 'root-frame', clearHistory: true });
+    navigateTo(LoginPage, { frame: 'root-frame', clearHistory: true });
 }
 </script>

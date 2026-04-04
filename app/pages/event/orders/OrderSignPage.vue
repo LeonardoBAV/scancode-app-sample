@@ -19,8 +19,9 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import { ref, getCurrentInstance } from 'vue';
+import { ref } from 'vue';
 import { Application, isAndroid } from '@nativescript/core';
+import { useNavigation } from '../../../composables/useNavigation';
 import OrderListPage from './OrderListPage.vue';
 
 
@@ -32,9 +33,7 @@ interface DrawingPadNative {
 
 const drawingPad = ref<{ nativeView?: DrawingPadNative } | null>(null);
 
-const instance = getCurrentInstance();
-const globals = instance?.appContext.config.globalProperties;
-const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void;
+const { navigateTo } = useNavigation();
 
 function setOrientation(landscape: boolean): void {
     if (isAndroid) {
@@ -63,10 +62,10 @@ function onConfirm(): void {
     const pad = drawingPad.value?.nativeView;
     if (pad) {
         pad.getDrawing().then(() => {
-            navigateTo?.(OrderListPage, { clearHistory: true });
+            navigateTo(OrderListPage, { clearHistory: true });
         });
     } else {
-        navigateTo?.(OrderListPage, { clearHistory: true });
+        navigateTo(OrderListPage, { clearHistory: true });
     }
 }
 </script>

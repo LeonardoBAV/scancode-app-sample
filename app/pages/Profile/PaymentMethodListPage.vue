@@ -13,20 +13,17 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import { ref, getCurrentInstance } from 'vue';
+import { ref } from 'vue';
 import type { PaymentMethod } from '../../types/payment-method';
 import { lucide } from '../../utils/icons';
+import { useNavigation } from '../../composables/useNavigation';
 import PaymentMethodListComponent from '../../components/PaymentMethodListComponent.vue';
 import PaymentMethodShowPage from './PaymentMethodShowPage.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
 
 // --- Component logic ---
-const instance = getCurrentInstance();
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
-    target: unknown,
-    options?: Record<string, unknown>
-) => void;
+const { navigateTo } = useNavigation();
 
 const selectedPaymentMethod = ref<PaymentMethod | null>(null);
 
@@ -36,7 +33,7 @@ function onSelectPaymentMethod(paymentMethod: PaymentMethod): void {
 
 function onViewTap(): void {
     if (!selectedPaymentMethod.value) return;
-    navigateTo?.(PaymentMethodShowPage, {
+    navigateTo(PaymentMethodShowPage, {
         props: { paymentMethod: selectedPaymentMethod.value },
         transition: { name: 'slideLeft', duration: 300 },
     });

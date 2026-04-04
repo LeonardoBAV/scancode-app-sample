@@ -16,8 +16,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, getCurrentInstance, nextTick } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { Frame } from '@nativescript/core';
+import { useNavigation } from '../composables/useNavigation';
 import { getAuth } from '../persistence/auth-session';
 import { lucide } from '../utils/icons';
 import Profile from '../pages/Profile/Profile.vue';
@@ -29,11 +30,7 @@ const props = withDefaults(defineProps<{
     showAvatar: true,
 });
 
-const instance = getCurrentInstance();
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
-    target: unknown,
-    options?: Record<string, unknown>
-) => void;
+const { navigateTo } = useNavigation();
 
 const canGoBack = ref(false);
 
@@ -72,7 +69,7 @@ function goBack(): void {
 }
 
 function openProfile(): void {
-    navigateTo?.(Profile, {
+    navigateTo(Profile, {
         frame: 'root-frame',
         transition: { name: 'slideLeft', duration: 300 },
     });

@@ -24,9 +24,10 @@ import {
     orderCreateClientFantasyName,
     orderCreateClientCpfCnpj,
 } from './order-create-state';
-import { ref, getCurrentInstance } from 'vue';
+import { ref } from 'vue';
 import type { Client } from '../../../types/client';
 import type { Ref } from 'vue';
+import { useNavigation } from '../../../composables/useNavigation';
 import ClientListComponent from '../../../components/ClientListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 
@@ -61,14 +62,13 @@ const clients = ref<Client[]>([
     { id: 20, cpf_cnpj: '98.999.000/0001-77', corporate_name: 'Upsilon Serviços Ltda', fantasy_name: 'Upsilon Serv', email: 'contato@upsilon.com', phone: '(41) 80000-0020', carrier: 'Oi' },
 ]);
 
-const instance = getCurrentInstance();
-const navigateBack = instance?.appContext.config.globalProperties.$navigateBack as () => void;
+const { navigateBack } = useNavigation();
 
 function onClientConfirmed(client: Client): void {
     orderCreateSelectedClient.value = client;
     orderCreateClientFantasyName.value = client.fantasy_name;
     orderCreateClientCpfCnpj.value = client.cpf_cnpj;
-    navigateBack?.();
+    void navigateBack();
 }
 
 function onConfirm(): void {

@@ -79,9 +79,10 @@
 <script setup lang="ts">
 // --- Imports ---
 import { orderCreateClientFantasyName, orderCreateBuyerName } from './order-create-state';
-import { ref, computed, getCurrentInstance, type ComponentInternalInstance, type ComputedRef, type Ref } from 'vue';
+import { ref, computed, type ComputedRef, type Ref } from 'vue';
 import { formatCurrencyBR } from '../../../utils/format';
 import { lucide } from '../../../utils/icons';
+import { useNavigation } from '../../../composables/useNavigation';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderClientShowPage from './OrderClientShowPage.vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
@@ -98,9 +99,7 @@ const props = withDefaults(
 
 const displayOrderValue: string = formatCurrencyBR(1250);
 const displayTotalItems: string = '5 itens';
-const instance: ComponentInternalInstance | null = getCurrentInstance();
-const globals: Record<string, unknown> | undefined = instance?.appContext.config.globalProperties;
-const navigateTo: ((target: unknown, options?: Record<string, unknown>) => void) | undefined = globals?.$navigateTo as ((target: unknown, options?: Record<string, unknown>) => void) | undefined;
+const { navigateTo } = useNavigation();
 
 const orderId: Ref<string> = ref(props.orderId ?? 'ORD-NEW');
 const observation: Ref<string> = ref('');
@@ -113,11 +112,11 @@ const buyerName: ComputedRef<string> = computed(() => orderCreateBuyerName.value
 
 
 function goToPayment(): void {
-    navigateTo?.(OrderPaymentPage);
+    navigateTo(OrderPaymentPage);
 }
 
 function goToClientShow(): void {
-    navigateTo?.(OrderClientShowPage);
+    navigateTo(OrderClientShowPage);
 }
 
 function onPrint(): void {
@@ -125,6 +124,6 @@ function onPrint(): void {
 }
 
 function onFinish(): void {
-    navigateTo?.(OrderSignPage);
+    navigateTo(OrderSignPage);
 }
 </script>

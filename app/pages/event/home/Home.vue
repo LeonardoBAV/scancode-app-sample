@@ -73,8 +73,8 @@
 </template>
 
 <script setup lang="ts">
-import { getCurrentInstance } from 'vue';
 import { useTranslation } from '../../../composables/useTranslation';
+import { useNavigation } from '../../../composables/useNavigation';
 import type { EventItem } from '../../../types/event-item';
 import { lucide } from '../../../utils/icons';
 import { formatCurrencyBR } from '../../../utils/format';
@@ -82,18 +82,13 @@ import HeaderComponent from '../../../components/HeaderComponent.vue';
 import EventsPage from '../../EventsPage.vue';
 
 const { t } = useTranslation();
+const { navigateTo } = useNavigation();
 
 const props = defineProps<{ event: EventItem }>();
 const event = props.event;
 
-const instance = getCurrentInstance();
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
-    target: unknown,
-    options?: Record<string, unknown>,
-) => void;
-
 function goToEvents(): void {
-    navigateTo?.(EventsPage, { frame: 'root-frame', clearHistory: true });
+    navigateTo(EventsPage, { frame: 'root-frame', clearHistory: true });
 }
 
 function statusLabel(status: string): string {

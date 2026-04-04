@@ -47,8 +47,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, getCurrentInstance } from 'vue';
+import { ref, computed } from 'vue';
 import { useTranslation } from '../../../composables/useTranslation';
+import { useNavigation } from '../../../composables/useNavigation';
 import type { Order, OrderStatus } from '../../../types/order';
 import { lucide } from '../../../utils/icons';
 import { formatCurrencyBR } from '../../../utils/format';
@@ -57,6 +58,7 @@ import OrderSelectClientPage from './OrderSelectClientPage.vue';
 import OrderShowPage from './OrderShowPage.vue';
 
 const { t } = useTranslation();
+const { navigateTo } = useNavigation();
 
 const searchQuery = ref('');
 
@@ -84,12 +86,6 @@ const filteredOrders = computed(() => {
     );
 });
 
-const instance = getCurrentInstance();
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
-    target: unknown,
-    options?: Record<string, unknown>,
-) => void;
-
 function statusLabel(status: OrderStatus): string {
     switch (status) {
         case 'Open': return t('pages.orderList.statusOpen');
@@ -109,13 +105,13 @@ function statusBadgeClass(status: OrderStatus): string {
 }
 
 function onOrderTap(order: Order): void {
-    navigateTo?.(OrderSelectClientPage, {
+    navigateTo(OrderSelectClientPage, {
         props: { targetPage: 'OrderShowPage' as const, orderId: order.id },
         backstackVisible: false,
     });
 }
 
 function onAddNewOrder(): void {
-    navigateTo?.(OrderShowPage);
+    navigateTo(OrderShowPage);
 }
 </script>

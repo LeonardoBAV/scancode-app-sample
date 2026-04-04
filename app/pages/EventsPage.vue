@@ -46,10 +46,11 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import { computed, getCurrentInstance, type ComputedRef } from 'vue';
+import { computed, type ComputedRef } from 'vue';
 import { formatCurrencyBR, formatIsoDateToBR } from '../utils/format';
 import { EventsComposable } from '../composables/event-composable';
 import { useTranslation } from '../composables/useTranslation';
+import { useNavigation } from '../composables/useNavigation';
 import HeaderComponent from '../components/HeaderComponent.vue';
 import DefaultLayout from '../layouts/Default.vue';
 import type { Event } from '../types/schema/event';
@@ -57,6 +58,7 @@ import type { EventItem } from '../types/event-item';
 
 
 const { t } = useTranslation();
+const { navigateTo } = useNavigation();
 const events = EventsComposable.getList();
 const isLoading = EventsComposable.getIsLoading();
 
@@ -73,10 +75,6 @@ const items: ComputedRef<EventItem[]> = computed(() =>
         ordersUnsynced: 0,
     })),
 );
-
-const instance = getCurrentInstance();
-const globals = instance?.appContext.config.globalProperties;
-const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void;
 
 function statusLabel(status: string): string {
     switch (status) {
@@ -116,6 +114,6 @@ function deriveEventStatus(start: string, end: string): 'scheduled' | 'in_progre
 }
 
 function openEvent(event: EventItem): void {
-    navigateTo?.(DefaultLayout, { frame: 'root-frame', props: { event }, clearHistory: true });
+    navigateTo(DefaultLayout, { frame: 'root-frame', props: { event }, clearHistory: true });
 }
 </script>

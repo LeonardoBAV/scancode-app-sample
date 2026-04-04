@@ -56,17 +56,16 @@
 // --- Imports ---
 import { orderCreateSelectedClient, orderCreateBuyerName, orderCreateBuyerContact } from './order-create-state';
 import { formatCPFCNPJ } from '../../../utils/format';
-import { computed, getCurrentInstance } from 'vue';
+import { computed } from 'vue';
 import type { Client } from '../../../types/client';
 import type { ComputedRef } from 'vue';
+import { useNavigation } from '../../../composables/useNavigation';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderSelectClientPage from './OrderSelectClientPage.vue';
 
 
 // --- Component logic ---
-const instance = getCurrentInstance();
-const globals = instance?.appContext.config.globalProperties;
-const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void;
+const { navigateTo } = useNavigation();
 
 const client: ComputedRef<Client> = computed(() => orderCreateSelectedClient.value);
 
@@ -75,7 +74,7 @@ const buyerContact = orderCreateBuyerContact;
 
 
 function goToClientList(): void {
-    navigateTo?.(OrderSelectClientPage, {
+    navigateTo(OrderSelectClientPage, {
         props: { targetPage: 'back' },
         backstackVisible: false,
     });

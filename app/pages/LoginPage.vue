@@ -39,11 +39,12 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import { ref, onMounted, getCurrentInstance, type Ref } from 'vue';
+import { ref, onMounted, type Ref } from 'vue';
 import { login } from '../integrations/adapters/scancode-adapter';
 import { SyncPullService } from '../sync/sync-pull-service';
 import { getAuth, setAuth } from '../persistence/auth-session';
 import { useTranslation } from '../composables/useTranslation';
+import { useNavigation } from '../composables/useNavigation';
 import { useAppVersion } from '../composables/useAppVersion';
 import { ApiException } from '../types/exceptions/api-exception';
 import EventsPage from './EventsPage.vue';
@@ -51,13 +52,8 @@ import EventsPage from './EventsPage.vue';
 
 // --- Component logic ---
 const { t } = useTranslation();
+const { navigateTo } = useNavigation();
 const appVersion: string = useAppVersion();
-
-const instance = getCurrentInstance();
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
-    target: unknown,
-    options?: Record<string, unknown>,
-) => void;
 
 const cpf: Ref<string> = ref('');
 const password: Ref<string> = ref('');
@@ -109,7 +105,7 @@ async function onLogin(): Promise<void> {
 }
 
 function goToEvents(): void {
-    navigateTo?.(EventsPage, { frame: 'root-frame', clearHistory: true });
+    navigateTo(EventsPage, { frame: 'root-frame', clearHistory: true });
 }
 
 onMounted(() => {

@@ -19,9 +19,10 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import { ref, getCurrentInstance } from 'vue';
+import { ref } from 'vue';
 import type { PaymentMethod } from '../../../types/payment-method';
 import { orderCreatePaymentMethodName } from './order-create-state';
+import { useNavigation } from '../../../composables/useNavigation';
 import PaymentMethodListComponent from '../../../components/PaymentMethodListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 
@@ -29,17 +30,16 @@ import HeaderComponent from '../../../components/HeaderComponent.vue';
 // --- Component logic ---
 const selectedPayment = ref<PaymentMethod | null>(null);
 
+const { navigateBack } = useNavigation();
+
 function onSelectPaymentMethod(paymentMethod: PaymentMethod): void {
     selectedPayment.value = selectedPayment.value?.id === paymentMethod.id ? null : paymentMethod;
 }
 
-const instance = getCurrentInstance();
-const navigateBack = instance?.appContext.config.globalProperties.$navigateBack as () => void;
-
 function onConfirm(): void {
     if (!selectedPayment.value) return;
     orderCreatePaymentMethodName.value = selectedPayment.value.name;
-    navigateBack?.();
+    void navigateBack();
 }
 
 const paymentMethods = ref<PaymentMethod[]>([

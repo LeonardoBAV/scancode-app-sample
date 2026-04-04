@@ -13,21 +13,18 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import { ref, getCurrentInstance } from 'vue';
+import { ref } from 'vue';
 import type { Product } from '../../types/product';
 import type { ProductCategory } from '../../types/product-category';
 import { lucide } from '../../utils/icons';
+import { useNavigation } from '../../composables/useNavigation';
 import ProductListComponent from '../../components/ProductListComponent.vue';
 import ProductShowPage from './ProductShowPage.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
 
 // --- Component logic ---
-const instance = getCurrentInstance();
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
-    target: unknown,
-    options?: Record<string, unknown>
-) => void;
+const { navigateTo } = useNavigation();
 
 const selectedProduct = ref<Product | null>(null);
 
@@ -37,7 +34,7 @@ function onSelectProduct(product: Product): void {
 
 function onViewTap(): void {
     if (!selectedProduct.value) return;
-    navigateTo?.(ProductShowPage, {
+    navigateTo(ProductShowPage, {
         props: { product: selectedProduct.value },
         transition: { name: 'slideLeft', duration: 300 },
     });

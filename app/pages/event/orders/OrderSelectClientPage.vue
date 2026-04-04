@@ -19,9 +19,10 @@ import {
     orderCreateClientFantasyName,
     orderCreateClientCpfCnpj,
 } from './order-create-state';
-import { ref, getCurrentInstance } from 'vue';
+import { ref } from 'vue';
 import type { Client } from '../../../types/client';
 import type { Ref } from 'vue';
+import { useNavigation } from '../../../composables/useNavigation';
 import ClientListComponent from '../../../components/ClientListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderShowPage from './OrderShowPage.vue';
@@ -65,10 +66,7 @@ const clients = ref<Client[]>([
     { id: 20, cpf_cnpj: '98.999.000/0001-77', corporate_name: 'Upsilon Serviços Ltda', fantasy_name: 'Upsilon Serv', email: 'contato@upsilon.com', phone: '(41) 80000-0020', carrier: 'Oi' },
 ]);
 
-const instance = getCurrentInstance();
-const globals = instance?.appContext.config.globalProperties;
-const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<string, unknown>) => void;
-const navigateBack = globals?.$navigateBack as () => void;
+const { navigateTo, navigateBack } = useNavigation();
 
 function onClientConfirmed(client: Client): void {
     orderCreateSelectedClient.value = client;
@@ -76,9 +74,9 @@ function onClientConfirmed(client: Client): void {
     orderCreateClientCpfCnpj.value = client.cpf_cnpj;
 
     if (props.targetPage === 'back') {
-        navigateBack?.();
+        void navigateBack();
     } else {
-        navigateTo?.(OrderShowPage, props.orderId ? { props: { orderId: props.orderId } } : undefined);
+        navigateTo(OrderShowPage, props.orderId ? { props: { orderId: props.orderId } } : undefined);
     }
 }
 

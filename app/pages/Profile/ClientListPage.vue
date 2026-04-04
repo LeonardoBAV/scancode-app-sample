@@ -13,20 +13,17 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import { ref, getCurrentInstance } from 'vue';
+import { ref } from 'vue';
 import type { Client } from '../../types/client';
 import { lucide } from '../../utils/icons';
+import { useNavigation } from '../../composables/useNavigation';
 import ClientListComponent from '../../components/ClientListComponent.vue';
 import ClientShowPage from './ClientShowPage.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
 
 // --- Component logic ---
-const instance = getCurrentInstance();
-const navigateTo = instance?.appContext.config.globalProperties.$navigateTo as (
-    target: unknown,
-    options?: Record<string, unknown>
-) => void;
+const { navigateTo } = useNavigation();
 
 const selectedClient = ref<Client | null>(null);
 
@@ -36,7 +33,7 @@ function onSelectClient(client: Client): void {
 
 function onViewTap(): void {
     if (!selectedClient.value) return;
-    navigateTo?.(ClientShowPage, {
+    navigateTo(ClientShowPage, {
         props: { client: selectedClient.value },
         transition: { name: 'slideLeft', duration: 300 },
     });

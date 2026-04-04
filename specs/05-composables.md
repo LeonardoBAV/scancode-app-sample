@@ -44,44 +44,29 @@ export function useProducts() {
 
 ---
 
-## `useEvents`
+## `EventsComposable` (lista de eventos)
 
-**Arquivo:** `app/composables/useEvents.ts`
+**Arquivo:** `app/composables/event-composable.ts` — **`EventsComposable`** com estado e API **estáticos**: `getList()` / `getIsLoading()` devolvem refs só de leitura; `refresh()` lê o SQLite e atualiza estado.
 
 ```typescript
-import { ref, readonly, type Ref } from 'vue';
-import type { Event } from '../types/schema/event';
-import { EventsRepository } from '../db/repositories/events.repo';
-
-const events: Ref<Event[]> = ref([]);
-const isLoading: Ref<boolean> = ref(false);
-
-export async function loadEvents(): Promise<void> {
-    isLoading.value = true;
-    try {
-        events.value = await EventsRepository.findAll();
-    } finally {
-        isLoading.value = false;
-    }
-}
-
-export function useEvents() {
-    return {
-        events: readonly(events),
-        isLoading: readonly(isLoading),
-        loadEvents,
-    };
+export class EventsComposable {
+    private static events = ref<Event[]>([]);
+    private static isLoading = ref<boolean>(false);
+    private constructor() {}
+    static getList() { return readonly(EventsComposable.events); }
+    static getIsLoading() { return readonly(EventsComposable.isLoading); }
+    static async refresh() { ... } // EventsRepository.findAll()
 }
 ```
 
-**Onde `loadEvents()` é chamado (únicos gatilhos):**
+**Onde `refresh()` é chamado (únicos gatilhos):**
 
 1. **`Application.launchEvent`** em `app/bootstrap/app.ts` — se `getAuth()`, hidrata o singleton no cold start com sessão já persistida.
-2. **`SyncPullService`** (pós-login em `LoginPage`) — após `truncate` + pull de events bem-sucedido, **`loadEvents()`** é invocado no fim de `pullEvents()` (ver `specs/03-sync-pull.md`). *Comportamento alvo com `finally` se o pull falhar após truncate — ainda a alinhar com `specs/00-architecture.md`.*
+2. **`SyncPullService`** (pós-login em `LoginPage`) — após `truncate` + pull de events bem-sucedido, **`EventsComposable.refresh()`** é invocado no fim de `pullEvents()` (ver `specs/03-sync-pull.md`). *Comportamento alvo com `finally` se o pull falhar após truncate — ainda a alinhar com `specs/00-architecture.md`.*
 
-Não chamar `loadEvents` em páginas (`LoginPage`, `Home`, `EventsPage` onMounted) para evitar dispersão; ver `specs/00-architecture.md`.
+Não chamar `refresh` em páginas (`LoginPage`, `Home`, `EventsPage` onMounted) para evitar dispersão; ver `specs/00-architecture.md`. Na UI: `getList()` e `getIsLoading()`.
 
-**Consumido por:** `EventsPage.vue` (lê `events` / `isLoading`), pontos acima para popular o singleton. O evento ativo na home vem de props após seleção na lista.
+**Consumido por:** `EventsPage.vue` (`getList()` + `getIsLoading()`), pontos acima para hidratar o estado estático. O evento ativo na home vem de props após seleção na lista.
 
 > Dados do SQLite seguem o tipo **`Event`** (`specs/01-db-schema.md`). Se a lista precisar de totais, contagens ou “status” derivado, compor um **view model** no composable ou na página (ex.: join com `orders`), em vez de reutilizar `EventItem` como se fosse linha de banco.
 
@@ -298,7 +283,7 @@ export function useOrders() {
 
 | Composable | Quando chamar `load*` |
 |---|---|
-| `useEvents` | `Application.launchEvent` (com sessão), e após sync pós-login via **`SyncPullService.pullEvents()`** → `loadEvents()` — ver `specs/00-architecture.md` |
+| `EventsComposable` | `Application.launchEvent` (com sessão), e após sync pós-login via **`SyncPullService.pullEvents()`** → `EventsComposable.refresh()` — ver `specs/00-architecture.md` |
 | `useProducts` | `onMounted` em `ProductListPage.vue` e quando abrir seletor de produto no carrinho |
 | `useClients` | `onMounted` em `ClientListPage.vue` e `OrderSelectClientPage.vue` |
 | `usePaymentMethods` | `onMounted` em `OrderPaymentPage.vue` |

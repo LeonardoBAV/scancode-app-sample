@@ -6,7 +6,7 @@
 
 | Gatilho | Escopo do pull |
 |---|---|
-| **Após login bem-sucedido** | **Alvo (documento):** sequência completa na secção **Ordem de Pull (login — completo)** — **sempre depois** do backup+wipe em `specs/00-architecture.md`. **Implementação atual:** `SyncPullService` faz wipe operacional (truncate em ordem FK) + pull só de **`events`** + `loadEvents()`; restantes entidades em roadmap. |
+| **Após login bem-sucedido** | **Alvo (documento):** sequência completa na secção **Ordem de Pull (login — completo)** — **sempre depois** do backup+wipe em `specs/00-architecture.md`. **Implementação atual:** `SyncPullService` faz wipe operacional (truncate em ordem FK) + pull só de **`events`** + `EventsComposable.refresh()`; restantes entidades em roadmap. |
 | **Botão “Sincronizar” no Profile** | **Parcial (catálogo):** apenas `product_categories`, `products`, `clients`, `payment_methods`. **Não** inclui `events`, `orders`, `order_items`. *(A implementar no serviço de pull.)* |
 
 Não há listener automático de reconexão nesta versão.
@@ -20,7 +20,7 @@ O **`SyncPullService`** é a ponte entre a camada de integração (adapter) e a 
 - Chama funções do adapter (que chamam a API).
 - Passa os dados recebidos para os repositórios gravarem no SQLite.
 - Atualiza o `sync_log` após cada entidade cuja pull **terminou com sucesso** (ver subseção abaixo).
-- **Não tem estado reativo.** Não conhece Vue; pode chamar **`loadEvents()`** (composable) só para hidratar o singleton após gravar `events` — exceção controlada ao critério do projeto.
+- **Não tem estado reativo.** Não conhece Vue; pode chamar **`EventsComposable.refresh()`** só para hidratar o singleton após gravar `events` — exceção controlada ao critério do projeto.
 - **Não trata erros de exibição.** Lança exceções para a camada de UI (ex.: `LoginPage`) tratar.
 
 ### O que significa “atualizar o `sync_log` após cada entidade”
@@ -247,7 +247,7 @@ export class SyncPullService {
     // Entrada pós-login (implementado): truncate operacional (FK) → pullEvents()
     public static async refreashAllEntities(): Promise<void> { ... }
 
-    public static async pullEvents(): Promise<void> { ... }  // adapter → events → sync_log → loadEvents()
+    public static async pullEvents(): Promise<void> { ... }  // adapter → events → sync_log → EventsComposable.refresh()
 
     private static async truncateAllEntities(): Promise<void> { ... }
 

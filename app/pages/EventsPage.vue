@@ -49,7 +49,7 @@
 import { computed, getCurrentInstance, type ComputedRef } from 'vue';
 import { eventSchemaToEventItem } from '../utils/event-display';
 import { useTranslation } from '../composables/useTranslation';
-import { useEvents } from '../composables/useEvents';
+import { EventsComposable } from '../composables/event-composable';
 import { formatCurrencyBR } from '../utils/format';
 import HeaderComponent from '../components/HeaderComponent.vue';
 import DefaultLayout from '../layouts/Default.vue';
@@ -58,7 +58,8 @@ import type { EventItem } from '../types/event-item';
 
 // --- Component logic ---
 const { t } = useTranslation();
-const { events, isLoading } = useEvents();
+const events = EventsComposable.getList();
+const isLoading = EventsComposable.getIsLoading();
 
 const listItems: ComputedRef<EventItem[]> = computed(() => events.value.map(eventSchemaToEventItem));
 

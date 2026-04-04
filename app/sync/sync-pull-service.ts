@@ -7,7 +7,7 @@ import { ProductsRepository } from '../db/repositories/products.repo';
 import { ClientsRepository } from '../db/repositories/clients.repo';
 import { PaymentMethodsRepository } from '../db/repositories/payment-methods.repo';
 import { ProductCategoriesRepository } from '../db/repositories/product-categories.repo';
-import { loadEvents } from '../composables/useEvents';
+import { EventsComposable } from '../composables/event-composable';
 
 export class SyncPullService {
     private constructor() { }
@@ -21,7 +21,7 @@ export class SyncPullService {
         const events = await scancodeAdapter.getEvents();
         await EventsRepository.upsertMany(events);
         await SyncLogRepository.setLastPulledAt('events', new Date().toISOString());
-        await loadEvents();
+        await EventsComposable.refresh();
     }
 
     private static async truncateAllEntities(): Promise<void> {

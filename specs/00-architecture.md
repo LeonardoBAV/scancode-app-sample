@@ -15,16 +15,16 @@ O app opera em **feiras sem internet**. A estratégia é:
 
 ---
 
-## Hidratação `loadEvents` (lista de eventos na UI)
+## Hidratação `EventsComposable.refresh` (lista de eventos na UI)
 
-O composable `useEvents` mantém `events` em memória (singleton). Para alinhar com o SQLite só há **dois** pontos de chamada a `loadEvents()`:
+`EventsComposable` mantém `events` em memória (estado estático). Para alinhar com o SQLite só há **dois** pontos de chamada a `EventsComposable.refresh()`:
 
 | Gatilho | Ficheiro | Comportamento |
 | --- | --- | --- |
-| **`Application.launchEvent`** (`launch`) | `app/bootstrap/app.ts` | Se existir sessão (`getAuth()`), lê `events` do disco ao arrancar o processo. |
-| **Sync pós-login** | `app/sync/sync-pull-service.ts` (`SyncPullService`) | Após auth: `truncate` operacional (ordem FK) → `pullEvents()` (adapter → `EventsRepository` → `sync_log` → **`loadEvents()`** no fim de `pullEvents`). *Comportamento alvo (backup assíncronos, pull completo 1–7, `finally` em falha)* — ver `specs/03-sync-pull.md` e regras em `00-architecture`; a implementação atual cobre truncate + pull de **events** + hidratação do composable. |
+| **`Application.launchEvent`** (`launch`) | `app/bootstrap/app.ts` | Se existir sessão (`getAuth()`), `EventsComposable.refresh()` — lê `events` do SQLite ao arrancar o processo. |
+| **Sync pós-login** | `app/sync/sync-pull-service.ts` (`SyncPullService`) | Após auth: `truncate` operacional (ordem FK) → `pullEvents()` (adapter → `EventsRepository` → `sync_log` → **`EventsComposable.refresh()`** no fim de `pullEvents`). *Comportamento alvo (backup assíncronos, pull completo 1–7, `finally` em falha)* — ver `specs/03-sync-pull.md` e regras em `00-architecture`; a implementação atual cobre truncate + pull de **events** + hidratação do composable. |
 
-**Contraponto:** com sessão guardada, o cold start pode fazer `loadEvents` no `launch` e outra vez após login noutra sessão — aceitável (dois `SELECT` curtos). Voltar da home do evento para a lista **não** dispara `loadEvents`; a lista usa o singleton já preenchido (se no futuro o schema passar a atualizar contagens no SQLite por tabela `events`, reavaliar).
+**Contraponto:** com sessão guardada, o cold start pode fazer `refresh` no `launch` e outra vez após login noutra sessão — aceitável (dois `SELECT` curtos). Voltar da home do evento para a lista **não** dispara `refresh`; a lista usa o singleton já preenchido (se no futuro o schema passar a atualizar contagens no SQLite por tabela `events`, reavaliar).
 
 ---
 
@@ -70,7 +70,7 @@ flowchart TD
     end
 
     subgraph composables [Composables]
-        useEvents["useEvents"]
+        EventsComposable["EventsComposable"]
         useProducts["useProducts"]
         useClients["useClients"]
         useOrders["useOrders"]
@@ -119,7 +119,7 @@ flowchart TD
 | **API** | `integrations/apis/scancode-api.ts` | Define endpoints, monta payloads, retorna DTOs | Trata erros de negócio |
 | **Adapter** | `integrations/adapters/scancode-adapter.ts` | Regras de erro, limpa auth no 401, converte DTOs | Conhece Vue ou SQLite |
 | **Repository** | `db/repositories/*.repo.ts` | CRUD no SQLite — único lugar com SQL | Conhece API ou Vue |
-| **SyncPullService** | `sync/sync-pull-service.ts` | Pull: chama adapter → repositórios → `sync_log`; truncates operacionais em ordem FK; chama `loadEvents()` após pull de events (pós-login). | Estado reativo Vue; SQL direto |
+| **SyncPullService** | `sync/sync-pull-service.ts` | Pull: chama adapter → repositórios → `sync_log`; truncates operacionais em ordem FK; chama `EventsComposable.refresh()` após pull de events (pós-login). | Estado reativo Vue; SQL direto |
 | **push.ts** | `sync/push.ts` (a implementar) | Lê não-sincronizados → envia via adapter → marca como sync | Tem estado reativo |
 | **Composable** | `composables/use*.ts` | Expõe `ref`s reativos para a UI, lê/escreve via repo | Chama API diretamente; contém SQL |
 | **Page/Component** | `pages/**/*.vue` | Consome composables, renderiza UI | Contém lógica de negócio ou SQL |
@@ -176,7 +176,7 @@ app/
 │   └── push.ts                  # envia do SQLite → API (quando existir)
 │
 └── composables/
-    ├── useEvents.ts
+    ├── event-composable.ts   # EventsComposable
     ├── useProducts.ts
     ├── useClients.ts
     ├── useOrders.ts

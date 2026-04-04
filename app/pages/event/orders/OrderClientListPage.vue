@@ -33,6 +33,8 @@ import HeaderComponent from '../../../components/HeaderComponent.vue';
 
 
 // --- Component logic ---
+const { navigateBack } = useNavigation();
+
 const selectedClient: Ref<Client | null> = ref(null);
 
 function onSelectClient(client: Client): void {
@@ -61,8 +63,6 @@ const clients = ref<Client[]>([
     { id: 19, cpf_cnpj: '87.888.999/0001-66', corporate_name: 'Tau Consultoria ME', fantasy_name: 'Tau Consult', email: 'contato@tau.com', phone: '(11) 81111-0019', carrier: 'Tim' },
     { id: 20, cpf_cnpj: '98.999.000/0001-77', corporate_name: 'Upsilon Serviços Ltda', fantasy_name: 'Upsilon Serv', email: 'contato@upsilon.com', phone: '(41) 80000-0020', carrier: 'Oi' },
 ]);
-
-const { navigateBack } = useNavigation();
 
 function onClientConfirmed(client: Client): void {
     orderCreateSelectedClient.value = client;

@@ -28,19 +28,9 @@ import HeaderComponent from '../../../components/HeaderComponent.vue';
 
 
 // --- Component logic ---
-const selectedPayment = ref<PaymentMethod | null>(null);
-
 const { navigateBack } = useNavigation();
 
-function onSelectPaymentMethod(paymentMethod: PaymentMethod): void {
-    selectedPayment.value = selectedPayment.value?.id === paymentMethod.id ? null : paymentMethod;
-}
-
-function onConfirm(): void {
-    if (!selectedPayment.value) return;
-    orderCreatePaymentMethodName.value = selectedPayment.value.name;
-    void navigateBack();
-}
+const selectedPayment = ref<PaymentMethod | null>(null);
 
 const paymentMethods = ref<PaymentMethod[]>([
     { id: 1, name: 'Credit card' },
@@ -64,4 +54,14 @@ const paymentMethods = ref<PaymentMethod[]>([
     { id: 19, name: 'Split payment' },
     { id: 20, name: 'Trade-in' },
 ]);
+
+function onSelectPaymentMethod(paymentMethod: PaymentMethod): void {
+    selectedPayment.value = selectedPayment.value?.id === paymentMethod.id ? null : paymentMethod;
+}
+
+function onConfirm(): void {
+    if (!selectedPayment.value) return;
+    orderCreatePaymentMethodName.value = selectedPayment.value.name;
+    void navigateBack();
+}
 </script>

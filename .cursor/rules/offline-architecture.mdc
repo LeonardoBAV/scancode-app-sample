@@ -13,8 +13,8 @@ Antes de implementar qualquer camada offline, leia a spec correspondente em `spe
 | Visão geral, camadas, fases de implementação | `specs/00-architecture.md` |
 | `app/db/database.ts`, `app/db/migrations.ts`, schema SQLite | `specs/01-db-schema.md` |
 | `app/db/repositories/` | `specs/02-repositories.md` |
-| `app/sync/pull.ts` | `specs/03-sync-pull.md` |
-| `app/sync/push.ts`, `app/sync/sync-service.ts` | `specs/04-sync-push.md` |
+| `app/sync/sync-pull-service.ts` | `specs/03-sync-pull.md` |
+| `app/sync/push.ts` (quando existir) | `specs/04-sync-push.md` |
 | `app/composables/use*.ts` (dados — events, products, clients, orders) | `specs/05-composables.md` |
 
 ## Resumo das Regras de Ouro
@@ -45,6 +45,6 @@ npm install @nativescript/connectivity
 | 1 | Pacotes + `db/database.ts` + `db/migrations.ts` |
 | 2 | Todos os repositórios em `db/repositories/` |
 | 3 | Endpoints na API + funções no adapter para pull |
-| 4 | `sync/pull.ts` + `sync/sync-service.ts` |
+| 4 | `sync/sync-pull-service.ts` (+ `sync/push.ts` na Fase 6) |
 | 5 | Composables (leitura do SQLite para UI) |
 | 6 | `sync/push.ts` + listener de conectividade |

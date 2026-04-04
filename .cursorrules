@@ -29,6 +29,9 @@ app/
 │   ├── App.vue          # Root component
 │   └── fonts/           # Icon fonts (lucide.ttf) — copiados pelo CopyPlugin
 ├── components/          # Componentes reutilizáveis
+├── composables/         # Estado reativo + leitura SQLite (ver specs/05-composables.md)
+├── db/                  # SQLite: database, migrations, repositories (offline-first)
+├── integrations/        # HTTP, APIs, adapters (sem Vue/SQLite nos adapters)
 ├── layouts/             # Layouts (Default com TabView)
 ├── pages/               # Páginas por domínio
 │   ├── event/           # Eventos (cart, home, orders)
@@ -36,6 +39,7 @@ app/
 │   ├── LoginPage.vue    # Autenticação
 │   └── Events.vue       # Lista de eventos
 ├── persistence/         # Persistência local (sessão em ApplicationSettings, etc.)
+├── sync/                # Pull/push — ex.: sync-pull-service.ts (ver specs/03, 04)
 ├── types/               # Interfaces TypeScript
 └── utils/               # Utilitários (format, icons, device — sem estado de sessão)
 ```
@@ -64,6 +68,7 @@ Colocar em `app/fonts/` ou `app/assets/` **não funciona** — o webpack ignora 
 3. **`nativescript-components.mdc`** — Catálogo: exemplos de todos os componentes usando `@utility`
 4. **`nativescript-implementer.mdc`** — Implementação: arquitetura, navegação, code style
 5. **`NATIVESCRIPT.md`** — Referência completa da plataforma NativeScript
+6. **`offline-architecture.mdc`** — Offline-first, SQLite, sync (`specs/` como fonte detalhada)
 
 ## Sistema de cores (referência rápida)
 

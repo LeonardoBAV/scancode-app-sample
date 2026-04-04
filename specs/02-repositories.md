@@ -90,7 +90,7 @@ interface EventsRepository {
 
     /**
      * Insere ou substitui múltiplos eventos (INSERT OR REPLACE).
-     * Usado pelo pull.ts após receber dados da API.
+     * Usado pela camada de pull (`SyncPullService` / `specs/03-sync-pull.md`) após receber dados da API.
      */
     upsertMany(events: Event[]): Promise<void>;
 }
@@ -144,7 +144,7 @@ interface ProductsRepository {
 
     /**
      * Insere ou substitui múltiplos produtos (INSERT OR REPLACE).
-     * Usado pelo pull.ts após receber dados da API.
+     * Usado pela camada de pull (`SyncPullService` / `specs/03-sync-pull.md`) após receber dados da API.
      */
     upsertMany(products: Product[]): Promise<void>;
 }
@@ -177,7 +177,7 @@ interface ClientsRepository {
 
     /**
      * Insere ou substitui múltiplos clientes (INSERT OR REPLACE).
-     * Usado pelo pull.ts após receber dados da API.
+     * Usado pela camada de pull (`SyncPullService` / `specs/03-sync-pull.md`) após receber dados da API.
      */
     upsertMany(clients: Client[]): Promise<void>;
 }
@@ -198,7 +198,7 @@ interface PaymentMethodsRepository {
 
     /**
      * Insere ou substitui múltiplos métodos de pagamento (INSERT OR REPLACE).
-     * Usado pelo pull.ts após receber dados da API.
+     * Usado pela camada de pull (`SyncPullService` / `specs/03-sync-pull.md`) após receber dados da API.
      */
     upsertMany(methods: PaymentMethod[]): Promise<void>;
 }
@@ -277,7 +277,7 @@ interface SyncLogRepository {
 
     /**
      * Grava ou atualiza o timestamp do último pull bem-sucedido.
-     * Chamado pelo pull.ts APENAS após pull completo e sem erros.
+     * Chamado pela camada de pull APENAS após pull completo e sem erros.
      *
      * @param entity   - nome da entidade
      * @param pulledAt - ISO 8601 do momento do pull

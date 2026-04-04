@@ -99,7 +99,7 @@ Erro 5xx da API:
   → tratar como falha de rede — retry na próxima janela
 ```
 
-> Esta versão usa retry simples (sem backoff exponencial). Se necessário no futuro, o `sync-service.ts` pode implementar backoff.
+> Esta versão usa retry simples (sem backoff exponencial). Se necessário no futuro, o orquestrador que disparar o push (ex.: serviço dedicado ou extensão de `SyncPullService`) pode implementar backoff.
 
 ---
 
@@ -123,7 +123,7 @@ export async function pushOrders(): Promise<void> {
 
     const auth = getAuth();
     if (!auth) {
-        return; // não deve acontecer se sync-service verificou auth antes
+        return; // não deve acontecer se o chamador verificou auth antes
     }
 
     for (const order of pending) {
@@ -209,7 +209,7 @@ Após `POST` bem-sucedido com resposta `apiId` (= **fonte de verdade** na API):
 
 ## Verificação antes do push
 
-O `sync-service.ts` deve verificar antes de chamar `push.ts`:
+O código que orquestrar o push (UI ou serviço) deve verificar antes de chamar `push.ts`:
 
 1. Há conectividade de rede.
 2. O usuário está autenticado (`getAuth()` não é null).

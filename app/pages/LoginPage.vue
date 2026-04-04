@@ -41,7 +41,7 @@
 // --- Imports ---
 import { ref, onMounted, getCurrentInstance, type Ref } from 'vue';
 import { login } from '../integrations/adapters/scancode-adapter';
-import { SyncService } from '../sync/sync-service';
+import { SyncPullService } from '../sync/sync-pull-service';
 import { getAuth, setAuth } from '../persistence/auth-session';
 import { useTranslation } from '../composables/useTranslation';
 import { useAppVersion } from '../composables/useAppVersion';
@@ -90,7 +90,7 @@ async function onLogin(): Promise<void> {
         buttonLabel.value = t('pages.login.syncing');
         syncStatus.value = t('pages.login.syncingEvents');
 
-        await SyncService.syncAfterLogin();
+        await SyncPullService.refreshAllEntities();
 
         syncStatus.value = '';
         goToEvents();
@@ -114,7 +114,7 @@ function goToEvents(): void {
 
 onMounted(() => {
     if (getAuth()) {
-        goToEvents();
+        setTimeout(() => goToEvents(), 0);
     }
 });
 </script>

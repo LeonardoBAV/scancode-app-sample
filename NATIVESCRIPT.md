@@ -1031,6 +1031,10 @@ createNativeView() {
 }
 ```
 
+## myCoolApp (este repositório)
+
+Este projeto usa **NativeScript 9 + Vue 3**, entry em `app/bootstrap/app.ts` (o `main` do `package.json` — não `src/app.ts`). Arquitetura **offline-first** (SQLite, sync pull/push): ver **`specs/`**, **`.cursorrules`**, **`.cursor/rules/offline-architecture.mdc`**. Alias TypeScript `~/` e `@/` mapeiam para `app/` no `tsconfig.json`; no webpack do NativeScript, `~` e `@` apontam para o **diretório do entry** (`app/bootstrap/`), por isso imports de código em `app/` devem usar **caminhos relativos** (ex.: `../db/...`), não `~/db/...`.
+
 ## Resources
 
 - Documentation: https://docs.nativescript.org

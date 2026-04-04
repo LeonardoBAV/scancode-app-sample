@@ -77,7 +77,7 @@ export function useEvents() {
 **Onde `loadEvents()` é chamado (únicos gatilhos):**
 
 1. **`Application.launchEvent`** em `app/bootstrap/app.ts` — se `getAuth()`, hidrata o singleton no cold start com sessão já persistida.
-2. **`SyncService.syncAfterLogin`** — `finally` após `truncate` + `pullFullAfterLogin` (também se o pull falhar, para o composable refletir o SQLite após truncate).
+2. **`SyncPullService`** (pós-login em `LoginPage`) — após `truncate` + pull de events bem-sucedido, **`loadEvents()`** é invocado no fim de `pullEvents()` (ver `specs/03-sync-pull.md`). *Comportamento alvo com `finally` se o pull falhar após truncate — ainda a alinhar com `specs/00-architecture.md`.*
 
 Não chamar `loadEvents` em páginas (`LoginPage`, `Home`, `EventsPage` onMounted) para evitar dispersão; ver `specs/00-architecture.md`.
 
@@ -298,7 +298,7 @@ export function useOrders() {
 
 | Composable | Quando chamar `load*` |
 |---|---|
-| `useEvents` | Apenas `Application.launchEvent` (com sessão) e `SyncService.syncAfterLogin` (`finally`) — ver `specs/00-architecture.md` |
+| `useEvents` | `Application.launchEvent` (com sessão), e após sync pós-login via **`SyncPullService.pullEvents()`** → `loadEvents()` — ver `specs/00-architecture.md` |
 | `useProducts` | `onMounted` em `ProductListPage.vue` e quando abrir seletor de produto no carrinho |
 | `useClients` | `onMounted` em `ClientListPage.vue` e `OrderSelectClientPage.vue` |
 | `usePaymentMethods` | `onMounted` em `OrderPaymentPage.vue` |

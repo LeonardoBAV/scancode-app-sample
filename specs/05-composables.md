@@ -50,29 +50,38 @@ export function useProducts() {
 
 ```typescript
 import { ref, readonly, type Ref } from 'vue';
-import type { Event } from '../types/event';
-import * as eventsRepo from '../db/repositories/events.repo';
+import type { Event } from '../types/schema/event';
+import { EventsRepository } from '../db/repositories/events.repo';
 
-// --- estado singleton ---
 const events: Ref<Event[]> = ref([]);
 const isLoading: Ref<boolean> = ref(false);
 
-async function loadEvents(): Promise<void> {
+export async function loadEvents(): Promise<void> {
     isLoading.value = true;
-    events.value = await eventsRepo.findAll();
-    isLoading.value = false;
+    try {
+        events.value = await EventsRepository.findAll();
+    } finally {
+        isLoading.value = false;
+    }
 }
 
 export function useEvents() {
     return {
-        events:    readonly(events),
+        events: readonly(events),
         isLoading: readonly(isLoading),
         loadEvents,
     };
 }
 ```
 
-**Consumido por:** `EventsPage.vue`, `Home.vue` (para exibir o evento ativo).
+**Onde `loadEvents()` é chamado (únicos gatilhos):**
+
+1. **`Application.launchEvent`** em `app/bootstrap/app.ts` — se `getAuth()`, hidrata o singleton no cold start com sessão já persistida.
+2. **`SyncService.syncAfterLogin`** — `finally` após `truncate` + `pullFullAfterLogin` (também se o pull falhar, para o composable refletir o SQLite após truncate).
+
+Não chamar `loadEvents` em páginas (`LoginPage`, `Home`, `EventsPage` onMounted) para evitar dispersão; ver `specs/00-architecture.md`.
+
+**Consumido por:** `EventsPage.vue` (lê `events` / `isLoading`), pontos acima para popular o singleton. O evento ativo na home vem de props após seleção na lista.
 
 > Dados do SQLite seguem o tipo **`Event`** (`specs/01-db-schema.md`). Se a lista precisar de totais, contagens ou “status” derivado, compor um **view model** no composable ou na página (ex.: join com `orders`), em vez de reutilizar `EventItem` como se fosse linha de banco.
 
@@ -289,7 +298,7 @@ export function useOrders() {
 
 | Composable | Quando chamar `load*` |
 |---|---|
-| `useEvents` | `onMounted` em `EventsPage.vue` |
+| `useEvents` | Apenas `Application.launchEvent` (com sessão) e `SyncService.syncAfterLogin` (`finally`) — ver `specs/00-architecture.md` |
 | `useProducts` | `onMounted` em `ProductListPage.vue` e quando abrir seletor de produto no carrinho |
 | `useClients` | `onMounted` em `ClientListPage.vue` e `OrderSelectClientPage.vue` |
 | `usePaymentMethods` | `onMounted` em `OrderPaymentPage.vue` |

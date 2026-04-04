@@ -46,7 +46,7 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import { computed, onMounted, getCurrentInstance, type ComputedRef } from 'vue';
+import { computed, getCurrentInstance, type ComputedRef } from 'vue';
 import { eventSchemaToEventItem } from '../utils/event-display';
 import { useTranslation } from '../composables/useTranslation';
 import { useEvents } from '../composables/useEvents';
@@ -58,7 +58,7 @@ import type { EventItem } from '../types/event-item';
 
 // --- Component logic ---
 const { t } = useTranslation();
-const { events, isLoading, loadEvents } = useEvents();
+const { events, isLoading } = useEvents();
 
 const listItems: ComputedRef<EventItem[]> = computed(() => events.value.map(eventSchemaToEventItem));
 
@@ -87,8 +87,4 @@ function statusBadgeClass(status: string): string {
 function openEvent(event: EventItem): void {
     navigateTo?.(DefaultLayout, { frame: 'root-frame', props: { event }, clearHistory: true });
 }
-
-onMounted(() => {
-    void loadEvents();
-});
 </script>

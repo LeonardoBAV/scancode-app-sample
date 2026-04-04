@@ -15,6 +15,26 @@ O app opera em **feiras sem internet**. A estratégia é:
 
 ---
 
+## Hidratação `loadEvents` (lista de eventos na UI)
+
+O composable `useEvents` mantém `events` em memória (singleton). Para alinhar com o SQLite só há **dois** pontos de chamada a `loadEvents()`:
+
+| Gatilho | Ficheiro | Comportamento |
+| --- | --- | --- |
+| **`Application.launchEvent`** (`launch`) | `app/bootstrap/app.ts` | Se existir sessão (`getAuth()`), lê `events` do disco ao arrancar o processo. |
+| **Sync pós-login** | `app/sync/sync-service.ts` | `try { truncate operacional; pullFullAfterLogin(); } finally { loadEvents(); }` — o `finally` garante atualização do composable após pull com sucesso **e** após falha do pull (ex.: disco já truncado). |
+
+**Contraponto:** com sessão guardada, o cold start pode fazer `loadEvents` no `launch` e outra vez após login noutra sessão — aceitável (dois `SELECT` curtos). Voltar da home do evento para a lista **não** dispara `loadEvents`; a lista usa o singleton já preenchido (se no futuro o schema passar a atualizar contagens no SQLite por tabela `events`, reavaliar).
+
+---
+
+## Documentação vs comentários no código
+
+- **Preferir sempre** `specs/` e regras em `.cursor/rules/` para decisões de arquitetura, contratos e “quando chamar o quê”.
+- **Evitar comentários** no código-fonte na grande maioria dos casos; só exceções pontuais quando o código não pode ser tornado autoexplicativo e a spec não cobre.
+
+---
+
 ## Ciclo de login, logout e reset do banco
 
 ### Logout

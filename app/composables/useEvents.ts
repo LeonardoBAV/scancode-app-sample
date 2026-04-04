@@ -1,19 +1,16 @@
 // --- Imports ---
-import * as eventsRepo from '../db/repositories/events.repo';
 import { ref, readonly, type Ref } from 'vue';
-import { initDatabase } from '../db/database';
+import { EventsRepository } from '../db/repositories/events.repo';
 import type { Event } from '../types/schema/event';
 
 
-// --- Singleton state (shared by every caller of useEvents) ---
 const events: Ref<Event[]> = ref([]);
 const isLoading: Ref<boolean> = ref(false);
 
-async function loadEvents(): Promise<void> {
+export async function loadEvents(): Promise<void> {
     isLoading.value = true;
     try {
-        await initDatabase();
-        const rows: Event[] = await eventsRepo.findAll();
+        const rows: Event[] = await EventsRepository.findAll();
         console.log('[useEvents] rows from SQLite:', rows.length);
         events.value = rows;
     } catch (error) {

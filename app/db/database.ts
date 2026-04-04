@@ -2,42 +2,32 @@ import { openOrCreate, type SQLiteDatabase } from '@nativescript-community/sqlit
 
 import { runMigrations } from './migrations';
 
-const DB_NAME: string = 'ordy.db';
 
-let instance: SQLiteDatabase | null = null;
-let initialized: boolean = false;
+export class Database {
+    private constructor() { }
 
-export async function initDatabase(): Promise<void> {
-    if (initialized && instance?.isOpen) {
-        return;
+    private static readonly DB_NAME: string = 'ordy.db';
+    private static sqlite: SQLiteDatabase | null = null;
+
+    public static async getConnection(): Promise<SQLiteDatabase> {
+        if (!Database.sqlite) {
+            Database.sqlite = await Database.open();
+        }
+
+        return Database.sqlite;
     }
 
-    if (instance && !instance.isOpen) {
-        instance = null;
-        initialized = false;
+    private static close(): void {
+        if (Database.sqlite && Database.sqlite.isOpen) {
+            Database.sqlite.close();
+            Database.sqlite = null;
+        }
     }
 
-    const db: SQLiteDatabase = openOrCreate(DB_NAME);
-    // Android: SQLiteDatabase.execSQL (used by db.execute) cannot run PRAGMAs that return rows
-    // (e.g. journal_mode). That throws: "Queries can be performed using ... rawQuery only."
-    await db.execute('PRAGMA foreign_keys = ON;');
-    await runMigrations(db);
-
-    instance = db;
-    initialized = true;
-}
-
-export function getDatabase(): SQLiteDatabase {
-    if (!instance || !instance.isOpen) {
-        throw new Error('Database not initialized. Call initDatabase() first.');
-    }
-    return instance;
-}
-
-export function closeDatabase(): void {
-    if (instance && instance.isOpen) {
-        instance.close();
-        instance = null;
-        initialized = false;
+    private static async open(): Promise<SQLiteDatabase> {
+        const db: SQLiteDatabase = openOrCreate(Database.DB_NAME);
+        await db.execute('PRAGMA foreign_keys = ON;');
+        await runMigrations(db);
+        return db;
     }
 }

@@ -347,44 +347,49 @@ export async function upsertMany(clients: Client[]): Promise<void> {
 // ... demais métodos
 ```
 
-> O `getDatabase()` é o singleton de `app/db/database.ts` — garante que a conexão é aberta uma única vez e reusada.
+> `Database.getConnection()` devolve o handle SQLite (singleton). Ver `app/db/database.ts`.
 
 ---
 
-## Helpers compartilhados (`app/db/repository-base.ts`)
+## Base compartilhada (`app/db/repository-base.ts`)
 
-Utilitários **genéricos** para reduzir repetição de `INSERT OR REPLACE` e de wrappers em `select`/`get`. **Migrations** (`migrations.ts`) e **interfaces TypeScript** (`app/types/`, `app/types/schema/`) continuam sendo fontes de verdade **independentes** — o repositório só precisa manter a lista de colunas do upsert **consistente** com o DDL e com o tipo usado no código.
+Classe abstrata **`RepositoryBase`**: `protected static connection()` delega em `Database.getConnection()`; métodos **`protected static`** para `insertOrReplaceMany`, `queryAll`, etc. Repositórios de entidade **estendem** `RepositoryBase`, `private constructor() { super(); }`, e expõem apenas métodos `public static` por tabela.
 
-| Função | Responsabilidade |
+**Migrations** (`migrations.ts`) e **interfaces TypeScript** (`app/types/`, `app/types/schema/`) continuam sendo fontes de verdade **independentes** — o repositório só precisa manter a lista de colunas do upsert **consistente** com o DDL e com o tipo usado no código.
+
+| Método (em `RepositoryBase`) | Responsabilidade |
 | --- | --- |
 | `assertSafeSqlIdentifier` | Valida identificadores SQL (tabela/coluna): `[a-zA-Z_][a-zA-Z0-9_]*`. |
 | `buildInsertOrReplaceSql` | Monta `INSERT OR REPLACE INTO t (c1,…) VALUES (?,…)`. |
 | `rowParamsForColumns` | Objeto → parâmetros posicionais na ordem das colunas (`undefined` → `null`). |
 | `insertOrReplaceMany` | Uma transação; um `INSERT OR REPLACE` por linha. |
 | `insertOrReplaceOne` | Atalho para uma única linha. |
+| `execute` | `db.execute` na conexão singleton (sem passar `db` nas subclasses). |
+| `truncateTable` | SQLite não tem `TRUNCATE TABLE`: `DELETE FROM t` + `DELETE FROM sqlite_sequence WHERE name = t` para reiniciar AUTOINCREMENT onde existir. |
 | `queryAll` / `queryOne` | Wrappers tipados sobre `db.select` / `db.get` (uma linha ou `null`). |
 
 **Regras:** (1) Colunas do upsert devem ser um `readonly` array literal alinhado ao schema local. (2) Não passar strings do usuário como nome de tabela/coluna — só literais do código. (3) Queries com `WHERE` dinâmico continuam escritas no repositório com parâmetros ligados (`?`).
 
-Exemplo para novos repositórios (colunas na **mesma ordem** do `CREATE TABLE` em `migrations.ts`; o tipo em TypeScript deve cobrir todas as colunas persistidas — ver `events.repo.ts`):
+Exemplo para novos repositórios (colunas na **mesma ordem** do `CREATE TABLE` em `migrations.ts`; ver `events.repo.ts`):
 
 ```typescript
-import { insertOrReplaceMany, queryAll } from '../repository-base';
-import { getDatabase } from '../database';
 import type { SomeEntity } from '../../types/some-entity';
+import { RepositoryBase } from '../repository-base';
 
-const SOME_TABLE_COLUMNS: readonly (keyof SomeEntity)[] = [
-    'id',
-    'name',
-    /* …demais colunas na ordem do DDL */
-];
+export class SomeEntityRepository extends RepositoryBase {
+    private constructor() {
+        super();
+    }
 
-export async function upsertMany(rows: SomeEntity[]): Promise<void> {
-    await insertOrReplaceMany(getDatabase(), 'some_table', SOME_TABLE_COLUMNS, rows);
-}
+    private static readonly COLUMNS: readonly (keyof SomeEntity)[] = ['id', 'name' /* … */];
 
-export async function findAll(): Promise<SomeEntity[]> {
-    return await queryAll<SomeEntity>(getDatabase(), 'SELECT * FROM some_table ORDER BY name ASC');
+    public static async upsertMany(rows: SomeEntity[]): Promise<void> {
+        await SomeEntityRepository.insertOrReplaceMany('some_table', SomeEntityRepository.COLUMNS, rows);
+    }
+
+    public static async findAll(): Promise<SomeEntity[]> {
+        return await SomeEntityRepository.queryAll<SomeEntity>('SELECT * FROM some_table ORDER BY name ASC');
+    }
 }
 ```
 

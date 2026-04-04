@@ -11,13 +11,13 @@
             </StackLayout>
 
             <!-- Empty State -->
-            <StackLayout v-else-if="listItems.length === 0" row="1" class="p-8" verticalAlignment="center" horizontalAlignment="center">
+            <StackLayout v-else-if="items.length === 0" row="1" class="p-8" verticalAlignment="center" horizontalAlignment="center">
                 <Label :text="$t('pages.events.empty')" class="text-lg font-semibold text-foreground text-center mb-2" />
                 <Label :text="$t('pages.events.emptyHint')" class="text-sm text-muted-foreground text-center" textWrap="true" />
             </StackLayout>
 
             <!-- Event List -->
-            <ListView v-else row="1" :items="listItems" separatorColor="transparent">
+            <ListView v-else row="1" :items="items" separatorColor="transparent">
                 <template #default="{ item }">
                     <StackLayout class="px-4 pt-3">
                         <StackLayout class="card p-0" androidElevation="2" @tap="openEvent(item)">
@@ -47,21 +47,32 @@
 <script setup lang="ts">
 // --- Imports ---
 import { computed, getCurrentInstance, type ComputedRef } from 'vue';
-import { eventSchemaToEventItem } from '../utils/event-display';
-import { useTranslation } from '../composables/useTranslation';
+import { formatCurrencyBR, formatIsoDateToBR } from '../utils/format';
 import { EventsComposable } from '../composables/event-composable';
-import { formatCurrencyBR } from '../utils/format';
+import { useTranslation } from '../composables/useTranslation';
 import HeaderComponent from '../components/HeaderComponent.vue';
 import DefaultLayout from '../layouts/Default.vue';
+import type { Event } from '../types/schema/event';
 import type { EventItem } from '../types/event-item';
 
 
-// --- Component logic ---
 const { t } = useTranslation();
 const events = EventsComposable.getList();
 const isLoading = EventsComposable.getIsLoading();
 
-const listItems: ComputedRef<EventItem[]> = computed(() => events.value.map(eventSchemaToEventItem));
+const items: ComputedRef<EventItem[]> = computed(() =>
+    events.value.map((row: Event): EventItem => ({
+        id: row.id,
+        name: row.name,
+        status: deriveEventStatus(row.start, row.end),
+        totalValue: 0,
+        startDate: formatIsoDateToBR(row.start),
+        endDate: formatIsoDateToBR(row.end),
+        orderCount: 0,
+        ordersSynced: 0,
+        ordersUnsynced: 0,
+    })),
+);
 
 const instance = getCurrentInstance();
 const globals = instance?.appContext.config.globalProperties;
@@ -83,6 +94,25 @@ function statusBadgeClass(status: string): string {
         case 'ended': return 'badge-outline';
         default: return 'badge-outline';
     }
+}
+
+function todayYyyyMmDd(): string {
+    const n: Date = new Date();
+    const y: number = n.getFullYear();
+    const m: string = String(n.getMonth() + 1).padStart(2, '0');
+    const d: string = String(n.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function deriveEventStatus(start: string, end: string): 'scheduled' | 'in_progress' | 'ended' {
+    const today: string = todayYyyyMmDd();
+    if (today < start) {
+        return 'scheduled';
+    }
+    if (today > end) {
+        return 'ended';
+    }
+    return 'in_progress';
 }
 
 function openEvent(event: EventItem): void {

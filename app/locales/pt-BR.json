@@ -48,6 +48,8 @@
       "paymentMethods": "Formas de pagamento",
       "sync": "Sincronizar",
       "syncMessage": "Sincronização em breve.",
+      "syncSuccess": "Cadastros (clientes, produtos e formas de pagamento) atualizados.",
+      "syncError": "Não foi possível sincronizar. Verifique a conexão e tente novamente.",
       "logoutSection": "Sessão",
       "logout": "Sair"
     },

@@ -65,11 +65,21 @@
 
                     <!-- Sync -->
                     <StackLayout class="px-4 mt-6">
-                        <StackLayout class="card p-0" androidElevation="2">
-                            <GridLayout columns="auto, *, auto" class="p-4" @tap="onSync">
-                                <Label col="0" :text="lucide('refresh-cw')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
-                                <Label col="1" :text="$t('pages.profile.sync')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
+                        <StackLayout class="card p-0" androidElevation="2" :isEnabled="!isSyncing" @tap="onSync">
+                            <GridLayout columns="auto, *, auto" class="p-4">
+                                <Label
+                                    col="0"
+                                    :text="isSyncing ? lucide('loader-2') : lucide('refresh-cw')"
+                                    :class="['lucide', 'text-muted-foreground', 'mr-4', isSyncing ? 'lucide-spin' : '']"
+                                    verticalAlignment="center"
+                                />
+                                <Label
+                                    col="1"
+                                    :text="isSyncing ? $t('common.loading') : $t('pages.profile.sync')"
+                                    class="text-base text-card-foreground"
+                                    verticalAlignment="center"
+                                />
+                                <Label v-if="!isSyncing" col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
                         </StackLayout>
                     </StackLayout>
@@ -98,20 +108,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { Dialogs } from '@nativescript/core';
+// --- Imports ---
+import { ref, computed, onMounted, type Ref } from 'vue';
+import { SyncPullService } from '../../sync/sync-pull-service';
+import { ApiException } from '../../types/exceptions/api-exception';
 import { useTranslation } from '../../composables/useTranslation';
 import { useNavigation } from '../../composables/useNavigation';
 import { useAppVersion } from '../../composables/useAppVersion';
 import { getAuth, clearAuth } from '../../persistence/auth-session';
 import { lucide } from '../../utils/icons';
 import HeaderComponent from '../../components/HeaderComponent.vue';
-import ProfileDetails from './ProfileDetails.vue';
 import ClientListPage from './ClientListPage.vue';
-import ProductListPage from './ProductListPage.vue';
 import PaymentMethodListPage from './PaymentMethodListPage.vue';
+import ProductListPage from './ProductListPage.vue';
+import ProfileDetails from './ProfileDetails.vue';
 import LoginPage from '../LoginPage.vue';
 
+
+// --- Component logic ---
 const { t } = useTranslation();
 const { navigateTo } = useNavigation();
 const appVersion = useAppVersion();
@@ -132,6 +146,8 @@ const userInitials = computed(() => {
     return name.substring(0, 2).toUpperCase();
 });
 
+const isSyncing: Ref<boolean> = ref(false);
+
 onMounted(() => {
     profile.value = getAuth();
 });
@@ -140,8 +156,20 @@ function goToProfileDetails(): void {
     navigateTo(ProfileDetails);
 }
 
-function onSync(): void {
-    Dialogs.alert({ title: t('pages.profile.sync'), message: t('pages.profile.syncMessage'), okButtonText: 'OK' });
+async function onSync(): Promise<void> {
+    if (isSyncing.value) {
+        return;
+    }
+    isSyncing.value = true;
+    try {
+        await SyncPullService.updateEntities();
+    } catch (err: unknown) {
+        const message: string =
+            err instanceof ApiException ? err.message : t('pages.profile.syncError');
+        console.error('[Profile] sync failed:', message, err);
+    } finally {
+        isSyncing.value = false;
+    }
 }
 
 function onClientList(): void {

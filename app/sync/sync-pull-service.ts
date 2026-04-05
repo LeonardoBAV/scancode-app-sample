@@ -25,14 +25,21 @@ export class SyncPullService {
         await SyncPullService.pullPaymentMethods();
     }
 
-    public static async pullEvents(): Promise<void> {
+
+    public static async updateEntities(): Promise<void> {
+        await SyncPullService.pullProducts();
+        await SyncPullService.pullClients();
+        await SyncPullService.pullPaymentMethods();
+    }
+
+    private static async pullEvents(): Promise<void> {
         const events = await ScancodeAdapter.getEvents();
         await EventsRepository.upsertMany(events);
         await SyncLogRepository.setLastPulledAt('events', new Date().toISOString());
         await EventsComposable.refresh();
     }
 
-    public static async pullProducts(): Promise<void> {
+    private static async pullProducts(): Promise<void> {
         const products: Product[] = await ScancodeAdapter.getProducts();
 
         const categoryById: Map<number, ProductCategory> = new Map<number, ProductCategory>();
@@ -46,14 +53,14 @@ export class SyncPullService {
         await ProductsComposable.refresh();
     }
 
-    public static async pullClients(): Promise<void> {
+    private static async pullClients(): Promise<void> {
         const clients = await ScancodeAdapter.getClients();
         await ClientsRepository.upsertMany(clients);
         await SyncLogRepository.setLastPulledAt('clients', new Date().toISOString());
         await ClientsComposable.refresh();
     }
 
-    public static async pullPaymentMethods(): Promise<void> {
+    private static async pullPaymentMethods(): Promise<void> {
         const methods = await ScancodeAdapter.getPaymentMethods();
         await PaymentMethodsRepository.upsertMany(methods);
         await SyncLogRepository.setLastPulledAt('payment_methods', new Date().toISOString());

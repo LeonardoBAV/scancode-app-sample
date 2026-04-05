@@ -48,6 +48,8 @@
       "paymentMethods": "Payment methods",
       "sync": "Sync",
       "syncMessage": "Sync coming soon.",
+      "syncSuccess": "Registrations (clients, products, payment methods) updated.",
+      "syncError": "Could not sync. Check your connection and try again.",
       "logoutSection": "Session",
       "logout": "Log out"
     },

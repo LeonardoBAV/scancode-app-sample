@@ -149,6 +149,23 @@ TextView {
   font-size: 20;
 }
 
+/* Spinner for Lucide icon labels (e.g. sync in progress) */
+@keyframes lucide-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@utility lucide-spin {
+  animation-name: lucide-spin;
+  animation-duration: 900ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+}
+
 /* ─── Layout Helpers ─── */
 
 @utility separator {

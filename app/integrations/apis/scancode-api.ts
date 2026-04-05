@@ -1,38 +1,46 @@
-import { SCANCODE_API_URL, SCANCODE_API_VERSION } from '../../configs/scancode-config';
-import type { ClientsResponseDTO, EventsResponseDTO, LoginResponseDTO } from '../../types/dtos/scancode-response';
-import type { LoginRequestDTO } from '../../types/dtos/scancode-request';
-import { createHttpClient, type HttpClient } from '../http-client';
-import { getToken } from '../../persistence/auth-session';
 import { Device } from '@nativescript/core';
 
-const http: HttpClient = createHttpClient({
-    baseURL: `${SCANCODE_API_URL}${SCANCODE_API_VERSION}`,
-});
+import { SCANCODE_API_URL, SCANCODE_API_VERSION } from '../../configs/scancode-config';
+import type { LoginRequestDTO } from '../../types/dtos/scancode-request';
+import type { ClientsResponseDTO, EventsResponseDTO, LoginResponseDTO } from '../../types/dtos/scancode-response';
+import { getToken } from '../../persistence/auth-session';
+import { HttpClient } from '../http-client';
 
-http.addRequestInterceptor((headers: Record<string, string>): Record<string, string> => {
-    const token: string | null = getToken();
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+
+export class ScancodeApi extends HttpClient {
+    public constructor() {
+        super({
+            baseURL: `${SCANCODE_API_URL}${SCANCODE_API_VERSION}`,
+        });
+        this.addRequestInterceptor((headers: Record<string, string>): Record<string, string> => {
+            const token: string | null = getToken();
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            return headers;
+        });
     }
-    return headers;
-});
 
-export async function login(cpf: string, password: string): Promise<LoginResponseDTO> {
-    const payload: LoginRequestDTO = {
-        cpf,
-        password,
-        device_name: `${Device.manufacturer} ${Device.model}`,
-    };
-    const { data } = await http.post<LoginResponseDTO>('/auth/login', payload);
-    return data;
+    public async login(cpf: string, password: string): Promise<LoginResponseDTO> {
+        const payload: LoginRequestDTO = {
+            cpf,
+            password,
+            device_name: `${Device.manufacturer} ${Device.model}`,
+        };
+        const { data } = await this.post<LoginResponseDTO>('/auth/login', payload);
+        return data;
+    }
+
+    public async getEvents(): Promise<EventsResponseDTO> {
+        const { data } = await this.get<EventsResponseDTO>('/events');
+        return data;
+    }
+
+    public async getClients(): Promise<ClientsResponseDTO> {
+        const { data } = await this.get<ClientsResponseDTO>('/clients');
+        return data;
+    }
 }
 
-export async function getEvents(): Promise<EventsResponseDTO> {
-    const { data } = await http.get<EventsResponseDTO>('/events');
-    return data;
-}
-
-export async function getClients(): Promise<ClientsResponseDTO> {
-    const { data } = await http.get<ClientsResponseDTO>('/clients');
-    return data;
-}
+//obs: singleton pattern padrao ouro se possivel IMITAR
+export const scancodeApi: ScancodeApi = new ScancodeApi();

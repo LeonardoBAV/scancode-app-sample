@@ -40,7 +40,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { ref, onMounted, type Ref } from 'vue';
-import { login } from '../integrations/adapters/scancode-adapter';
+import { ScancodeAdapter } from '../integrations/adapters/scancode-adapter';
 import { SyncPullService } from '../sync/sync-pull-service';
 import { getAuth, setAuth } from '../persistence/auth-session';
 import { useTranslation } from '../composables/useTranslation';
@@ -79,7 +79,7 @@ async function onLogin(): Promise<void> {
     buttonLabel.value = t('pages.login.submitting');
 
     try {
-        const response = await login(cpfValue, passValue);
+        const response = await ScancodeAdapter.login(cpfValue, passValue);
         setAuth(response);
 
         isSyncing.value = true;

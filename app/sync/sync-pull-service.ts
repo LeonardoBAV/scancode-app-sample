@@ -1,4 +1,4 @@
-import * as scancodeAdapter from '../integrations/adapters/scancode-adapter';
+import { ScancodeAdapter } from '../integrations/adapters/scancode-adapter';
 import { EventsRepository } from '../db/repositories/events.repo';
 import { SyncLogRepository } from '../db/repositories/sync-log.repo';
 import { OrdersRepository } from '../db/repositories/orders.repo';
@@ -20,14 +20,14 @@ export class SyncPullService {
     }
 
     public static async pullEvents(): Promise<void> {
-        const events = await scancodeAdapter.getEvents();
+        const events = await ScancodeAdapter.getEvents();
         await EventsRepository.upsertMany(events);
         await SyncLogRepository.setLastPulledAt('events', new Date().toISOString());
         await EventsComposable.refresh();
     }
 
     public static async pullClients(): Promise<void> {
-        const clients = await scancodeAdapter.getClients();
+        const clients = await ScancodeAdapter.getClients();
         await ClientsRepository.upsertMany(clients);
         await SyncLogRepository.setLastPulledAt('clients', new Date().toISOString());
         await ClientsComposable.refresh();

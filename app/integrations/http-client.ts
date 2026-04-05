@@ -23,23 +23,23 @@ export class HttpClient {
         this.interceptors.push(fn);
     }
 
-    async get<T>(path: string): Promise<HttpClientResponse<T>> {
+    public async get<T>(path: string): Promise<HttpClientResponse<T>> {
         return this.request<T>('GET', path);
     }
 
-    async post<T>(path: string, body?: unknown): Promise<HttpClientResponse<T>> {
+    public async post<T>(path: string, body?: unknown): Promise<HttpClientResponse<T>> {
         return this.request<T>('POST', path, body);
     }
 
-    async put<T>(path: string, body?: unknown): Promise<HttpClientResponse<T>> {
+    public async put<T>(path: string, body?: unknown): Promise<HttpClientResponse<T>> {
         return this.request<T>('PUT', path, body);
     }
 
-    async patch<T>(path: string, body?: unknown): Promise<HttpClientResponse<T>> {
+    public async patch<T>(path: string, body?: unknown): Promise<HttpClientResponse<T>> {
         return this.request<T>('PATCH', path, body);
     }
 
-    async delete<T>(path: string): Promise<HttpClientResponse<T>> {
+    public async delete<T>(path: string): Promise<HttpClientResponse<T>> {
         return this.request<T>('DELETE', path);
     }
 

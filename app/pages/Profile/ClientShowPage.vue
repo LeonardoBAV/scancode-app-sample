@@ -40,7 +40,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { computed } from 'vue';
-import type { Client } from '../../types/client';
+import type { Client } from '../../types/schema/client';
 import { formatCPFCNPJ } from '../../utils/format';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 

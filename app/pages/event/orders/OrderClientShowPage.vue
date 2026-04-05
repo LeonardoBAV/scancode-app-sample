@@ -57,7 +57,7 @@
 import { orderCreateSelectedClient, orderCreateBuyerName, orderCreateBuyerContact } from './order-create-state';
 import { formatCPFCNPJ } from '../../../utils/format';
 import { computed } from 'vue';
-import type { Client } from '../../../types/client';
+import type { Client } from '../../../types/schema/client';
 import type { ComputedRef } from 'vue';
 import { useNavigation } from '../../../composables/useNavigation';
 import HeaderComponent from '../../../components/HeaderComponent.vue';

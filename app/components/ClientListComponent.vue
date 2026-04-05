@@ -37,7 +37,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { ref, computed } from 'vue';
-import type { Client } from '../types/client';
+import type { Client } from '../types/schema/client';
 import { formatCPFCNPJ } from '../utils/format';
 import { lucide } from '../utils/icons';
 

@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import type { Client } from '../../../types/client';
+import type { Client } from '../../../types/schema/client';
 
 /** Default client for initial state. */
 const defaultClient: Client = {
@@ -10,6 +10,8 @@ const defaultClient: Client = {
     email: 'contato@alpha.com',
     phone: '(11) 99999-0001',
     carrier: 'Vivo',
+    created_at: new Date(0).toISOString(),
+    updated_at: new Date(0).toISOString(),
 };
 
 /** Shared state for order create flow: selected payment method and client. */

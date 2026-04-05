@@ -30,3 +30,19 @@ export interface EventDTO {
 export interface EventsResponseDTO {
     data: EventDTO[];
 }
+
+export interface ClientDTO {
+    id: number;
+    cpf_cnpj: string;
+    corporate_name: string;
+    fantasy_name: string | null;
+    email: string | null;
+    phone: string | null;
+    carrier: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ClientsResponseDTO {
+    data: ClientDTO[];
+}

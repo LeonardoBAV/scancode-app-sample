@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from '@nativescript-community/sqlite';
 
-const SCHEMA_VERSION: number = 1;
+const SCHEMA_VERSION: number = 2;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const currentVersion: number = db.getVersion();
@@ -11,6 +11,10 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
 
     if (currentVersion < 1) {
         await migrateToV1(db);
+    }
+
+    if (currentVersion < 2) {
+        await migrateToV2(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -142,5 +146,11 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
             entity      TEXT    PRIMARY KEY,
             pulled_at   TEXT    NOT NULL
         );
+    `);
+}
+
+async function migrateToV2(db: SQLiteDatabase): Promise<void> {
+    await db.execute(`
+        ALTER TABLE clients ADD COLUMN created_at TEXT NOT NULL DEFAULT '';
     `);
 }

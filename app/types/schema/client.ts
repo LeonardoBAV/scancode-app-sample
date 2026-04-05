@@ -1,6 +1,3 @@
-/**
- * Client entity.
- */
 export interface Client {
     id: number;
     cpf_cnpj: string;
@@ -9,4 +6,6 @@ export interface Client {
     email: string;
     phone: string;
     carrier: string;
+    created_at: string;
+    updated_at: string;
 }

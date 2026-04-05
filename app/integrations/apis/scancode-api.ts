@@ -1,5 +1,5 @@
 import { SCANCODE_API_URL, SCANCODE_API_VERSION } from '../../configs/scancode-config';
-import type { EventsResponseDTO, LoginResponseDTO } from '../../types/dtos/scancode-response';
+import type { ClientsResponseDTO, EventsResponseDTO, LoginResponseDTO } from '../../types/dtos/scancode-response';
 import type { LoginRequestDTO } from '../../types/dtos/scancode-request';
 import { createHttpClient, type HttpClient } from '../http-client';
 import { getToken } from '../../persistence/auth-session';
@@ -29,5 +29,10 @@ export async function login(cpf: string, password: string): Promise<LoginRespons
 
 export async function getEvents(): Promise<EventsResponseDTO> {
     const { data } = await http.get<EventsResponseDTO>('/events');
+    return data;
+}
+
+export async function getClients(): Promise<ClientsResponseDTO> {
+    const { data } = await http.get<ClientsResponseDTO>('/clients');
     return data;
 }

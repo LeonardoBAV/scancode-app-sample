@@ -1,6 +1,7 @@
 import type { ValidationErrorResponseDTO } from '../../types/dtos/scancode-response';
 import { ApiException } from '../../types/exceptions/api-exception';
 import type { Auth } from '../../types/sessions/auth';
+import type { Client } from '../../types/schema/client';
 import type { Event } from '../../types/schema/event';
 import { i18n } from '../../configs/i18n';
 import { clearAuth } from '../../persistence/auth-session';
@@ -33,6 +34,26 @@ export async function getEvents(): Promise<Event[]> {
     }
 }
 
+export async function getClients(): Promise<Client[]> {
+    try {
+        const response = await scancodeApi.getClients();
+
+        return response.data.map((dto): Client => ({
+            id: dto.id,
+            cpf_cnpj: dto.cpf_cnpj,
+            corporate_name: dto.corporate_name,
+            fantasy_name: nullableString(dto.fantasy_name),
+            email: nullableString(dto.email),
+            phone: nullableString(dto.phone),
+            carrier: nullableString(dto.carrier),
+            created_at: dto.created_at,
+            updated_at: dto.updated_at,
+        }));
+    } catch (err: unknown) {
+        handleApiError(err);
+    }
+}
+
 
 function handleApiError(err: unknown): never {
     if (isNetworkError(err)) {
@@ -56,4 +77,8 @@ function handleApiError(err: unknown): never {
 
 function isNetworkError(err: unknown): boolean {
     return err instanceof HttpError && err.statusCode === 0;
+}
+
+function nullableString(value: string | null | undefined): string {
+    return value ?? '';
 }

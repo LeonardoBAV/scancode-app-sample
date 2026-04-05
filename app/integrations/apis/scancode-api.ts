@@ -2,7 +2,13 @@ import { Device } from '@nativescript/core';
 
 import { SCANCODE_API_URL, SCANCODE_API_VERSION } from '../../configs/scancode-config';
 import type { LoginRequestDTO } from '../../types/dtos/scancode-request';
-import type { ClientsResponseDTO, EventsResponseDTO, LoginResponseDTO, ProductsResponseDTO } from '../../types/dtos/scancode-response';
+import type {
+    ClientsResponseDTO,
+    EventsResponseDTO,
+    LoginResponseDTO,
+    PaymentMethodsResponseDTO,
+    ProductsResponseDTO,
+} from '../../types/dtos/scancode-response';
 import { getToken } from '../../persistence/auth-session';
 import { HttpClient } from '../http-client';
 
@@ -43,6 +49,11 @@ export class ScancodeApi extends HttpClient {
 
     public async getProducts(): Promise<ProductsResponseDTO> {
         const { data } = await this.get<ProductsResponseDTO>('/products', { relations: ['productCategory'] });
+        return data;
+    }
+
+    public async getPaymentMethods(): Promise<PaymentMethodsResponseDTO> {
+        const { data } = await this.get<PaymentMethodsResponseDTO>('/payment-methods');
         return data;
     }
 }

@@ -11,6 +11,7 @@ import { SyncLogRepository } from '../db/repositories/sync-log.repo';
 import { OrdersRepository } from '../db/repositories/orders.repo';
 import { ClientsComposable } from '../composables/clients-composable';
 import { EventsComposable } from '../composables/event-composable';
+import { PaymentMethodsComposable } from '../composables/payment-methods-composable';
 import { ProductsComposable } from '../composables/products-composable';
 
 export class SyncPullService {
@@ -21,6 +22,7 @@ export class SyncPullService {
         await SyncPullService.pullEvents();
         await SyncPullService.pullProducts();
         await SyncPullService.pullClients();
+        await SyncPullService.pullPaymentMethods();
     }
 
     public static async pullEvents(): Promise<void> {
@@ -49,6 +51,13 @@ export class SyncPullService {
         await ClientsRepository.upsertMany(clients);
         await SyncLogRepository.setLastPulledAt('clients', new Date().toISOString());
         await ClientsComposable.refresh();
+    }
+
+    public static async pullPaymentMethods(): Promise<void> {
+        const methods = await ScancodeAdapter.getPaymentMethods();
+        await PaymentMethodsRepository.upsertMany(methods);
+        await SyncLogRepository.setLastPulledAt('payment_methods', new Date().toISOString());
+        await PaymentMethodsComposable.refresh();
     }
 
     private static async truncateAllEntities(): Promise<void> {

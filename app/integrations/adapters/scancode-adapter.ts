@@ -3,6 +3,7 @@ import { ApiException } from '../../types/exceptions/api-exception';
 import type { Auth } from '../../types/sessions/auth';
 import type { Client } from '../../types/schema/client';
 import type { Event } from '../../types/schema/event';
+import type { PaymentMethod } from '../../types/schema/payment-method';
 import type { Product } from '../../types/schema/product';
 import { i18n } from '../../configs/i18n';
 import { clearAuth } from '../../persistence/auth-session';
@@ -78,6 +79,22 @@ export class ScancodeAdapter {
                     created_at: '',
                     updated_at: dto.updated_at,
                 },
+                created_at: dto.created_at,
+                updated_at: dto.updated_at,
+            }));
+        } catch (err: unknown) {
+            ScancodeAdapter.handleApiError(err);
+        }
+    }
+
+    public static async getPaymentMethods(): Promise<PaymentMethod[]> {
+        try {
+            const response = await scancodeApi.getPaymentMethods();
+
+            return response.data.map((dto): PaymentMethod => ({
+                id: dto.id,
+                remote_id: dto.id,
+                name: dto.name,
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
             }));

@@ -136,34 +136,35 @@ export class ClientsComposable {
 
 ---
 
-## `usePaymentMethods`
+## `PaymentMethodsComposable` (formas de pagamento)
 
-**Arquivo:** `app/composables/usePaymentMethods.ts`
+**Arquivo:** `app/composables/payment-methods-composable.ts` — mesmo padrão estático que `ProductsComposable` / `ClientsComposable`.
 
 ```typescript
-import { ref, readonly, type Ref } from 'vue';
-import type { PaymentMethod } from '../types/payment-method';
-import * as paymentMethodsRepo from '../db/repositories/payment-methods.repo';
+import { ref, readonly } from 'vue';
+import type { PaymentMethod } from '../types/schema/payment-method';
+import { PaymentMethodsRepository } from '../db/repositories/payment-methods.repo';
 
-const methods: Ref<PaymentMethod[]> = ref([]);
-const isLoading: Ref<boolean>       = ref(false);
-
-async function loadPaymentMethods(): Promise<void> {
-    isLoading.value = true;
-    methods.value = await paymentMethodsRepo.findAll();
-    isLoading.value = false;
-}
-
-export function usePaymentMethods() {
-    return {
-        methods:             readonly(methods),
-        isLoading:           readonly(isLoading),
-        loadPaymentMethods,
-    };
+export class PaymentMethodsComposable {
+    private static paymentMethods = ref<PaymentMethod[]>([]);
+    private static isLoading = ref<boolean>(false);
+    private constructor() {}
+    static getList() { return readonly(PaymentMethodsComposable.paymentMethods); }
+    static getIsLoading() { return readonly(PaymentMethodsComposable.isLoading); }
+    static async refresh() {
+        PaymentMethodsComposable.paymentMethods.value = await PaymentMethodsRepository.findAll();
+    }
 }
 ```
 
-**Consumido por:** `OrderPaymentPage.vue`.
+**Onde `refresh()` é chamado:**
+
+1. **`Application.launchEvent`** em `app/bootstrap/app.ts` — se `getAuth()`.
+2. **`SyncPullService.pullPaymentMethods()`** — após upsert no SQLite (ver `specs/03-sync-pull.md`).
+
+**Consumido por:** `PaymentMethodListPage.vue`, `OrderPaymentPage.vue` (`getList()` + `computed` com cópia superficial para tipagem). Busca em **`PaymentMethodListComponent`**.
+
+> Tipo **`PaymentMethod`**: `app/types/schema/payment-method.ts`.
 
 ---
 
@@ -256,7 +257,7 @@ export function useOrders() {
 | `EventsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullEvents()`** → `EventsComposable.refresh()` — ver `specs/00-architecture.md` |
 | `ProductsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullProducts()`** → `ProductsComposable.refresh()` |
 | `ClientsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullClients()`** → `ClientsComposable.refresh()` |
-| `usePaymentMethods` | `onMounted` em `OrderPaymentPage.vue` *(quando implementado)* |
+| `PaymentMethodsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullPaymentMethods()`** → `PaymentMethodsComposable.refresh()` |
 | `useOrders` | `onMounted` em `OrderListPage.vue`, passando o `eventId` do evento selecionado *(quando implementado)* |
 
 > Como os composables de catálogo são singletons, se os dados já foram carregados após login ou cold start, o `ref` já estará preenchido — a página só lê `getList()`. O `refresh()` após pull garante dados alinhados ao servidor.

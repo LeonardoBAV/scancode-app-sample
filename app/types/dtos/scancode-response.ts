@@ -67,3 +67,14 @@ export interface ProductDTO {
 export interface ProductsResponseDTO {
     data: ProductDTO[];
 }
+
+export interface PaymentMethodDTO {
+    id: number;
+    name: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PaymentMethodsResponseDTO {
+    data: PaymentMethodDTO[];
+}

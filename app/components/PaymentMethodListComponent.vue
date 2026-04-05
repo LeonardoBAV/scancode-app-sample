@@ -34,7 +34,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { ref, computed } from 'vue';
-import type { PaymentMethod } from '../types/payment-method';
+import type { PaymentMethod } from '../types/schema/payment-method';
 import { lucide } from '../utils/icons';
 
 

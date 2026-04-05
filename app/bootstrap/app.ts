@@ -7,6 +7,7 @@ import App from './App.vue';
 import { i18n } from '../configs/i18n';
 import { EventsComposable } from '../composables/event-composable';
 import { ClientsComposable } from '../composables/clients-composable';
+import { PaymentMethodsComposable } from '../composables/payment-methods-composable';
 import { ProductsComposable } from '../composables/products-composable';
 import { getAuth } from '../persistence/auth-session';
 
@@ -17,6 +18,7 @@ Application.on(Application.launchEvent, () => {
         void EventsComposable.refresh();
         void ClientsComposable.refresh();
         void ProductsComposable.refresh();
+        void PaymentMethodsComposable.refresh();
     }
 });
 

@@ -73,8 +73,8 @@ flowchart TD
         EventsComposable["EventsComposable"]
         ProductsComposable["ProductsComposable"]
         ClientsComposable["ClientsComposable"]
+        PaymentMethodsComposable["PaymentMethodsComposable"]
         useOrders["useOrders"]
-        usePaymentMethods["usePaymentMethods"]
     end
 
     subgraph db [DB — Camada Local]
@@ -178,9 +178,9 @@ app/
 └── composables/
     ├── event-composable.ts     # EventsComposable
     ├── products-composable.ts  # ProductsComposable
-    ├── clients-composable.ts   # ClientsComposable
-    ├── useOrders.ts
-    └── usePaymentMethods.ts
+    ├── clients-composable.ts       # ClientsComposable
+    ├── payment-methods-composable.ts  # PaymentMethodsComposable
+    └── useOrders.ts
 
 specs/                           # este diretório — documentação técnica
 ```

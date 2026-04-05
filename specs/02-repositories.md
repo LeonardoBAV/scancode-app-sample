@@ -191,6 +191,8 @@ interface ClientsRepository {
 
 Arquivo: `app/db/repositories/payment-methods.repo.ts`
 
+Tipo **`PaymentMethod`**: `app/types/schema/payment-method.ts`.
+
 ```typescript
 interface PaymentMethodsRepository {
     /**

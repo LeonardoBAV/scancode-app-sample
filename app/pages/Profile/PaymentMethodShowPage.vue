@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import type { PaymentMethod } from '../../types/payment-method';
+import type { PaymentMethod } from '../../types/schema/payment-method';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
 

@@ -37,7 +37,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { ref, computed } from 'vue';
-import type { Product } from '../types/product';
+import type { Product } from '../types/schema/product';
 import { formatCurrencyBR } from '../utils/format';
 import { lucide } from '../utils/icons';
 

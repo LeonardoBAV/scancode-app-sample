@@ -11,6 +11,7 @@ import { SyncLogRepository } from '../db/repositories/sync-log.repo';
 import { OrdersRepository } from '../db/repositories/orders.repo';
 import { ClientsComposable } from '../composables/clients-composable';
 import { EventsComposable } from '../composables/event-composable';
+import { ProductsComposable } from '../composables/products-composable';
 
 export class SyncPullService {
     private constructor() { }
@@ -40,6 +41,7 @@ export class SyncPullService {
         await ProductCategoriesRepository.upsertMany([...categoryById.values()]);
         await ProductsRepository.upsertMany(products);
         await SyncLogRepository.setLastPulledAt('products', new Date().toISOString());
+        await ProductsComposable.refresh();
     }
 
     public static async pullClients(): Promise<void> {

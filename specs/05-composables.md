@@ -21,7 +21,7 @@
 |---|---|
 | `Controller` (recebe request, retorna response) | A função do composable (recebe contexto, retorna estado reativo) |
 | `Service` (lógica de negócio) | Ações dentro do composable (`createOrder`, `cancelOrder`) |
-| `$products` na view | `products` — `Ref<Product[]>` observado pelo template |
+| `$products` na view | `ProductsComposable.getList()` — `Ref<Product[]>` observado pelo template |
 
 A diferença: o composable mantém estado **vivo** (reativo) em vez de retornar uma resposta única.
 
@@ -31,12 +31,12 @@ A diferença: o composable mantém estado **vivo** (reativo) em vez de retornar 
 
 ```typescript
 // Declarado NO MÓDULO (fora da função) → compartilhado entre todos os consumidores
-const products = ref<Product[]>([]);
+// (Exemplo genérico; no projeto, catálogo e eventos usam classes estáticas — ver secções abaixo.)
+const items = ref<Item[]>([]);
 const isLoading = ref<boolean>(false);
 
-// A função exporta uma visão desse estado
-export function useProducts() {
-    return { products: readonly(products), isLoading: readonly(isLoading), loadProducts };
+export function useItems() {
+    return { items: readonly(items), isLoading: readonly(isLoading), loadItems };
 }
 ```
 
@@ -72,97 +72,67 @@ Não chamar `refresh` em páginas (`LoginPage`, `Home`, `EventsPage` onMounted) 
 
 ---
 
-## `useProducts`
+## `ProductsComposable` (catálogo de produtos)
 
-**Arquivo:** `app/composables/useProducts.ts`
+**Arquivo:** `app/composables/products-composable.ts` — **`ProductsComposable`** com estado e API **estáticos**: `getList()` / `getIsLoading()` devolvem refs só de leitura; `refresh()` lê o SQLite e atualiza estado.
 
 ```typescript
-import { ref, computed, readonly, type Ref, type ComputedRef } from 'vue';
-import type { Product } from '../types/product';
-import * as productsRepo from '../db/repositories/products.repo';
+import { ref, readonly } from 'vue';
+import type { Product } from '../types/schema/product';
+import { ProductsRepository } from '../db/repositories/products.repo';
 
-const products: Ref<Product[]>    = ref([]);
-const isLoading: Ref<boolean>     = ref(false);
-const searchQuery: Ref<string>    = ref('');
-
-// Filtro in-memory — evita queries SQL a cada keystroke
-const filteredProducts: ComputedRef<Product[]> = computed(() => {
-    const q = searchQuery.value.trim().toLowerCase();
-    if (!q) return products.value;
-    return products.value.filter((p) =>
-        p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)
-    );
-});
-
-async function loadProducts(): Promise<void> {
-    isLoading.value = true;
-    products.value = await productsRepo.findAll();
-    isLoading.value = false;
-}
-
-async function findByBarcode(barcode: string): Promise<Product | null> {
-    return productsRepo.findByBarcode(barcode);
-}
-
-export function useProducts() {
-    return {
-        products:         readonly(products),
-        isLoading:        readonly(isLoading),
-        searchQuery,                           // mutável — o template escreve diretamente
-        filteredProducts,
-        loadProducts,
-        findByBarcode,
-    };
+export class ProductsComposable {
+    private static products = ref<Product[]>([]);
+    private static isLoading = ref<boolean>(false);
+    private constructor() {}
+    static getList() { return readonly(ProductsComposable.products); }
+    static getIsLoading() { return readonly(ProductsComposable.isLoading); }
+    static async refresh() {
+        ProductsComposable.products.value = await ProductsRepository.findAll(); // JOIN com categorias
+    }
 }
 ```
 
-**Consumido por:** `ProductListPage.vue`, `ProductShowPage.vue`, seletor de produto no carrinho.
+**Onde `refresh()` é chamado (gatilhos):**
 
-> `searchQuery` é exposto como mutável para que o `v-model` do `TextField` funcione diretamente. `products` e `isLoading` são `readonly` para evitar mutação acidental.
+1. **`Application.launchEvent`** em `app/bootstrap/app.ts` — se `getAuth()`, hidrata junto de `EventsComposable` e `ClientsComposable`.
+2. **`SyncPullService.pullProducts()`** — após upsert no SQLite bem-sucedido (ver `specs/03-sync-pull.md`).
+
+Não chamar `refresh` em `onMounted` de `ProductListPage` — a lista consome `getList()` já preenchido pelos gatilhos acima.
+
+**Consumido por:** `ProductListPage.vue` (`getList()`). O campo de busca e o filtro in-memory ficam em **`ProductListComponent`** (`searchQuery` local + `computed` sobre a prop `products`), no mesmo padrão de `ClientListComponent`.
+
+> Tipo **`Product`**: `app/types/schema/product.ts` (inclui `product_category` aninhado; o repositório faz JOIN ao montar `findAll()`).
 
 ---
 
-## `useClients`
+## `ClientsComposable` (catálogo de clientes)
 
-**Arquivo:** `app/composables/useClients.ts`
+**Arquivo:** `app/composables/clients-composable.ts` — **`ClientsComposable`** com o mesmo padrão estático que `ProductsComposable`.
 
 ```typescript
-import { ref, computed, readonly, type Ref, type ComputedRef } from 'vue';
-import type { Client } from '../types/client';
-import * as clientsRepo from '../db/repositories/clients.repo';
+import { ref, readonly } from 'vue';
+import type { Client } from '../types/schema/client';
+import { ClientsRepository } from '../db/repositories/clients.repo';
 
-const clients: Ref<Client[]>   = ref([]);
-const isLoading: Ref<boolean>  = ref(false);
-const searchQuery: Ref<string> = ref('');
-
-const filteredClients: ComputedRef<Client[]> = computed(() => {
-    const q = searchQuery.value.trim().toLowerCase();
-    if (!q) return clients.value;
-    return clients.value.filter((c) =>
-        c.corporate_name.toLowerCase().includes(q) ||
-        (c.fantasy_name ?? '').toLowerCase().includes(q) ||
-        c.cpf_cnpj.includes(q)
-    );
-});
-
-async function loadClients(): Promise<void> {
-    isLoading.value = true;
-    clients.value = await clientsRepo.findAll();
-    isLoading.value = false;
-}
-
-export function useClients() {
-    return {
-        clients:         readonly(clients),
-        isLoading:       readonly(isLoading),
-        searchQuery,
-        filteredClients,
-        loadClients,
-    };
+export class ClientsComposable {
+    private static clients = ref<Client[]>([]);
+    private static isLoading = ref<boolean>(false);
+    private constructor() {}
+    static getList() { return readonly(ClientsComposable.clients); }
+    static getIsLoading() { return readonly(ClientsComposable.isLoading); }
+    static async refresh() {
+        ClientsComposable.clients.value = await ClientsRepository.findAll();
+    }
 }
 ```
 
-**Consumido por:** `ClientListPage.vue`, `OrderSelectClientPage.vue`.
+**Onde `refresh()` é chamado:**
+
+1. **`Application.launchEvent`** em `app/bootstrap/app.ts` — se `getAuth()`.
+2. **`SyncPullService.pullClients()`** — após upsert no SQLite.
+
+**Consumido por:** `ClientListPage.vue` (`getList()` + `computed` para exibir `fantasy_name` ou `corporate_name`), `OrderSelectClientPage.vue` (quando existir). Busca em **`ClientListComponent`**.
 
 ---
 
@@ -279,14 +249,14 @@ export function useOrders() {
 
 ---
 
-## Quando chamar `load*` nos componentes
+## Quando chamar `refresh()` / `load*` nos componentes
 
-| Composable | Quando chamar `load*` |
+| Composable | Quando hidratar / atualizar |
 |---|---|
-| `EventsComposable` | `Application.launchEvent` (com sessão), e após sync pós-login via **`SyncPullService.pullEvents()`** → `EventsComposable.refresh()` — ver `specs/00-architecture.md` |
-| `useProducts` | `onMounted` em `ProductListPage.vue` e quando abrir seletor de produto no carrinho |
-| `useClients` | `onMounted` em `ClientListPage.vue` e `OrderSelectClientPage.vue` |
-| `usePaymentMethods` | `onMounted` em `OrderPaymentPage.vue` |
-| `useOrders` | `onMounted` em `OrderListPage.vue`, passando o `eventId` do evento selecionado |
+| `EventsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullEvents()`** → `EventsComposable.refresh()` — ver `specs/00-architecture.md` |
+| `ProductsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullProducts()`** → `ProductsComposable.refresh()` |
+| `ClientsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullClients()`** → `ClientsComposable.refresh()` |
+| `usePaymentMethods` | `onMounted` em `OrderPaymentPage.vue` *(quando implementado)* |
+| `useOrders` | `onMounted` em `OrderListPage.vue`, passando o `eventId` do evento selecionado *(quando implementado)* |
 
-> Como os composables são singletons, se os dados já foram carregados em outra tela, o `ref` já estará preenchido e a tela renderiza imediatamente — o `load*` atualiza com dados frescos do SQLite.
+> Como os composables de catálogo são singletons, se os dados já foram carregados após login ou cold start, o `ref` já estará preenchido — a página só lê `getList()`. O `refresh()` após pull garante dados alinhados ao servidor.

@@ -62,7 +62,7 @@ import { useTranslation } from '../../../composables/useTranslation';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import { vibrateSuccess } from '../../../utils/haptics';
 import { formatCurrencyBR } from '../../../utils/format';
-import type { Product } from '../../../types/product';
+import type { Product } from '../../../types/schema/product';
 import type { CartItem } from '../../../types/cart';
 import { lucide } from '../../../utils/icons';
 

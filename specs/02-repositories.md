@@ -122,6 +122,8 @@ interface ProductCategoriesRepository {
 
 Arquivo: `app/db/repositories/products.repo.ts`
 
+Tipos **`Product`** e **`ProductCategory`**: `app/types/schema/product.ts` e `app/types/schema/product-category.ts` (produto com relação aninhada após JOIN em `findAll()`).
+
 ```typescript
 interface ProductsRepository {
     /**

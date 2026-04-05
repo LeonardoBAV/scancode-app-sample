@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import type { Product } from '../../types/product';
+import type { Product } from '../../types/schema/product';
 import { formatCurrencyBR } from '../../utils/format';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 

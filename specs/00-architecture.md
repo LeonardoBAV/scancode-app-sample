@@ -71,8 +71,8 @@ flowchart TD
 
     subgraph composables [Composables]
         EventsComposable["EventsComposable"]
-        useProducts["useProducts"]
-        useClients["useClients"]
+        ProductsComposable["ProductsComposable"]
+        ClientsComposable["ClientsComposable"]
         useOrders["useOrders"]
         usePaymentMethods["usePaymentMethods"]
     end
@@ -176,9 +176,9 @@ app/
 │   └── push.ts                  # envia do SQLite → API (quando existir)
 │
 └── composables/
-    ├── event-composable.ts   # EventsComposable
-    ├── useProducts.ts
-    ├── useClients.ts
+    ├── event-composable.ts     # EventsComposable
+    ├── products-composable.ts  # ProductsComposable
+    ├── clients-composable.ts   # ClientsComposable
     ├── useOrders.ts
     └── usePaymentMethods.ts
 

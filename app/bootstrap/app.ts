@@ -7,6 +7,7 @@ import App from './App.vue';
 import { i18n } from '../configs/i18n';
 import { EventsComposable } from '../composables/event-composable';
 import { ClientsComposable } from '../composables/clients-composable';
+import { ProductsComposable } from '../composables/products-composable';
 import { getAuth } from '../persistence/auth-session';
 
 registerElement('DrawingPad', () => require('@nativescript-community/drawingpad').DrawingPad);
@@ -15,6 +16,7 @@ Application.on(Application.launchEvent, () => {
     if (getAuth()) {
         void EventsComposable.refresh();
         void ClientsComposable.refresh();
+        void ProductsComposable.refresh();
     }
 });
 

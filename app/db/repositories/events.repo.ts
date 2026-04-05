@@ -10,6 +10,7 @@ export class EventsRepository extends RepositoryBase {
 
     private static readonly EVENT_COLUMNS: readonly (keyof Event)[] = [
         'id',
+        'remote_id',
         'name',
         'start',
         'end',

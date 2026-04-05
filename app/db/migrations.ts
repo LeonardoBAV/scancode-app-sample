@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from '@nativescript-community/sqlite';
 
-const SCHEMA_VERSION: number = 2;
+const SCHEMA_VERSION: number = 3;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const currentVersion: number = db.getVersion();
@@ -15,6 +15,10 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
 
     if (currentVersion < 2) {
         await migrateToV2(db);
+    }
+
+    if (currentVersion < 3) {
+        await migrateToV3(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -153,4 +157,16 @@ async function migrateToV2(db: SQLiteDatabase): Promise<void> {
     await db.execute(`
         ALTER TABLE clients ADD COLUMN created_at TEXT NOT NULL DEFAULT '';
     `);
+}
+
+async function migrateToV3(db: SQLiteDatabase): Promise<void> {
+    await db.execute("ALTER TABLE products ADD COLUMN created_at TEXT NOT NULL DEFAULT '';");
+    await db.execute("ALTER TABLE product_categories ADD COLUMN created_at TEXT NOT NULL DEFAULT '';");
+    await db.execute("ALTER TABLE payment_methods ADD COLUMN created_at TEXT NOT NULL DEFAULT '';");
+
+    await db.execute('ALTER TABLE events ADD COLUMN remote_id INTEGER;');
+    await db.execute('ALTER TABLE product_categories ADD COLUMN remote_id INTEGER;');
+    await db.execute('ALTER TABLE products ADD COLUMN remote_id INTEGER;');
+    await db.execute('ALTER TABLE clients ADD COLUMN remote_id INTEGER;');
+    await db.execute('ALTER TABLE payment_methods ADD COLUMN remote_id INTEGER;');
 }

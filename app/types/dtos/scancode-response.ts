@@ -46,3 +46,24 @@ export interface ClientDTO {
 export interface ClientsResponseDTO {
     data: ClientDTO[];
 }
+
+export interface ProductCategoryDTO {
+    id: number;
+    name: string;
+}
+
+export interface ProductDTO {
+    id: number;
+    sku: string;
+    barcode: string | null;
+    name: string;
+    price: string;
+    product_category_id: number;
+    created_at: string;
+    updated_at: string;
+    product_category: ProductCategoryDTO;
+}
+
+export interface ProductsResponseDTO {
+    data: ProductDTO[];
+}

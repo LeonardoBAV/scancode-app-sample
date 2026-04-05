@@ -23,8 +23,23 @@ export class HttpClient {
         this.interceptors.push(fn);
     }
 
-    public async get<T>(path: string): Promise<HttpClientResponse<T>> {
-        return this.request<T>('GET', path);
+    public async get<T>(path: string, params?: Record<string, string | string[]>): Promise<HttpClientResponse<T>> {
+        const fullPath: string = params ? `${path}?${HttpClient.buildQueryString(params)}` : path;
+        return this.request<T>('GET', fullPath);
+    }
+
+    private static buildQueryString(params: Record<string, string | string[]>): string {
+        const parts: string[] = [];
+        for (const [key, value] of Object.entries(params)) {
+            if (Array.isArray(value)) {
+                for (const v of value) {
+                    parts.push(`${encodeURIComponent(key)}[]=${encodeURIComponent(v)}`);
+                }
+            } else {
+                parts.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+            }
+        }
+        return parts.join('&');
     }
 
     public async post<T>(path: string, body?: unknown): Promise<HttpClientResponse<T>> {

@@ -1,9 +1,7 @@
-export interface Event {
+export interface ProductCategory {
     id: number;
     remote_id: number;
     name: string;
-    start: string;
-    end: string;
     created_at: string;
     updated_at: string;
 }

@@ -3,6 +3,7 @@ import { ApiException } from '../../types/exceptions/api-exception';
 import type { Auth } from '../../types/sessions/auth';
 import type { Client } from '../../types/schema/client';
 import type { Event } from '../../types/schema/event';
+import type { Product } from '../../types/schema/product';
 import { i18n } from '../../configs/i18n';
 import { clearAuth } from '../../persistence/auth-session';
 import { HttpError } from '../../types/http/http-types';
@@ -25,6 +26,7 @@ export class ScancodeAdapter {
 
             return response.data.map((dto): Event => ({
                 id: dto.id,
+                remote_id: dto.id,
                 name: dto.name,
                 start: dto.start,
                 end: dto.end,
@@ -42,12 +44,40 @@ export class ScancodeAdapter {
 
             return response.data.map((dto): Client => ({
                 id: dto.id,
+                remote_id: dto.id,
                 cpf_cnpj: dto.cpf_cnpj,
                 corporate_name: dto.corporate_name,
                 fantasy_name: ScancodeAdapter.nullableString(dto.fantasy_name),
                 email: ScancodeAdapter.nullableString(dto.email),
                 phone: ScancodeAdapter.nullableString(dto.phone),
                 carrier: ScancodeAdapter.nullableString(dto.carrier),
+                created_at: dto.created_at,
+                updated_at: dto.updated_at,
+            }));
+        } catch (err: unknown) {
+            ScancodeAdapter.handleApiError(err);
+        }
+    }
+
+    public static async getProducts(): Promise<Product[]> {
+        try {
+            const response = await scancodeApi.getProducts();
+
+            return response.data.map((dto): Product => ({
+                id: dto.id,
+                remote_id: dto.id,
+                sku: dto.sku,
+                barcode: ScancodeAdapter.nullableString(dto.barcode),
+                name: dto.name,
+                price: Number.parseFloat(dto.price),
+                product_category_id: dto.product_category_id,
+                product_category: {
+                    id: dto.product_category.id,
+                    remote_id: dto.product_category.id,
+                    name: dto.product_category.name,
+                    created_at: '',
+                    updated_at: dto.updated_at,
+                },
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
             }));

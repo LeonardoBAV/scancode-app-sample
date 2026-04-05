@@ -10,6 +10,7 @@ export class ClientsRepository extends RepositoryBase {
 
     private static readonly CLIENT_COLUMNS: readonly (keyof Client)[] = [
         'id',
+        'remote_id',
         'cpf_cnpj',
         'corporate_name',
         'fantasy_name',

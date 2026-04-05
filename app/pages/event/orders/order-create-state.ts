@@ -4,6 +4,7 @@ import type { Client } from '../../../types/schema/client';
 /** Default client for initial state. */
 const defaultClient: Client = {
     id: 1,
+    remote_id: 1,
     cpf_cnpj: '12.345.678/0001-90',
     corporate_name: 'Alpha Comércio Ltda',
     fantasy_name: 'Alpha Store',

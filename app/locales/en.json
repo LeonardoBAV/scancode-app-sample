@@ -70,7 +70,22 @@
       "view": "View"
     },
     "clientShow": {
-      "title": "Client details"
+      "title": "Client details",
+      "segmentView": "View",
+      "segmentEdit": "Edit"
+    },
+    "clientForm": {
+      "save": "Save",
+      "saveSuccess": "Client saved successfully.",
+      "saveError": "Could not save. Please try again.",
+      "saveErrorNoClient": "No client loaded to save.",
+      "carrier": "Carrier",
+      "fantasyNameHint": "Trade name",
+      "corporateNameHint": "Corporate name",
+      "cpfCnpjHint": "CPF or CNPJ",
+      "emailHint": "Email",
+      "phoneHint": "Phone",
+      "carrierHint": "Carrier"
     },
     "productList": {
       "title": "Products",

@@ -25,6 +25,10 @@ export class ClientsRepository extends RepositoryBase {
         await ClientsRepository.insertOrReplaceMany('clients', ClientsRepository.CLIENT_COLUMNS, clients);
     }
 
+    public static async upsertOne(client: Client): Promise<void> {
+        await ClientsRepository.insertOrReplaceOne('clients', ClientsRepository.CLIENT_COLUMNS, client);
+    }
+
     public static async findAll(): Promise<Client[]> {
         return await ClientsRepository.queryAll<Client>('SELECT * FROM clients ORDER BY corporate_name ASC');
     }

@@ -70,7 +70,22 @@
       "view": "Visualizar"
     },
     "clientShow": {
-      "title": "Detalhes do cliente"
+      "title": "Detalhes do cliente",
+      "segmentView": "Visualizar",
+      "segmentEdit": "Editar"
+    },
+    "clientForm": {
+      "save": "Salvar",
+      "saveSuccess": "Cliente salvo com sucesso.",
+      "saveError": "Não foi possível salvar. Tente novamente.",
+      "saveErrorNoClient": "Nenhum cliente carregado para salvar.",
+      "carrier": "Transportadora",
+      "fantasyNameHint": "Nome fantasia",
+      "corporateNameHint": "Razão social",
+      "cpfCnpjHint": "CPF ou CNPJ",
+      "emailHint": "E-mail",
+      "phoneHint": "Telefone",
+      "carrierHint": "Transportadora"
     },
     "productList": {
       "title": "Produtos",

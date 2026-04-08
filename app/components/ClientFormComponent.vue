@@ -89,22 +89,12 @@ import type { Client } from '../types/schema/client';
 
 
 // --- Component logic ---
-export interface ClientFormSubmitPayload {
-    id: number | null;
-    fantasy_name: string;
-    corporate_name: string;
-    cpf_cnpj: string;
-    email: string;
-    phone: string;
-    carrier: string;
-}
-
 const props = defineProps<{
-    client: Client | null;
+    client: Client;
 }>();
 
 const emit = defineEmits<{
-    save: [payload: ClientFormSubmitPayload];
+    save: [client: Client];
 }>();
 
 const fantasyName: Ref<string> = ref('');
@@ -114,16 +104,7 @@ const email: Ref<string> = ref('');
 const phone: Ref<string> = ref('');
 const carrier: Ref<string> = ref('');
 
-function applyClientToFields(c: Client | null): void {
-    if (!c) {
-        fantasyName.value = '';
-        corporateName.value = '';
-        cpfCnpj.value = '';
-        email.value = '';
-        phone.value = '';
-        carrier.value = '';
-        return;
-    }
+function applyClientToFields(c: Client): void {
     fantasyName.value = c.fantasy_name ?? '';
     corporateName.value = c.corporate_name ?? '';
     cpfCnpj.value = c.cpf_cnpj ?? '';
@@ -134,21 +115,24 @@ function applyClientToFields(c: Client | null): void {
 
 watch(
     () => props.client,
-    (c: Client | null) => {
+    (c: Client) => {
         applyClientToFields(c);
     },
     { immediate: true },
 );
 
 function onSave(): void {
-    emit('save', {
-        id: props.client?.id ?? null,
+    const base: Client = props.client;
+    const next: Client = {
+        ...base,
         fantasy_name: fantasyName.value.trim(),
         corporate_name: corporateName.value.trim(),
         cpf_cnpj: cpfCnpj.value.trim(),
         email: email.value.trim(),
         phone: phone.value.trim(),
         carrier: carrier.value.trim(),
-    });
+        updated_at: new Date().toISOString(),
+    };
+    emit('save', next);
 }
 </script>

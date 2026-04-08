@@ -19,9 +19,7 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import type { ClientFormSubmitPayload } from '../../components/ClientFormComponent.vue';
 import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
-import { ClientsComposable } from '../../composables/clients-composable';
 import { ClientsRepository } from '../../db/repositories/clients.repo';
 import { showToast } from '../../composables/toast-state';
 import { useTranslation } from '../../composables/useTranslation';
@@ -53,28 +51,14 @@ watch(
 );
 
 const headerTitle: ComputedRef<string> = computed(() => {
-    const name: string | undefined = localClient.value?.fantasy_name?.trim();
-    if (name) {
-        return name;
-    }
-    return t('pages.clientShow.title');
+    const name: string = localClient.value.fantasy_name.trim();
+    return name;
 });
 
-async function onClientFormSave(payload: ClientFormSubmitPayload): Promise<void> {
-    const next: Client = {
-        ...localClient.value,
-        fantasy_name: payload.fantasy_name,
-        corporate_name: payload.corporate_name,
-        cpf_cnpj: payload.cpf_cnpj,
-        email: payload.email,
-        phone: payload.phone,
-        carrier: payload.carrier,
-        updated_at: new Date().toISOString(),
-    };
+async function onClientFormSave(client: Client): Promise<void> {
     try {
-        await ClientsRepository.upsertOne(next);
-        localClient.value = next;
-        await ClientsComposable.refresh();
+        await ClientsRepository.upsertOne(client);
+        localClient.value = client;
         vibrateSuccess();
         showToast({
             message: t('pages.clientForm.saveSuccess'),

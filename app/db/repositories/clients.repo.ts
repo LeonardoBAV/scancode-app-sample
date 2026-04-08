@@ -1,6 +1,7 @@
 // --- Imports ---
 import type { Client } from '../../types/schema/client';
 import { RepositoryBase } from '../repository-base';
+import { ClientsComposable } from '../../composables/clients-composable';
 
 
 export class ClientsRepository extends RepositoryBase {
@@ -23,10 +24,12 @@ export class ClientsRepository extends RepositoryBase {
 
     public static async upsertMany(clients: Client[]): Promise<void> {
         await ClientsRepository.insertOrReplaceMany('clients', ClientsRepository.CLIENT_COLUMNS, clients);
+        await ClientsComposable.refresh();
     }
 
     public static async upsertOne(client: Client): Promise<void> {
         await ClientsRepository.insertOrReplaceOne('clients', ClientsRepository.CLIENT_COLUMNS, client);
+        await ClientsComposable.refresh();
     }
 
     public static async findAll(): Promise<Client[]> {
@@ -35,5 +38,6 @@ export class ClientsRepository extends RepositoryBase {
 
     public static async truncate(): Promise<void> {
         await ClientsRepository.truncateTable('clients');
+        await ClientsComposable.refresh();
     }
 }

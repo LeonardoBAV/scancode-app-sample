@@ -9,18 +9,10 @@
 
                     <!-- User Hero Section -->
                     <StackLayout class="bg-primary pt-8 pb-6 px-4" horizontalAlignment="stretch">
-                        <Label
-                            :text="userInitials"
-                            class="text-2xl font-bold text-foreground bg-card w-20 h-20 rounded-full text-center mb-4"
-                            horizontalAlignment="center"
-                        />
+                        <Label :text="userInitials" class="text-2xl font-bold text-foreground bg-card w-20 h-20 rounded-full text-center mb-4" horizontalAlignment="center" />
                         <Label :text="userName" class="text-xl font-bold text-primary-foreground text-center" />
                         <Label :text="userEmail" class="text-sm text-primary-foreground opacity-70 text-center mt-1" />
-                        <Label
-                            v-if="distributorName !== '—'"
-                            :text="distributorName"
-                            class="text-sm text-primary-foreground opacity-50 text-center mt-1"
-                        />
+                        <Label v-if="distributorName !== '—'" :text="distributorName" class="text-sm text-primary-foreground opacity-50 text-center mt-1" />
                     </StackLayout>
 
                     <!-- Profile Details -->
@@ -67,18 +59,8 @@
                     <StackLayout class="px-4 mt-6">
                         <StackLayout class="card p-0" androidElevation="2" :isEnabled="!isSyncing" @tap="onSync">
                             <GridLayout columns="auto, *, auto" class="p-4">
-                                <Label
-                                    col="0"
-                                    :text="isSyncing ? lucide('loader-2') : lucide('refresh-cw')"
-                                    :class="['lucide', 'text-muted-foreground', 'mr-4', isSyncing ? 'lucide-spin' : '']"
-                                    verticalAlignment="center"
-                                />
-                                <Label
-                                    col="1"
-                                    :text="isSyncing ? $t('common.loading') : $t('pages.profile.sync')"
-                                    class="text-base text-card-foreground"
-                                    verticalAlignment="center"
-                                />
+                                <Label col="0" :text="isSyncing ? lucide('loader-2') : lucide('refresh-cw')" :class="['lucide', 'text-muted-foreground', 'mr-4', isSyncing ? 'lucide-spin' : '']" verticalAlignment="center" />
+                                <Label col="1" :text="isSyncing ? $t('common.loading') : $t('pages.profile.sync')" class="text-base text-card-foreground" verticalAlignment="center" />
                                 <Label v-if="!isSyncing" col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
                         </StackLayout>
@@ -160,6 +142,7 @@ async function onSync(): Promise<void> {
     if (isSyncing.value) {
         return;
     }
+
     isSyncing.value = true;
     try {
         await SyncPullService.updateEntities();

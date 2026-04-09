@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from '@nativescript-community/sqlite';
 
-const SCHEMA_VERSION: number = 4;
+const SCHEMA_VERSION: number = 5;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const currentVersion: number = db.getVersion();
@@ -23,6 +23,10 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
 
     if (currentVersion < 4) {
         await migrateToV4(db);
+    }
+
+    if (currentVersion < 5) {
+        await migrateToV5(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -148,13 +152,6 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
         );
     `);
     await db.execute('CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);');
-
-    await db.execute(`
-        CREATE TABLE IF NOT EXISTS sync_log (
-            entity      TEXT    PRIMARY KEY,
-            pulled_at   TEXT    NOT NULL
-        );
-    `);
 }
 
 async function migrateToV2(db: SQLiteDatabase): Promise<void> {
@@ -181,4 +178,8 @@ async function migrateToV4(db: SQLiteDatabase): Promise<void> {
     await db.execute('ALTER TABLE products ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
     await db.execute('ALTER TABLE clients ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
     await db.execute('ALTER TABLE payment_methods ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
+}
+
+async function migrateToV5(db: SQLiteDatabase): Promise<void> {
+    await db.execute('DROP TABLE IF EXISTS sync_log;');
 }

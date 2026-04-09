@@ -7,7 +7,6 @@ import { OrderItemsRepository } from '../db/repositories/order-items.repo';
 import { ProductsRepository } from '../db/repositories/products.repo';
 import { ClientsRepository } from '../db/repositories/clients.repo';
 import { EventsRepository } from '../db/repositories/events.repo';
-import { SyncLogRepository } from '../db/repositories/sync-log.repo';
 import { OrdersRepository } from '../db/repositories/orders.repo';
 import { EventsComposable } from '../composables/event-composable';
 import { PaymentMethodsComposable } from '../composables/payment-methods-composable';
@@ -34,7 +33,6 @@ export class SyncPullService {
     private static async pullEvents(): Promise<void> {
         const events = await ScancodeAdapter.getEvents();
         await EventsRepository.upsertMany(events);
-        await SyncLogRepository.setLastPulledAt('events', new Date().toISOString());
         await EventsComposable.refresh();
     }
 
@@ -48,20 +46,17 @@ export class SyncPullService {
 
         await ProductCategoriesRepository.upsertMany([...categoryById.values()]);
         await ProductsRepository.upsertMany(products);
-        await SyncLogRepository.setLastPulledAt('products', new Date().toISOString());
         await ProductsComposable.refresh();
     }
 
     private static async pullClients(): Promise<void> {
         const clients = await ScancodeAdapter.getClients();
         await ClientsRepository.upsertMany(clients);
-        await SyncLogRepository.setLastPulledAt('clients', new Date().toISOString());
     }
 
     private static async pullPaymentMethods(): Promise<void> {
         const methods = await ScancodeAdapter.getPaymentMethods();
         await PaymentMethodsRepository.upsertMany(methods);
-        await SyncLogRepository.setLastPulledAt('payment_methods', new Date().toISOString());
         await PaymentMethodsComposable.refresh();
     }
 
@@ -73,6 +68,5 @@ export class SyncPullService {
         await ClientsRepository.truncate();
         await PaymentMethodsRepository.truncate();
         await EventsRepository.truncate();
-        await SyncLogRepository.truncate();
     }
 }

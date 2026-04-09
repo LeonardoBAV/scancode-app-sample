@@ -20,6 +20,11 @@ export abstract class RepositoryBase {
         return name;
     }
 
+    /** SQLite stores booleans as INTEGER 0/1. */
+    protected static readSqliteBool(value: unknown): boolean {
+        return Number(value) === 1;
+    }
+
     protected static buildInsertOrReplaceSql(table: string, columns: readonly string[]): string {
         RepositoryBase.assertSafeSqlIdentifier(table);
         const safeColumns: string[] = columns.map((c: string) => RepositoryBase.assertSafeSqlIdentifier(c));
@@ -35,6 +40,9 @@ export abstract class RepositoryBase {
             const v: unknown = (row as Record<string, unknown>)[col];
             if (v === undefined) {
                 return null;
+            }
+            if (typeof v === 'boolean') {
+                return v ? 1 : 0;
             }
             return v as SqliteParam;
         });

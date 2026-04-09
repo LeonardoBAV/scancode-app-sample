@@ -11,6 +11,7 @@ export class ProductCategoriesRepository extends RepositoryBase {
     private static readonly CATEGORY_COLUMNS: readonly (keyof ProductCategory)[] = [
         'id',
         'remote_id',
+        'is_sync',
         'name',
         'created_at',
         'updated_at',

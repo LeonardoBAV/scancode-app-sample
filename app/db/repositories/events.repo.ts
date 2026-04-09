@@ -11,6 +11,7 @@ export class EventsRepository extends RepositoryBase {
     private static readonly EVENT_COLUMNS: readonly (keyof Event)[] = [
         'id',
         'remote_id',
+        'is_sync',
         'name',
         'start',
         'end',
@@ -23,11 +24,24 @@ export class EventsRepository extends RepositoryBase {
     }
 
     public static async findAll(): Promise<Event[]> {
-        return await EventsRepository.queryAll<Event>('SELECT * FROM events ORDER BY start ASC');
+        const rows: Event[] = await EventsRepository.queryAll<Event>('SELECT * FROM events ORDER BY start ASC');
+        return rows.map(
+            (row: Event): Event => ({
+                ...row,
+                is_sync: EventsRepository.readSqliteBool(row.is_sync as unknown),
+            }),
+        );
     }
 
     public static async findById(id: number): Promise<Event | null> {
-        return await EventsRepository.queryOne<Event>('SELECT * FROM events WHERE id = ?', [id]);
+        const row: Event | null = await EventsRepository.queryOne<Event>('SELECT * FROM events WHERE id = ?', [id]);
+        if (!row) {
+            return null;
+        }
+        return {
+            ...row,
+            is_sync: EventsRepository.readSqliteBool(row.is_sync as unknown),
+        };
     }
 
     public static async truncate(): Promise<void> {

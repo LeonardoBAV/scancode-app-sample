@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from '@nativescript-community/sqlite';
 
-const SCHEMA_VERSION: number = 3;
+const SCHEMA_VERSION: number = 4;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const currentVersion: number = db.getVersion();
@@ -19,6 +19,10 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
 
     if (currentVersion < 3) {
         await migrateToV3(db);
+    }
+
+    if (currentVersion < 4) {
+        await migrateToV4(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -169,4 +173,12 @@ async function migrateToV3(db: SQLiteDatabase): Promise<void> {
     await db.execute('ALTER TABLE products ADD COLUMN remote_id INTEGER;');
     await db.execute('ALTER TABLE clients ADD COLUMN remote_id INTEGER;');
     await db.execute('ALTER TABLE payment_methods ADD COLUMN remote_id INTEGER;');
+}
+
+async function migrateToV4(db: SQLiteDatabase): Promise<void> {
+    await db.execute('ALTER TABLE events ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
+    await db.execute('ALTER TABLE product_categories ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
+    await db.execute('ALTER TABLE products ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
+    await db.execute('ALTER TABLE clients ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
+    await db.execute('ALTER TABLE payment_methods ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
 }

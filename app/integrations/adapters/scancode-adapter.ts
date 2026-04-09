@@ -28,6 +28,7 @@ export class ScancodeAdapter {
             return response.data.map((dto): Event => ({
                 id: dto.id,
                 remote_id: dto.id,
+                is_sync: true,
                 name: dto.name,
                 start: dto.start,
                 end: dto.end,
@@ -46,6 +47,7 @@ export class ScancodeAdapter {
             return response.data.map((dto): Client => ({
                 id: dto.id,
                 remote_id: dto.id,
+                is_sync: true,
                 cpf_cnpj: dto.cpf_cnpj,
                 corporate_name: dto.corporate_name,
                 fantasy_name: ScancodeAdapter.nullableString(dto.fantasy_name),
@@ -67,6 +69,7 @@ export class ScancodeAdapter {
             return response.data.map((dto): Product => ({
                 id: dto.id,
                 remote_id: dto.id,
+                is_sync: true,
                 sku: dto.sku,
                 barcode: ScancodeAdapter.nullableString(dto.barcode),
                 name: dto.name,
@@ -75,6 +78,7 @@ export class ScancodeAdapter {
                 product_category: {
                     id: dto.product_category.id,
                     remote_id: dto.product_category.id,
+                    is_sync: true,
                     name: dto.product_category.name,
                     created_at: '',
                     updated_at: dto.updated_at,
@@ -94,6 +98,7 @@ export class ScancodeAdapter {
             return response.data.map((dto): PaymentMethod => ({
                 id: dto.id,
                 remote_id: dto.id,
+                is_sync: true,
                 name: dto.name,
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,

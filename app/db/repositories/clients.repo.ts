@@ -12,6 +12,7 @@ export class ClientsRepository extends RepositoryBase {
     private static readonly CLIENT_COLUMNS: readonly (keyof Client)[] = [
         'id',
         'remote_id',
+        'is_sync',
         'cpf_cnpj',
         'corporate_name',
         'fantasy_name',
@@ -33,7 +34,13 @@ export class ClientsRepository extends RepositoryBase {
     }
 
     public static async findAll(): Promise<Client[]> {
-        return await ClientsRepository.queryAll<Client>('SELECT * FROM clients ORDER BY corporate_name ASC');
+        const rows: Client[] = await ClientsRepository.queryAll<Client>('SELECT * FROM clients ORDER BY corporate_name ASC');
+        return rows.map(
+            (row: Client): Client => ({
+                ...row,
+                is_sync: ClientsRepository.readSqliteBool(row.is_sync as unknown),
+            }),
+        );
     }
 
     public static async truncate(): Promise<void> {

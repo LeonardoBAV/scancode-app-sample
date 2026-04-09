@@ -11,6 +11,7 @@ export class PaymentMethodsRepository extends RepositoryBase {
     private static readonly PAYMENT_METHOD_COLUMNS: readonly (keyof PaymentMethod)[] = [
         'id',
         'remote_id',
+        'is_sync',
         'name',
         'created_at',
         'updated_at',
@@ -25,8 +26,14 @@ export class PaymentMethodsRepository extends RepositoryBase {
     }
 
     public static async findAll(): Promise<PaymentMethod[]> {
-        return await PaymentMethodsRepository.queryAll<PaymentMethod>(
+        const rows: PaymentMethod[] = await PaymentMethodsRepository.queryAll<PaymentMethod>(
             'SELECT * FROM payment_methods ORDER BY name COLLATE NOCASE ASC',
+        );
+        return rows.map(
+            (row: PaymentMethod): PaymentMethod => ({
+                ...row,
+                is_sync: PaymentMethodsRepository.readSqliteBool(row.is_sync as unknown),
+            }),
         );
     }
 

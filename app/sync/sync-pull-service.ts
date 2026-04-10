@@ -13,30 +13,35 @@ import { PaymentMethodsComposable } from '../composables/payment-methods-composa
 import { ProductsComposable } from '../composables/products-composable';
 
 export class SyncPullService {
+    private static readonly _instance: SyncPullService = new SyncPullService();
+
     private constructor() { }
 
-    public static async refreshAllEntities(): Promise<void> {
-        await SyncPullService.truncateAllEntities();
-        await SyncPullService.pullEvents();
-        await SyncPullService.pullProducts();
-        await SyncPullService.pullClients();
-        await SyncPullService.pullPaymentMethods();
+    public static getInstance(): SyncPullService {
+        return SyncPullService._instance;
     }
 
-
-    public static async updateEntities(): Promise<void> {
-        await SyncPullService.pullProducts();
-        await SyncPullService.pullClients();
-        await SyncPullService.pullPaymentMethods();
+    public async refresh(): Promise<void> {
+        await this.truncateAllEntities();
+        await this.pullEvents();
+        await this.pullProducts();
+        await this.pullClients();
+        await this.pullPaymentMethods();
     }
 
-    private static async pullEvents(): Promise<void> {
+    public async updateEntities(): Promise<void> {
+        await this.pullProducts();
+        await this.pullClients();
+        await this.pullPaymentMethods();
+    }
+
+    private async pullEvents(): Promise<void> {
         const events = await ScancodeAdapter.getEvents();
         await EventsRepository.upsertMany(events);
         await EventsComposable.refresh();
     }
 
-    private static async pullProducts(): Promise<void> {
+    private async pullProducts(): Promise<void> {
         const products: Product[] = await ScancodeAdapter.getProducts();
 
         const categoryById: Map<number, ProductCategory> = new Map<number, ProductCategory>();
@@ -49,18 +54,18 @@ export class SyncPullService {
         await ProductsComposable.refresh();
     }
 
-    private static async pullClients(): Promise<void> {
+    private async pullClients(): Promise<void> {
         const clients = await ScancodeAdapter.getClients();
         await ClientsRepository.upsertMany(clients);
     }
 
-    private static async pullPaymentMethods(): Promise<void> {
+    private async pullPaymentMethods(): Promise<void> {
         const methods = await ScancodeAdapter.getPaymentMethods();
         await PaymentMethodsRepository.upsertMany(methods);
         await PaymentMethodsComposable.refresh();
     }
 
-    private static async truncateAllEntities(): Promise<void> {
+    private async truncateAllEntities(): Promise<void> {
         await OrderItemsRepository.truncate();
         await OrdersRepository.truncate();
         await ProductsRepository.truncate();
@@ -70,3 +75,5 @@ export class SyncPullService {
         await EventsRepository.truncate();
     }
 }
+
+export const syncPullService: SyncPullService = SyncPullService.getInstance();

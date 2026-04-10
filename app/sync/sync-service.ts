@@ -1,5 +1,5 @@
 import { syncPushService } from './sync-push-service';
-import { SyncPullService } from './sync-pull-service';
+import { syncPullService } from './sync-pull-service';
 
 
 export class SyncService {
@@ -13,7 +13,11 @@ export class SyncService {
 
     public async updateEntities(): Promise<void> {
         await syncPushService.updateEntities();
-        await SyncPullService.updateEntities();
+        await syncPullService.updateEntities();
+    }
+
+    public async refresh(): Promise<void> {
+        await syncPullService.refresh();
     }
 }
 

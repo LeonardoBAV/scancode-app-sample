@@ -97,11 +97,23 @@
     },
     "productShow": {
       "title": "Product details",
+      "segmentView": "View",
+      "segmentEdit": "Edit",
       "name": "Name",
       "sku": "SKU",
       "barcode": "Barcode",
       "category": "Category",
       "price": "Price"
+    },
+    "productForm": {
+      "save": "Save",
+      "saveSuccess": "Product saved successfully.",
+      "saveError": "Could not save. Please try again.",
+      "nameHint": "Product name",
+      "skuHint": "SKU",
+      "barcodeHint": "Barcode",
+      "priceHint": "Price (e.g. 999.00)",
+      "noCategories": "No categories available. Sync your data."
     },
     "paymentMethodList": {
       "title": "Payment methods",
@@ -111,7 +123,15 @@
     },
     "paymentMethodShow": {
       "title": "Payment method details",
+      "segmentView": "View",
+      "segmentEdit": "Edit",
       "name": "Name"
+    },
+    "paymentMethodForm": {
+      "save": "Save",
+      "saveSuccess": "Payment method saved successfully.",
+      "saveError": "Could not save. Please try again.",
+      "nameHint": "Payment method name"
     },
     "eventLayout": {
       "tabHome": "Event",

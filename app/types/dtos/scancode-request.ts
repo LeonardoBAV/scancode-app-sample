@@ -13,3 +13,17 @@ export interface ClientUpdateRequestDTO {
     phone: string;
     carrier: string;
 }
+
+/** PATCH /products/:id — server sets created_at / updated_at; price as decimal string */
+export interface ProductUpdateRequestDTO {
+    sku: string;
+    barcode: string;
+    name: string;
+    price: string;
+    product_category_id: number;
+}
+
+/** PATCH /payment-methods/:id — server sets created_at / updated_at */
+export interface PaymentMethodUpdateRequestDTO {
+    name: string;
+}

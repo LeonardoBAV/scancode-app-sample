@@ -97,11 +97,23 @@
     },
     "productShow": {
       "title": "Detalhes do produto",
+      "segmentView": "Visualizar",
+      "segmentEdit": "Editar",
       "name": "Nome",
       "sku": "SKU",
       "barcode": "Código de barras",
       "category": "Categoria",
       "price": "Preço"
+    },
+    "productForm": {
+      "save": "Salvar",
+      "saveSuccess": "Produto salvo com sucesso.",
+      "saveError": "Não foi possível salvar. Tente novamente.",
+      "nameHint": "Nome do produto",
+      "skuHint": "SKU",
+      "barcodeHint": "Código de barras",
+      "priceHint": "Preço (ex.: 999.00)",
+      "noCategories": "Nenhuma categoria disponível. Sincronize os dados."
     },
     "paymentMethodList": {
       "title": "Formas de pagamento",
@@ -111,7 +123,15 @@
     },
     "paymentMethodShow": {
       "title": "Detalhes da forma de pagamento",
+      "segmentView": "Visualizar",
+      "segmentEdit": "Editar",
       "name": "Nome"
+    },
+    "paymentMethodForm": {
+      "save": "Salvar",
+      "saveSuccess": "Forma de pagamento salva com sucesso.",
+      "saveError": "Não foi possível salvar. Tente novamente.",
+      "nameHint": "Nome da forma de pagamento"
     },
     "eventLayout": {
       "tabHome": "Evento",

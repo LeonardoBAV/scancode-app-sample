@@ -1,11 +1,13 @@
-import type { ClientUpdateRequestDTO } from '../../types/dtos/scancode-request';
+import type { ClientUpdateRequestDTO, PaymentMethodUpdateRequestDTO, ProductUpdateRequestDTO } from '../../types/dtos/scancode-request';
 import type { ValidationErrorResponseDTO } from '../../types/dtos/scancode-response';
 import { ApiException } from '../../types/exceptions/api-exception';
 import type { Auth } from '../../types/sessions/auth';
 import type { Client } from '../../types/schema/client';
 import type { Event } from '../../types/schema/event';
 import type { PaymentMethod } from '../../types/schema/payment-method';
+import type { ProductCategory } from '../../types/schema/product-category';
 import type { Product } from '../../types/schema/product';
+import { ProductCategoriesRepository } from '../../db/repositories/product-categories.repo';
 import { i18n } from '../../configs/i18n';
 import { clearAuth } from '../../persistence/auth-session';
 import { HttpError } from '../../types/http/http-types';
@@ -124,6 +126,66 @@ export class ScancodeAdapter {
         }
     }
 
+    public static async updateProduct(product: Product): Promise<Product> {
+        try {
+            const remoteId: number = product.remote_id ?? product.id;
+            const payload: ProductUpdateRequestDTO = {
+                sku: product.sku.trim(),
+                barcode: product.barcode.trim(),
+                name: product.name.trim(),
+                price: product.price.toFixed(2),
+                product_category_id: product.product_category_id,
+            };
+            const response = await scancodeApi.patchProduct(remoteId, payload);
+            const dto = response.data;
+
+            let category: ProductCategory;
+            if (dto.product_category) {
+                category = {
+                    id: dto.product_category.id,
+                    remote_id: dto.product_category.id,
+                    is_sync: true,
+                    name: dto.product_category.name,
+                    created_at: product.product_category.created_at,
+                    updated_at: dto.updated_at,
+                };
+            } else if (dto.product_category_id === product.product_category_id) {
+                category = {
+                    ...product.product_category,
+                    updated_at: dto.updated_at,
+                };
+            } else {
+                const fromDb: ProductCategory | null = await ProductCategoriesRepository.findById(dto.product_category_id);
+                category =
+                    fromDb ??
+                    ({
+                        id: dto.product_category_id,
+                        remote_id: dto.product_category_id,
+                        is_sync: true,
+                        name: '',
+                        created_at: '',
+                        updated_at: dto.updated_at,
+                    } as ProductCategory);
+            }
+
+            return {
+                id: product.id,
+                remote_id: dto.id,
+                is_sync: true,
+                sku: dto.sku,
+                barcode: ScancodeAdapter.nullableString(dto.barcode),
+                name: dto.name,
+                price: Number.parseFloat(dto.price),
+                product_category_id: dto.product_category_id,
+                product_category: category,
+                created_at: dto.created_at,
+                updated_at: dto.updated_at,
+            };
+        } catch (err: unknown) {
+            ScancodeAdapter.handleApiError(err);
+        }
+    }
+
     public static async getPaymentMethods(): Promise<PaymentMethod[]> {
         try {
             const response = await scancodeApi.getPaymentMethods();
@@ -136,6 +198,28 @@ export class ScancodeAdapter {
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
             }));
+        } catch (err: unknown) {
+            ScancodeAdapter.handleApiError(err);
+        }
+    }
+
+    public static async updatePaymentMethod(method: PaymentMethod): Promise<PaymentMethod> {
+        try {
+            const remoteId: number = method.remote_id ?? method.id;
+            const payload: PaymentMethodUpdateRequestDTO = {
+                name: method.name.trim(),
+            };
+            const response = await scancodeApi.patchPaymentMethod(remoteId, payload);
+            const dto = response.data;
+
+            return {
+                id: method.id,
+                remote_id: dto.id,
+                is_sync: true,
+                name: dto.name,
+                created_at: dto.created_at,
+                updated_at: dto.updated_at,
+            };
         } catch (err: unknown) {
             ScancodeAdapter.handleApiError(err);
         }

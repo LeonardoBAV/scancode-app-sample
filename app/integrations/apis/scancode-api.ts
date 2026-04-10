@@ -1,13 +1,20 @@
 import { Device } from '@nativescript/core';
 
 import { SCANCODE_API_URL, SCANCODE_API_VERSION } from '../../configs/scancode-config';
-import type { ClientUpdateRequestDTO, LoginRequestDTO } from '../../types/dtos/scancode-request';
+import type {
+    ClientUpdateRequestDTO,
+    LoginRequestDTO,
+    PaymentMethodUpdateRequestDTO,
+    ProductUpdateRequestDTO,
+} from '../../types/dtos/scancode-request';
 import type {
     ClientsResponseDTO,
     ClientResponseDTO,
     EventsResponseDTO,
     LoginResponseDTO,
+    PaymentMethodResponseDTO,
     PaymentMethodsResponseDTO,
+    ProductResponseDTO,
     ProductsResponseDTO,
 } from '../../types/dtos/scancode-response';
 import { getToken } from '../../persistence/auth-session';
@@ -58,8 +65,18 @@ export class ScancodeApi extends HttpClient {
         return data;
     }
 
+    public async patchProduct(remoteId: number, body: ProductUpdateRequestDTO): Promise<ProductResponseDTO> {
+        const { data } = await this.patch<ProductResponseDTO>(`/products/${remoteId}`, body);
+        return data;
+    }
+
     public async getPaymentMethods(): Promise<PaymentMethodsResponseDTO> {
         const { data } = await this.get<PaymentMethodsResponseDTO>('/payment-methods');
+        return data;
+    }
+
+    public async patchPaymentMethod(remoteId: number, body: PaymentMethodUpdateRequestDTO): Promise<PaymentMethodResponseDTO> {
+        const { data } = await this.patch<PaymentMethodResponseDTO>(`/payment-methods/${remoteId}`, body);
         return data;
     }
 }

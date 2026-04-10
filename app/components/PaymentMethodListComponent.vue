@@ -17,7 +17,21 @@
                     @tap="$emit('select', item)"
                 >
                     <Label col="0" :text="lucide('credit-card')" :class="['lucide mr-4', selectedPaymentMethodId === item.id ? 'text-primary-foreground' : 'text-muted-foreground']" verticalAlignment="center" />
-                    <Label col="1" :text="item.name" :class="['text-base font-medium', selectedPaymentMethodId === item.id ? 'text-primary-foreground' : 'text-card-foreground']" verticalAlignment="center" />
+                    <GridLayout col="1" columns="*, auto">
+                        <Label
+                            col="0"
+                            :text="item.name"
+                            :class="['text-base font-semibold pr-2', selectedPaymentMethodId === item.id ? 'text-primary-foreground' : 'text-card-foreground']"
+                            textWrap="true"
+                            verticalAlignment="center"
+                        />
+                        <Label
+                            col="1"
+                            :text="item.is_sync ? $t('common.syncBadgeSynced') : $t('common.syncBadgePending')"
+                            :class="item.is_sync ? 'badge-success' : 'badge-secondary'"
+                            verticalAlignment="top"
+                        />
+                    </GridLayout>
                 </GridLayout>
             </template>
         </ListView>

@@ -18,8 +18,22 @@
                     @tap="$emit('select', item)"
                 >
                     <Label row="0" col="0" rowSpan="2" :text="lucide('package')" :class="['lucide mr-4', selectedProductId === item.id ? 'text-primary-foreground' : 'text-muted-foreground']" verticalAlignment="top" />
-                    <Label row="0" col="1" :text="item.name" :class="['text-base font-semibold', selectedProductId === item.id ? 'text-primary-foreground' : 'text-card-foreground']" textWrap="true" verticalAlignment="top" />
-                    <Label row="0" col="2" :text="formatCurrencyBR(item.price)" :class="['text-base font-bold', selectedProductId === item.id ? 'text-primary-foreground' : 'text-primary']" />
+                    <GridLayout row="0" col="1" columns="*, auto">
+                        <Label
+                            col="0"
+                            :text="item.name"
+                            :class="['text-base font-semibold pr-2', selectedProductId === item.id ? 'text-primary-foreground' : 'text-card-foreground']"
+                            textWrap="true"
+                            verticalAlignment="center"
+                        />
+                        <Label
+                            col="1"
+                            :text="item.is_sync ? $t('common.syncBadgeSynced') : $t('common.syncBadgePending')"
+                            :class="item.is_sync ? 'badge-success' : 'badge-secondary'"
+                            verticalAlignment="top"
+                        />
+                    </GridLayout>
+                    <Label row="0" col="2" :text="formatCurrencyBR(item.price)" :class="['text-base font-bold', selectedProductId === item.id ? 'text-primary-foreground' : 'text-primary']" verticalAlignment="top" />
                     <Label row="1" col="1" colSpan="2" :text="item.sku + ' · ' + item.product_category.name" :class="['text-xs mt-1', selectedProductId === item.id ? 'text-primary-foreground opacity-70' : 'text-muted-foreground']" />
                 </GridLayout>
             </template>

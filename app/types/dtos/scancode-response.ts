@@ -72,6 +72,23 @@ export interface ProductsResponseDTO {
     data: ProductDTO[];
 }
 
+/** PATCH /products/:id — body may omit nested product_category */
+export interface ProductUpdatedDTO {
+    id: number;
+    sku: string;
+    barcode: string | null;
+    name: string;
+    price: string;
+    product_category_id: number;
+    created_at: string;
+    updated_at: string;
+    product_category?: ProductCategoryDTO;
+}
+
+export interface ProductResponseDTO {
+    data: ProductUpdatedDTO;
+}
+
 export interface PaymentMethodDTO {
     id: number;
     name: string;
@@ -81,4 +98,8 @@ export interface PaymentMethodDTO {
 
 export interface PaymentMethodsResponseDTO {
     data: PaymentMethodDTO[];
+}
+
+export interface PaymentMethodResponseDTO {
+    data: PaymentMethodDTO;
 }

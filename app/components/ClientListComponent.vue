@@ -18,7 +18,21 @@
                     @tap="$emit('select', item)"
                 >
                     <Label row="0" col="0" rowSpan="3" :text="lucide('users')" :class="['lucide mr-4', selectedClientId === item.id ? 'text-primary-foreground' : 'text-muted-foreground']" verticalAlignment="top" />
-                    <Label row="0" col="1" :text="item.fantasy_name" :class="['text-base font-semibold', selectedClientId === item.id ? 'text-primary-foreground' : 'text-card-foreground']" textWrap="true" verticalAlignment="top" />
+                    <GridLayout row="0" col="1" columns="*, auto">
+                        <Label
+                            col="0"
+                            :text="item.fantasy_name"
+                            :class="['text-base font-semibold pr-2', selectedClientId === item.id ? 'text-primary-foreground' : 'text-card-foreground']"
+                            textWrap="true"
+                            verticalAlignment="center"
+                        />
+                        <Label
+                            col="1"
+                            :text="item.is_sync ? $t('common.syncBadgeSynced') : $t('common.syncBadgePending')"
+                            :class="item.is_sync ? 'badge-success' : 'badge-secondary'"
+                            verticalAlignment="top"
+                        />
+                    </GridLayout>
                     <Label row="1" col="1" :text="formatCPFCNPJ(item.cpf_cnpj)" :class="['text-sm mt-1', selectedClientId === item.id ? 'text-primary-foreground opacity-70' : 'text-muted-foreground']" />
                     <Label row="2" col="1" :text="item.phone" :class="['text-xs mt-1', selectedClientId === item.id ? 'text-primary-foreground opacity-70' : 'text-muted-foreground']" />
                 </GridLayout>

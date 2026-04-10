@@ -10,7 +10,9 @@
     "networkError": "Erro de conexão. Verifique sua internet.",
     "error": "Erro",
     "free": "Grátis",
-    "orders": "pedidos"
+    "orders": "pedidos",
+    "syncBadgeSynced": "Sincronizado",
+    "syncBadgePending": "Pendente"
   },
   "pages": {
     "login": {

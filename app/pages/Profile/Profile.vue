@@ -92,7 +92,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { ref, computed, onMounted, type Ref } from 'vue';
-import { SyncPullService } from '../../sync/sync-pull-service';
+import { syncService } from '../../sync/sync-service';
 import { ApiException } from '../../types/exceptions/api-exception';
 import { useTranslation } from '../../composables/useTranslation';
 import { useNavigation } from '../../composables/useNavigation';
@@ -145,7 +145,7 @@ async function onSync(): Promise<void> {
 
     isSyncing.value = true;
     try {
-        await SyncPullService.updateEntities();
+        await syncService.updateEntities();
     } catch (err: unknown) {
         const message: string =
             err instanceof ApiException ? err.message : t('pages.profile.syncError');

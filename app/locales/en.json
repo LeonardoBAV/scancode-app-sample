@@ -10,7 +10,9 @@
     "networkError": "Connection error. Check your internet.",
     "error": "Error",
     "free": "Free",
-    "orders": "orders"
+    "orders": "orders",
+    "syncBadgeSynced": "Synced",
+    "syncBadgePending": "Pending"
   },
   "pages": {
     "login": {

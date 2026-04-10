@@ -47,6 +47,10 @@ export interface ClientsResponseDTO {
     data: ClientDTO[];
 }
 
+export interface ClientResponseDTO {
+    data: ClientDTO;
+}
+
 export interface ProductCategoryDTO {
     id: number;
     name: string;

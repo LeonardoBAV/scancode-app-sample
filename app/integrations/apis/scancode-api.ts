@@ -1,9 +1,10 @@
 import { Device } from '@nativescript/core';
 
 import { SCANCODE_API_URL, SCANCODE_API_VERSION } from '../../configs/scancode-config';
-import type { LoginRequestDTO } from '../../types/dtos/scancode-request';
+import type { ClientUpdateRequestDTO, LoginRequestDTO } from '../../types/dtos/scancode-request';
 import type {
     ClientsResponseDTO,
+    ClientResponseDTO,
     EventsResponseDTO,
     LoginResponseDTO,
     PaymentMethodsResponseDTO,
@@ -44,6 +45,11 @@ export class ScancodeApi extends HttpClient {
 
     public async getClients(): Promise<ClientsResponseDTO> {
         const { data } = await this.get<ClientsResponseDTO>('/clients');
+        return data;
+    }
+
+    public async patchClient(remoteId: number, body: ClientUpdateRequestDTO): Promise<ClientResponseDTO> {
+        const { data } = await this.patch<ClientResponseDTO>(`/clients/${remoteId}`, body);
         return data;
     }
 

@@ -43,6 +43,18 @@ export class ClientsRepository extends RepositoryBase {
         );
     }
 
+    public static async findAllUnsynced(): Promise<Client[]> {
+        const rows: Client[] = await ClientsRepository.queryAll<Client>(
+            'SELECT * FROM clients WHERE is_sync = 0 ORDER BY id ASC',
+        );
+        return rows.map(
+            (row: Client): Client => ({
+                ...row,
+                is_sync: ClientsRepository.readSqliteBool(row.is_sync as unknown),
+            }),
+        );
+    }
+
     public static async truncate(): Promise<void> {
         await ClientsRepository.truncateTable('clients');
         await ClientsComposable.refresh();

@@ -2,6 +2,13 @@
     <StackLayout class="p-4 pb-8">
         <StackLayout class="card p-0" androidElevation="2">
             <StackLayout class="p-4">
+                <StackLayout v-if="client" horizontalAlignment="right" class="mb-3">
+                    <Label
+                        :text="client.is_sync ? $t('common.syncBadgeSynced') : $t('common.syncBadgePending')"
+                        :class="client.is_sync ? 'badge-success' : 'badge-secondary'"
+                        horizontalAlignment="right"
+                    />
+                </StackLayout>
                 <Label :text="$t('pages.orderClientShow.fantasyName')" class="text-xs text-muted-foreground mb-1" />
                 <Label :text="client?.fantasy_name ?? '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
             </StackLayout>

@@ -62,7 +62,7 @@ export class EventsComposable {
 **Onde `refresh()` é chamado (únicos gatilhos):**
 
 1. **`Application.launchEvent`** em `app/bootstrap/app.ts` — se `getAuth()`, hidrata o singleton no cold start com sessão já persistida.
-2. **`SyncPullService`** (pós-login em `LoginPage`) — após `truncate` + pull de events bem-sucedido, **`EventsComposable.refresh()`** é invocado no fim de `pullEvents()` (ver `specs/03-sync-pull.md`). *Comportamento alvo com `finally` se o pull falhar após truncate — ainda a alinhar com `specs/00-architecture.md`.*
+2. **`syncPullService.refresh()`** (via `syncService.refresh()` em `LoginPage` após auth) — após `truncate` + pulls bem-sucedidos, **`EventsComposable.refresh()`** no fim de `pullEvents()`; também `ProductsComposable` / `PaymentMethodsComposable` nos pulls correspondentes (ver `specs/03-sync-pull.md`, `specs/06-sync-services.md`). *Comportamento alvo com `finally` se o pull falhar após truncate — ainda a alinhar com `specs/00-architecture.md`.*
 
 Não chamar `refresh` em páginas (`LoginPage`, `Home`, `EventsPage` onMounted) para evitar dispersão; ver `specs/00-architecture.md`. Na UI: `getList()` e `getIsLoading()`.
 
@@ -96,7 +96,7 @@ export class ProductsComposable {
 **Onde `refresh()` é chamado (gatilhos):**
 
 1. **`Application.launchEvent`** em `app/bootstrap/app.ts` — se `getAuth()`, hidrata junto de `EventsComposable` e `ClientsComposable`.
-2. **`SyncPullService.pullProducts()`** — após upsert no SQLite bem-sucedido (ver `specs/03-sync-pull.md`).
+2. **`syncPullService`** (`pullProducts`) — após upsert no SQLite bem-sucedido (ver `specs/03-sync-pull.md`, `06-sync-services.md`).
 
 Não chamar `refresh` em `onMounted` de `ProductListPage` — a lista consome `getList()` já preenchido pelos gatilhos acima.
 
@@ -130,7 +130,7 @@ export class ClientsComposable {
 **Onde `refresh()` é chamado:**
 
 1. **`Application.launchEvent`** em `app/bootstrap/app.ts` — se `getAuth()`.
-2. **`SyncPullService.pullClients()`** — após upsert no SQLite.
+2. **Não** é chamado após `syncPullService.pullClients()` no código atual — o SQLite é atualizado, mas o singleton em memória só refresca no próximo cold start com sessão até se adicionar `ClientsComposable.refresh()` no fim de `pullClients()` (ver `specs/06-sync-services.md`).
 
 **Consumido por:** `ClientListPage.vue` (`getList()` + `computed` para exibir `fantasy_name` ou `corporate_name`), `OrderSelectClientPage.vue` (quando existir). Busca em **`ClientListComponent`**.
 
@@ -160,7 +160,7 @@ export class PaymentMethodsComposable {
 **Onde `refresh()` é chamado:**
 
 1. **`Application.launchEvent`** em `app/bootstrap/app.ts` — se `getAuth()`.
-2. **`SyncPullService.pullPaymentMethods()`** — após upsert no SQLite (ver `specs/03-sync-pull.md`).
+2. **`syncPullService`** (`pullPaymentMethods`) — após upsert no SQLite (ver `specs/03-sync-pull.md`, `06-sync-services.md`).
 
 **Consumido por:** `PaymentMethodListPage.vue`, `OrderPaymentPage.vue` (`getList()` + `computed` com cópia superficial para tipagem). Busca em **`PaymentMethodListComponent`**.
 
@@ -254,10 +254,10 @@ export function useOrders() {
 
 | Composable | Quando hidratar / atualizar |
 |---|---|
-| `EventsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullEvents()`** → `EventsComposable.refresh()` — ver `specs/00-architecture.md` |
-| `ProductsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullProducts()`** → `ProductsComposable.refresh()` |
-| `ClientsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullClients()`** → `ClientsComposable.refresh()` |
-| `PaymentMethodsComposable` | `Application.launchEvent` (com sessão), e após **`SyncPullService.pullPaymentMethods()`** → `PaymentMethodsComposable.refresh()` |
+| `EventsComposable` | `Application.launchEvent` (com sessão), e após **`syncPullService.pullEvents()`** (login via `syncService.refresh()`) → `EventsComposable.refresh()` — ver `specs/00-architecture.md`, `06-sync-services.md` |
+| `ProductsComposable` | `Application.launchEvent` (com sessão), e após **`syncPullService.pullProducts()`** → `ProductsComposable.refresh()` |
+| `ClientsComposable` | `Application.launchEvent` (com sessão) **apenas**; *não* após `pullClients()` até backlog |
+| `PaymentMethodsComposable` | `Application.launchEvent` (com sessão), e após **`syncPullService.pullPaymentMethods()`** → `PaymentMethodsComposable.refresh()` |
 | `useOrders` | `onMounted` em `OrderListPage.vue`, passando o `eventId` do evento selecionado *(quando implementado)* |
 
 > Como os composables de catálogo são singletons, se os dados já foram carregados após login ou cold start, o `ref` já estará preenchido — a página só lê `getList()`. O `refresh()` após pull garante dados alinhados ao servidor.

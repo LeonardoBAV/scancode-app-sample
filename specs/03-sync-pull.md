@@ -1,13 +1,15 @@
 # Sync Pull — API → SQLite
 
-**Arquivo:** `app/sync/sync-pull-service.ts` — classe **`SyncPullService`**
-**Direção:** API → SQLite local
-**Quando é executado:** dois gatilhos distintos (o segundo é **alvo** de implementação):
+**Mapa da camada de sync:** `specs/06-sync-services.md`  
+**Arquivo:** `app/sync/sync-pull-service.ts` — classe **`SyncPullService`** + instância **`syncPullService`** (singleton; ver `specs/06-sync-services.md`).  
+**Direção:** API → SQLite local.
 
-| Gatilho | Escopo do pull |
-|---|---|
-| **Após login bem-sucedido** | **Alvo (documento):** sequência completa na secção **Ordem de Pull (login — completo)** — **sempre depois** do backup+wipe em `specs/00-architecture.md`. **Implementação atual:** `SyncPullService` faz wipe operacional (truncate em ordem FK) + pull só de **`events`** + `EventsComposable.refresh()`; restantes entidades em roadmap. |
-| **Botão “Sincronizar” no Profile** | **Parcial (catálogo):** apenas `product_categories`, `products`, `clients`, `payment_methods`. **Não** inclui `events`, `orders`, `order_items`. *(A implementar no serviço de pull.)* |
+**Quando é executado:**
+
+| Gatilho | Quem chama | Método | Escopo (implementação atual) |
+|---|---|---|---|
+| **Após login bem-sucedido** | `LoginPage` → `syncService.refresh()` | `syncPullService.refresh()` | `truncateAllEntities()` (ordem FK) → `pullEvents` → `pullProducts` (inclui upsert de `product_categories` a partir dos produtos) → `pullClients` → `pullPaymentMethods`. **Não** puxa `orders` / `order_items`. *Alvo arquitetural:* backup antes do wipe + pull completo 1–7 em `00-architecture.md`. |
+| **Botão “Sincronizar” no Profile** | `Profile.vue` → `syncService.updateEntities()` | `syncPullService.updateEntities()` | Só `pullProducts` → `pullClients` → `pullPaymentMethods` (sem truncate, sem `events`). Precedido de **push de clientes** no orquestrador. |
 
 Não há listener automático de reconexão nesta versão.
 
@@ -19,18 +21,17 @@ O **`SyncPullService`** é a ponte entre a camada de integração (adapter) e a 
 
 - Chama funções do adapter (que chamam a API).
 - Passa os dados recebidos para os repositórios gravarem no SQLite.
-- Atualiza o `sync_log` após cada entidade cuja pull **terminou com sucesso** (ver subseção abaixo).
-- **Não tem estado reativo.** Não conhece Vue; pode chamar **`EventsComposable.refresh()`** só para hidratar o singleton após gravar `events` — exceção controlada ao critério do projeto.
-- **Não trata erros de exibição.** Lança exceções para a camada de UI (ex.: `LoginPage`) tratar.
+- **Alvo:** atualizar o `sync_log` após cada entidade cuja pull **terminou com sucesso** (ver subseção abaixo). **Código atual:** os métodos em `sync-pull-service.ts` **não** escrevem em `sync_log` — a subsecção descreve o desenho pretendido quando for ligado ao repositório `sync-log`.
 
-### O que significa “atualizar o `sync_log` após cada entidade”
+- **Não tem estado reativo.** Não conhece Vue; chama **`EventsComposable.refresh()`**, **`ProductsComposable.refresh()`** e **`PaymentMethodsComposable.refresh()`** após os pulls correspondentes. **`ClientsComposable.refresh()`** não é invocado após `pullClients()` (lista de clientes em memória só no cold start com sessão, até backlog).
+- **Não trata erros de exibição.** Lança exceções para a camada de UI (ex.: `LoginPage`, `Profile`) tratar.
 
-A tabela `sync_log` guarda, **por nome de entidade** (`events`, `products`, …), o instante (`pulled_at`) em que **aquela** pull terminou sem erro.
+### `sync_log` — comportamento alvo (quando implementado)
+
+A tabela `sync_log` guardaria, **por nome de entidade** (`events`, `products`, …), o instante (`pulled_at`) em que **aquela** pull terminou sem erro.
 
 - Ex.: após `pullProducts()` concluir com sucesso → `setLastPulledAt('products', now)`.
-- Se `pullProducts()` falhar, **não** atualiza a linha de `products` — na próxima sync, o app refaz **pull completo** dessa entidade. Uso de `pulled_at` para filtro na API é **backlog V2** (sync incremental — ver fim deste documento).
-
-Isso **não apaga pedidos locais** e **não substitui dados de outras entidades**; só registra “até quando” a última sincronização daquele tipo foi considerada bem-sucedida.
+- Se `pullProducts()` falhar, **não** atualizar a linha de `products`. Uso de `pulled_at` para filtro na API é **backlog V2** (sync incremental — ver fim deste documento).
 
 ---
 
@@ -238,25 +239,33 @@ async function pullPaymentMethods(): Promise<void> {
 
 ## Estrutura — `SyncPullService` (`sync-pull-service.ts`)
 
-Contrato **alvo** (funções livres ou métodos estáticos — o importante é a ordem e os repos):
+Contrato **no código** (singleton; métodos de instância):
 
 ```typescript
-// app/sync/sync-pull-service.ts — resumo
+// app/sync/sync-pull-service.ts — resumo fiel ao código
 
 export class SyncPullService {
-    // Entrada pós-login (implementado): truncate operacional (FK) → pullEvents()
-    public static async refreashAllEntities(): Promise<void> { ... }
+    private static readonly _instance: SyncPullService = new SyncPullService();
+    private constructor() {}
+    public static getInstance(): SyncPullService { return SyncPullService._instance; }
 
-    public static async pullEvents(): Promise<void> { ... }  // adapter → events → sync_log → EventsComposable.refresh()
+    /** Truncate FK-safe → pull events, products (+ categories), clients, payment_methods */
+    public async refresh(): Promise<void> { ... }
 
-    private static async truncateAllEntities(): Promise<void> { ... }
+    /** Sem truncate: pull products, clients, payment_methods */
+    public async updateEntities(): Promise<void> { ... }
 
-    // Roadmap: alinhar com a ordem 1–7 deste documento
-    // public static async pullCatalogFromProfile(): Promise<void> { ... }  // só passos 2–5
+    private async pullEvents(): Promise<void> { ... }       // + EventsComposable.refresh()
+    private async pullProducts(): Promise<void> { ... }     // + ProductsComposable.refresh()
+    private async pullClients(): Promise<void> { ... }
+    private async pullPaymentMethods(): Promise<void> { ... } // + PaymentMethodsComposable.refresh()
+    private async truncateAllEntities(): Promise<void> { ... }
 }
+
+export const syncPullService: SyncPullService = SyncPullService.getInstance();
 ```
 
-**Alvo:** método de “pull completo após login” deve cobrir a secção **Ordem de Pull (login — completo)**. **Hoje:** truncate + `pullEvents()` apenas; expandir com `pullProductCategories`, `pullProducts`, etc., conforme adapters.
+**Alvo em relação a este documento:** passos **6–7** (`orders`, `order_items`) no login; `sync_log` após cada pull; backup antes do truncate no fluxo de login (`00-architecture` + `06-sync-services.md`).
 
 ---
 
@@ -273,7 +282,7 @@ Seguir exatamente o mesmo padrão do `login()` já existente.
 
 ## Comportamento em Caso de Falha
 
-- Falha em um pull **não cancela** os demais (a política fica no orquestrador — hoje `SyncPullService` / chamador).
+- Falha em um pull **não cancela** os demais (a política fica no orquestrador — `syncPullService` / `syncService` / chamador).
 - O `sync_log` **não é atualizado** para a entidade que falhou.
 - Na próxima ação de sync (login ou Profile), o pull da entidade que falhou pode ser retentado.
 - Dados locais existentes no SQLite **permanecem intactos** — o app continua funcional com a versão anterior dos dados.

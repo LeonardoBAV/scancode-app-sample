@@ -13,8 +13,9 @@ Antes de implementar qualquer camada offline, leia a spec correspondente em `spe
 | Visão geral, camadas, fases de implementação | `specs/00-architecture.md` |
 | `app/db/database.ts`, `app/db/migrations.ts`, schema SQLite | `specs/01-db-schema.md` |
 | `app/db/repositories/` | `specs/02-repositories.md` |
-| `app/sync/sync-pull-service.ts` | `specs/03-sync-pull.md` |
-| `app/sync/push.ts` (quando existir) | `specs/04-sync-push.md` |
+| Mapa de sync (`sync-service`, pull, push, gatilhos UI) | `specs/06-sync-services.md` |
+| Pull API → SQLite (`sync-pull-service.ts`) | `specs/03-sync-pull.md` |
+| Push SQLite → API (pedidos alvo; clientes implementados) | `specs/04-sync-push.md` |
 | `app/composables/use*.ts` (dados — events, products, clients, orders) | `specs/05-composables.md` |
 
 ## Resumo das Regras de Ouro
@@ -26,15 +27,15 @@ Antes de implementar qualquer camada offline, leia a spec correspondente em `spe
 5. **Preço do item é imutável após criação local** — snapshot; não re-consultado no push.
 6. **Pull não bloqueia uso** — falha no pull do Profile mantém catálogo anterior; wipe + pull completo só no login (após backup).
 7. **Logout não apaga SQLite** — só sessão/token; dados ficam até o próximo login.
-8. **Login (pós-auth):** se existir pedido com `synced_at IS NULL` → backup em `orders_backup` / `order_items_backup` (qualquer seller) → wipe operacional → **pull completo** (events … orders … order_items). **Sem push automático** na V1.
-9. **Profile “Sincronizar”:** só pull parcial de catálogo (`product_categories`, `products`, `clients`, `payment_methods`).
+8. **Login (pós-auth) — alvo:** se existir pedido com `synced_at IS NULL` → backup em `orders_backup` / `order_items_backup` (qualquer seller) → wipe operacional → **pull completo** (events … orders … order_items). **Sem push automático** na V1. **Código atual:** `LoginPage` chama `syncService.refresh()` (truncate + pull de events, catálogo e payment methods; **sem** backup explícito nem pull de orders — ver `specs/06-sync-services.md`).
+9. **Profile “Sincronizar” — código atual:** `syncService.updateEntities()` → push de **clientes** pendentes (`syncPushService`) **depois** pull parcial de catálogo (`product_categories`/`products`, `clients`, `payment_methods`) sem `events`. Ver `specs/06-sync-services.md`.
 10. **Pedidos:** `id` INTEGER — autoincrement offline; no pull, `id` = id da API; após push, **realinhar** `id` = `remote_id` = id da API. Conflito de id na **restauração** de backup: novo autoincrement + atualizar `order_items.order_id` (backlog).
 11. **Backup:** V1 só armazenar; **sem push** antes do backup. Backlog: botão Restaurar pedidos assíncronos **por seller** (`sales_representative_id`).
 
 ## Pacotes necessários (instalar antes da Fase 1)
 
 ```bash
-npm install @nativescript/sqlite
+npm install @nativescript-community/sqlite
 npm install @nativescript/connectivity
 ```
 
@@ -45,6 +46,6 @@ npm install @nativescript/connectivity
 | 1 | Pacotes + `db/database.ts` + `db/migrations.ts` |
 | 2 | Todos os repositórios em `db/repositories/` |
 | 3 | Endpoints na API + funções no adapter para pull |
-| 4 | `sync/sync-pull-service.ts` (+ `sync/push.ts` na Fase 6) |
+| 4 | `sync/sync-pull-service.ts` + `sync/sync-push-service.ts` (clientes) + `sync/sync-service.ts` (+ `sync/push.ts` pedidos na Fase 6, se aplicável) |
 | 5 | Composables (leitura do SQLite para UI) |
 | 6 | `sync/push.ts` + listener de conectividade |

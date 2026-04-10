@@ -1,14 +1,28 @@
 # Sync Push — SQLite → API
 
-**Arquivo:** `app/sync/push.ts`
 **Direção:** SQLite local → API
-**Quando é executado:** ação **explícita** do usuário (ou fluxo de tela definido na implementação). **Sem push automático** “transparente” na V1 (inclusive **não** enviar pedidos automaticamente no login).
+
+Este documento cobre: **(A)** o que está implementado em `app/sync/sync-push-service.ts` (**clientes**); **(B)** o **alvo** para **pedidos** (`app/sync/push.ts`, ainda inexistente). Mapa geral: `specs/06-sync-services.md`.
+
+**Quando é executado:** ação **explícita** (ex.: “Sincronizar” no Profile chama `syncService.updateEntities()`, que inclui push de clientes). **Sem push automático** “transparente” na V1 (inclusive **não** enviar pedidos automaticamente no login).
 
 ---
 
-## Responsabilidade
+## A) Implementado — `sync-push-service.ts` (`SyncPushService` / `syncPushService`)
 
-O `push.ts` lê os registros criados offline (com `synced_at IS NULL`) e os envia à API.
+**Responsabilidade:** enviar **clientes** marcados como não sincronizados no SQLite e gravar a versão devolvida/atualizada pela API.
+
+- `ClientsRepository.findAllUnsynced()` → para cada registro, `ScancodeAdapter.updateClient(client)` → `ClientsRepository.upsertOne(updated)`.
+- **Não tem estado reativo.** Não conhece Vue.
+- Orquestrado por **`syncService.updateEntities()`** (Profile), **antes** do pull parcial de catálogo.
+
+---
+
+## B) Alvo — `push.ts` (pedidos)
+
+**Arquivo alvo:** `app/sync/push.ts` (ficheiro a criar quando o push de pedidos for implementado).
+
+O `push.ts` leria os registros de pedidos criados offline (com `synced_at IS NULL`) e enviá-los à API.
 
 - Lê pedidos pendentes via repositório.
 - Monta o payload com os itens do pedido.
@@ -21,13 +35,16 @@ O `push.ts` lê os registros criados offline (com `synced_at IS NULL`) e os envi
 
 ## Entidades que fazem push
 
-Apenas **`orders`** faz push nesta versão.
+| Entidade | Estado |
+|---|---|
+| **Clientes** | **Implementado** em `sync-push-service.ts` (pendentes locais → API → upsert). |
+| **`orders`** | **Alvo** em `push.ts` (secção B abaixo). |
 
-`order_items` não têm push independente — são enviados **embutidos no payload do pedido** como um array. O backend cria os itens junto com o pedido em uma única requisição.
+`order_items` não têm push independente no desenho de pedidos — seriam enviados **embutidos no payload do pedido**. O backend criaria os itens junto com o pedido numa única requisição.
 
 ---
 
-## Fluxo Completo
+## Fluxo alvo — push de pedidos (`push.ts`)
 
 ```mermaid
 flowchart TD
@@ -99,14 +116,14 @@ Erro 5xx da API:
   → tratar como falha de rede — retry na próxima janela
 ```
 
-> Esta versão usa retry simples (sem backoff exponencial). Se necessário no futuro, o orquestrador que disparar o push (ex.: serviço dedicado ou extensão de `SyncPullService`) pode implementar backoff.
+> Esta versão usa retry simples (sem backoff exponencial). Se necessário no futuro, o orquestrador (`syncService` ou serviço dedicado) pode implementar backoff.
 
 ---
 
-## Estrutura do push.ts
+## Estrutura alvo do `push.ts` (pedidos)
 
 ```typescript
-// app/sync/push.ts
+// app/sync/push.ts — a criar
 
 import { getAuth } from '../persistence/auth-session';
 import * as scancodeAdapter from '../integrations/adapters/scancode-adapter';
@@ -158,7 +175,7 @@ export async function pushOrders(): Promise<void> {
 
 ---
 
-## O que precisa ser adicionado na camada de integração
+## O que precisa ser adicionado na camada de integração (pedidos)
 
 ### `scancode-api.ts`
 
@@ -207,9 +224,9 @@ Após `POST` bem-sucedido com resposta `apiId` (= **fonte de verdade** na API):
 
 ---
 
-## Verificação antes do push
+## Verificação antes do push de pedidos
 
-O código que orquestrar o push (UI ou serviço) deve verificar antes de chamar `push.ts`:
+O código que orquestrar o push de **pedidos** (UI ou serviço) deverá verificar antes de chamar `push.ts`:
 
 1. Há conectividade de rede.
 2. O usuário está autenticado (`getAuth()` não é null).

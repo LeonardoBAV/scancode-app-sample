@@ -1,6 +1,6 @@
 # Arquitetura Offline-First
 
-**Versão:** 28/03/2026
+**Versão:** 09/04/2026 (camada de sync alinhada a `specs/06-sync-services.md`)
 **Stack:** NativeScript 9 · Vue 3 · TypeScript · SQLite
 
 ---
@@ -21,8 +21,8 @@ O app opera em **feiras sem internet**. A estratégia é:
 
 | Gatilho | Ficheiro | Comportamento |
 | --- | --- | --- |
-| **`Application.launchEvent`** (`launch`) | `app/bootstrap/app.ts` | Se existir sessão (`getAuth()`), `EventsComposable.refresh()` — lê `events` do SQLite ao arrancar o processo. |
-| **Sync pós-login** | `app/sync/sync-pull-service.ts` (`SyncPullService`) | Após auth: `truncate` operacional (ordem FK) → `pullEvents()` (adapter → `EventsRepository` → `sync_log` → **`EventsComposable.refresh()`** no fim de `pullEvents`). *Comportamento alvo (backup assíncronos, pull completo 1–7, `finally` em falha)* — ver `specs/03-sync-pull.md` e regras em `00-architecture`; a implementação atual cobre truncate + pull de **events** + hidratação do composable. |
+| **`Application.launchEvent`** (`launch`) | `app/bootstrap/app.ts` | Se existir sessão (`getAuth()`), refresco dos composables de dados (`Events`, `Clients`, `Products`, `PaymentMethods`) a partir do SQLite. |
+| **Sync pós-login** | `app/pages/LoginPage.vue` → `syncService.refresh()` → `syncPullService.refresh()` | `truncate` operacional (ordem FK) → pull de **events**, **products** (com `product_categories`), **clients**, **payment_methods**; `EventsComposable.refresh()` / `ProductsComposable.refresh()` / `PaymentMethodsComposable.refresh()` após os pulls correspondentes. *Alvo:* backup de pedidos assíncronos antes do wipe, `sync_log`, pull de **orders** / **order_items** — ainda não no código; mapa em `specs/06-sync-services.md`. |
 
 **Contraponto:** com sessão guardada, o cold start pode fazer `refresh` no `launch` e outra vez após login noutra sessão — aceitável (dois `SELECT` curtos). Voltar da home do evento para a lista **não** dispara `refresh`; a lista usa o singleton já preenchido (se no futuro o schema passar a atualizar contagens no SQLite por tabela `events`, reavaliar).
 
@@ -47,7 +47,7 @@ O app opera em **feiras sem internet**. A estratégia é:
 1. **Backup de pedidos assíncronos:** se existir **ao menos um** registro em `orders` com `synced_at IS NULL`, copiar **todos** esses pedidos e respectivos `order_items` para `orders_backup` / `order_items_backup` (**independente** de `sales_representative_id` — qualquer seller). Se **não** houver pedido assíncrono, este passo é no-op.
 2. **Sem push automático** antes do wipe (nada de enviar pedidos “em silêncio” na V1).
 3. **Wipe operacional:** apagar dados do “mundo sincronizado” do login anterior — tabelas operacionais (`events`, `product_categories`, `products`, `clients`, `payment_methods`, `orders`, `order_items`) e **reiniciar** `sync_log` conforme política definida (ex.: `DELETE` em todas as linhas). **Não** apagar `orders_backup` nem `order_items_backup` (acumulam histórico de resgates futuros).
-4. **Pull completo (login):** na ordem de `specs/03-sync-pull.md` — `events` → `product_categories` → `products` → `clients` → `payment_methods` → **`orders`** → **`order_items`**.
+4. **Pull completo (login):** na ordem de `specs/03-sync-pull.md` — `events` → `product_categories` → `products` → `clients` → `payment_methods` → **`orders`** → **`order_items`** (*alvo*; **implementação atual** do `syncPullService.refresh()` ainda **não** puxa `orders` / `order_items` após o truncate — ver `specs/06-sync-services.md`).
 
 ### Pedidos e seller (sem lógica extra de “identificação”)
 
@@ -56,8 +56,8 @@ O app opera em **feiras sem internet**. A estratégia é:
 
 ### Botão Sincronizar no Profile
 
-- Apenas **pull parcial** de catálogo: `product_categories`, `products`, `clients`, `payment_methods`.
-- **Não** puxa `events`, `orders`, `order_items`. Novo evento na distribuidora exige **novo login** (pull completo).
+- **`syncService.updateEntities()`** (implementação atual): primeiro **push** de clientes pendentes (`syncPushService`), depois **pull parcial** — `product_categories`/`products`, `clients`, `payment_methods` (sem `events`, sem `orders` / `order_items`).
+- Novo evento na distribuidora continua a exigir fluxo com **pull de events** (ex.: novo login com `syncService.refresh()`), até haver outro gatilho na app.
 
 ---
 
@@ -83,8 +83,9 @@ flowchart TD
     end
 
     subgraph sync [Sync]
+        SyncOrch["sync-service.ts\nSyncService"]
         SyncPull["sync-pull-service.ts\nSyncPullService"]
-        Push["push.ts\nSQLite → API"]
+        SyncPush["sync-push-service.ts\nSyncPushService"]
     end
 
     subgraph integration [Integração — já existe]
@@ -98,11 +99,12 @@ flowchart TD
     composables --> Repos
     Repos --> SQLite
 
+    SyncOrch --> SyncPull
+    SyncOrch --> SyncPush
     SyncPull -->|"chama adapter"| Adapter
     SyncPull -->|"upsert / truncate"| Repos
-    Push -->|"findUnsynced"| Repos
-    Push -->|"POST"| Adapter
-    Push -->|"markAsSynced"| Repos
+    SyncPush -->|"clientes pendentes"| Adapter
+    SyncPush -->|"upsert local"| Repos
 
     Adapter --> ApiFile
     ApiFile --> HttpClient
@@ -119,8 +121,10 @@ flowchart TD
 | **API** | `integrations/apis/scancode-api.ts` | Define endpoints, monta payloads, retorna DTOs | Trata erros de negócio |
 | **Adapter** | `integrations/adapters/scancode-adapter.ts` | Regras de erro, limpa auth no 401, converte DTOs | Conhece Vue ou SQLite |
 | **Repository** | `db/repositories/*.repo.ts` | CRUD no SQLite — único lugar com SQL | Conhece API ou Vue |
-| **SyncPullService** | `sync/sync-pull-service.ts` | Pull: chama adapter → repositórios → `sync_log`; truncates operacionais em ordem FK; chama `EventsComposable.refresh()` após pull de events (pós-login). | Estado reativo Vue; SQL direto |
-| **push.ts** | `sync/push.ts` (a implementar) | Lê não-sincronizados → envia via adapter → marca como sync | Tem estado reativo |
+| **SyncService** | `sync/sync-service.ts` | Orquestrador: `refresh()` (login) delega no pull; `updateEntities()` (Profile) push de clientes + pull parcial. | SQL direto; API direta |
+| **SyncPullService** | `sync/sync-pull-service.ts` | Pull: adapter → repositórios; truncate em `refresh()`; `*Composable.refresh()` onde implementado (events, products, payment methods). **`sync_log` ainda não escrito aqui.** | Estado reativo (exceto refresh explícito); SQL direto |
+| **SyncPushService** | `sync/sync-push-service.ts` | Push de **clientes** não sincronizados via adapter → `upsert` local. | Estado reativo |
+| **push.ts (pedidos)** | `sync/push.ts` (não existe — alvo em `04`) | Lê pedidos `synced_at IS NULL` → API → realinhamento de PK | — |
 | **Composable** | `composables/use*.ts` | Expõe `ref`s reativos para a UI, lê/escreve via repo | Chama API diretamente; contém SQL |
 | **Page/Component** | `pages/**/*.vue` | Consome composables, renderiza UI | Contém lógica de negócio ou SQL |
 
@@ -141,13 +145,13 @@ flowchart TD
 ## Pacotes a Instalar
 
 ```bash
-npm install @nativescript/sqlite
+npm install @nativescript-community/sqlite
 npm install @nativescript/connectivity
 ```
 
 | Pacote | Uso |
 |---|---|
-| `@nativescript/sqlite` | Banco de dados local no device |
+| `@nativescript-community/sqlite` | Banco de dados local no device |
 | `@nativescript/connectivity` | Detectar mudança de rede para disparar sync automático |
 
 ---
@@ -172,8 +176,10 @@ app/
 │       └── sync-log.repo.ts
 │
 ├── sync/
-│   ├── sync-pull-service.ts     # SyncPullService — pull API → SQLite + truncate pós-login
-│   └── push.ts                  # envia do SQLite → API (quando existir)
+│   ├── sync-service.ts          # SyncService — orquestrador (login refresh, Profile updateEntities)
+│   ├── sync-pull-service.ts     # SyncPullService — pull API → SQLite (+ truncate em refresh)
+│   ├── sync-push-service.ts     # SyncPushService — push clientes → API (hoje)
+│   └── push.ts                  # pedidos SQLite → API (alvo — quando existir)
 │
 └── composables/
     ├── event-composable.ts     # EventsComposable
@@ -194,9 +200,9 @@ specs/                           # este diretório — documentação técnica
 | **1** | Instalar pacotes + `db/database.ts` + `db/migrations.ts` | `specs/01-db-schema.md` |
 | **2** | Todos os repositórios em `db/repositories/` | Fase 1 |
 | **3** | Novos endpoints na API + funções no adapter para pull | Fase 2 |
-| **4** | `sync/sync-pull-service.ts` (pull; alinhar com `03-sync-pull.md`) | Fase 3 |
+| **4** | `sync/sync-pull-service.ts`, `sync/sync-push-service.ts`, `sync/sync-service.ts` — ver `06-sync-services.md` | Fase 3 |
 | **5** | Composables (leitura do SQLite para UI) | Fase 2 |
-| **6** | `sync/push.ts` (ação explícita; sem push automático na V1) | Fase 3 |
+| **6** | `sync/push.ts` para **pedidos** (ação explícita; alvo em `04`; clientes já em `sync-push-service.ts`) | Fase 3 |
 
 > As fases 4, 5 e 6 podem ser desenvolvidas em paralelo após a Fase 3.
 
@@ -207,8 +213,7 @@ specs/                           # este diretório — documentação técnica
 ```
 1. Login (online) — após auth OK
       ↓
-2. Se houver orders com synced_at IS NULL → backup → wipe operacional → pull completo:
-   events → product_categories → products → clients → payment_methods → orders → order_items
+2. **Alvo:** se houver orders com synced_at IS NULL → backup → wipe → pull completo (incl. orders/order_items). **Código atual:** `syncService.refresh()` → wipe + pull de events, catálogo e payment_methods (sem backup automático nem pull de pedidos) — `06-sync-services.md`.
       ↓
 3. Usuário seleciona evento → feira (offline)
       ↓
@@ -217,5 +222,5 @@ specs/                           # este diretório — documentação técnica
 5. Push explícito (ação do usuário / fluxo definido na implementação) → API
    Após sucesso: id e remote_id = id da API (realinhamento)
       ↓
-6. Profile “Sincronizar” → só catálogo (categories, products, clients, payment_methods)
+6. Profile “Sincronizar” → `syncService.updateEntities()` — push clientes pendentes + pull parcial de catálogo (ver `06-sync-services.md`)
 ```

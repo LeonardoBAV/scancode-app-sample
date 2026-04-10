@@ -90,7 +90,7 @@ interface EventsRepository {
 
     /**
      * Insere ou substitui múltiplos eventos (INSERT OR REPLACE).
-     * Usado pela camada de pull (`SyncPullService` / `specs/03-sync-pull.md`) após receber dados da API.
+     * Usado pela camada de pull (`syncPullService` — `specs/03-sync-pull.md`, `06-sync-services.md`) após receber dados da API.
      */
     upsertMany(events: Event[]): Promise<void>;
 }
@@ -146,7 +146,7 @@ interface ProductsRepository {
 
     /**
      * Insere ou substitui múltiplos produtos (INSERT OR REPLACE).
-     * Usado pela camada de pull (`SyncPullService` / `specs/03-sync-pull.md`) após receber dados da API.
+     * Usado pela camada de pull (`syncPullService` — `specs/03-sync-pull.md`, `06-sync-services.md`) após receber dados da API.
      */
     upsertMany(products: Product[]): Promise<void>;
 }
@@ -179,7 +179,7 @@ interface ClientsRepository {
 
     /**
      * Insere ou substitui múltiplos clientes (INSERT OR REPLACE).
-     * Usado pela camada de pull (`SyncPullService` / `specs/03-sync-pull.md`) após receber dados da API.
+     * Usado pela camada de pull (`syncPullService` — `specs/03-sync-pull.md`, `06-sync-services.md`) após receber dados da API.
      */
     upsertMany(clients: Client[]): Promise<void>;
 }
@@ -202,7 +202,7 @@ interface PaymentMethodsRepository {
 
     /**
      * Insere ou substitui múltiplos métodos de pagamento (INSERT OR REPLACE).
-     * Usado pela camada de pull (`SyncPullService` / `specs/03-sync-pull.md`) após receber dados da API.
+     * Usado pela camada de pull (`syncPullService` — `specs/03-sync-pull.md`, `06-sync-services.md`) após receber dados da API.
      */
     upsertMany(methods: PaymentMethod[]): Promise<void>;
 }

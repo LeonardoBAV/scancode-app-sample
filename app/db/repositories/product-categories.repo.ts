@@ -3,16 +3,6 @@ import type { ProductCategory } from '../../types/schema/product-category';
 import { RepositoryBase } from '../repository-base';
 
 
-interface ProductCategoryRow {
-    id: number;
-    remote_id: number | null;
-    is_sync: number;
-    name: string;
-    created_at: string;
-    updated_at: string;
-}
-
-
 export class ProductCategoriesRepository extends RepositoryBase {
     private constructor() {
         super();
@@ -36,23 +26,20 @@ export class ProductCategoriesRepository extends RepositoryBase {
     }
 
     public static async findAll(): Promise<ProductCategory[]> {
-        const rows: ProductCategoryRow[] = await ProductCategoriesRepository.queryAll<ProductCategoryRow>(
+        const rows: ProductCategory[] = await ProductCategoriesRepository.queryAll<ProductCategory>(
             'SELECT * FROM product_categories ORDER BY name COLLATE NOCASE ASC',
         );
         return rows.map(
-            (row: ProductCategoryRow): ProductCategory => ({
-                id: row.id,
+            (row: ProductCategory): ProductCategory => ({
+                ...row,
                 remote_id: row.remote_id ?? row.id,
-                is_sync: ProductCategoriesRepository.readSqliteBool(row.is_sync),
-                name: row.name,
-                created_at: row.created_at,
-                updated_at: row.updated_at,
+                is_sync: ProductCategoriesRepository.readSqliteBool(row.is_sync as unknown),
             }),
         );
     }
 
     public static async findById(id: number): Promise<ProductCategory | null> {
-        const row: ProductCategoryRow | null = await ProductCategoriesRepository.queryOne<ProductCategoryRow>(
+        const row: ProductCategory | null = await ProductCategoriesRepository.queryOne<ProductCategory>(
             'SELECT * FROM product_categories WHERE id = ?',
             [id],
         );
@@ -60,12 +47,9 @@ export class ProductCategoriesRepository extends RepositoryBase {
             return null;
         }
         return {
-            id: row.id,
+            ...row,
             remote_id: row.remote_id ?? row.id,
-            is_sync: ProductCategoriesRepository.readSqliteBool(row.is_sync),
-            name: row.name,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
+            is_sync: ProductCategoriesRepository.readSqliteBool(row.is_sync as unknown),
         };
     }
 

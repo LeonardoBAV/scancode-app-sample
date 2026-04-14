@@ -71,6 +71,10 @@
       "actions": "Ações",
       "view": "Visualizar"
     },
+    "clientCreate": {
+      "title": "Novo cliente",
+      "initError": "Não foi possível iniciar o cadastro. Tente novamente."
+    },
     "clientShow": {
       "title": "Detalhes do cliente",
       "segmentView": "Visualizar",

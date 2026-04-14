@@ -1,7 +1,13 @@
 <template>
     <Page actionBarHidden="true">
         <GridLayout :rows="selectedClient ? 'auto, *, auto' : 'auto, *'" class="bg-background">
-            <HeaderComponent row="0" :title="$t('pages.clientList.title')" :showAvatar="false" />
+            <HeaderComponent
+                row="0"
+                :title="$t('pages.clientList.title')"
+                :showAvatar="false"
+                right-action-icon="user-plus"
+                @rightAction="onNewClientTap"
+            />
             <ClientListComponent row="1" :clients="clients" :selected-client-id="selectedClient?.id ?? null" @select="onSelectClient" />
 
             <StackLayout v-if="selectedClient" row="2" class="footer-bar">
@@ -19,6 +25,7 @@ import { ClientsComposable } from '../../composables/clients-composable';
 import { lucide } from '../../utils/icons';
 import { useNavigation } from '../../composables/useNavigation';
 import ClientListComponent from '../../components/ClientListComponent.vue';
+import ClientCreatePage from './ClientCreatePage.vue';
 import ClientShowPage from './ClientShowPage.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
@@ -45,6 +52,12 @@ function onViewTap(): void {
     if (!selectedClient.value) return;
     navigateTo(ClientShowPage, {
         props: { client: selectedClient.value },
+        transition: { name: 'slideLeft', duration: 300 },
+    });
+}
+
+function onNewClientTap(): void {
+    navigateTo(ClientCreatePage, {
         transition: { name: 'slideLeft', duration: 300 },
     });
 }

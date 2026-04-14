@@ -8,37 +8,67 @@
         <!-- Center: Title -->
         <Label col="1" :text="title" class="text-lg font-bold text-foreground text-center" verticalAlignment="center" />
 
-        <!-- Right: Avatar or custom slot area -->
-        <Label v-if="showAvatar && avatarInitials" col="2" :text="avatarInitials" class="text-sm font-bold text-primary-foreground bg-primary w-10 h-10 rounded-full text-center" verticalAlignment="center" @tap="openProfile" />
+        <!-- Right: optional action icon, else avatar, else spacer -->
+        <Label
+            v-if="rightActionIcon"
+            col="2"
+            :text="lucide(rightActionIcon)"
+            class="lucide text-primary w-10 h-10 text-center"
+            verticalAlignment="center"
+            @tap="onRightAction"
+        />
+        <Label
+            v-else-if="showAvatar && avatarInitials"
+            col="2"
+            :text="avatarInitials"
+            class="text-sm font-bold text-primary-foreground bg-primary w-10 h-10 rounded-full text-center"
+            verticalAlignment="center"
+            @tap="openProfile"
+        />
         <Label v-else col="2" text="" class="w-10" />
 
     </GridLayout>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
+// --- Imports ---
+import { nextTick, onMounted, ref, type Ref } from 'vue';
 import { Frame } from '@nativescript/core';
+import type { LucideIcon } from '../utils/icons';
 import { useNavigation } from '../composables/useNavigation';
 import { getAuth } from '../persistence/auth-session';
 import { lucide } from '../utils/icons';
 import Profile from '../pages/Profile/Profile.vue';
 
-const props = withDefaults(defineProps<{
-    title: string;
-    showAvatar?: boolean;
-}>(), {
-    showAvatar: true,
-});
+
+// --- Component logic ---
+const props = withDefaults(
+    defineProps<{
+        title: string;
+        showAvatar?: boolean;
+        rightActionIcon?: LucideIcon | null;
+    }>(),
+    {
+        showAvatar: true,
+        rightActionIcon: null,
+    },
+);
+
+const emit = defineEmits<{
+    rightAction: [];
+}>();
 
 const { navigateTo } = useNavigation();
 
-const canGoBack = ref(false);
+const canGoBack: Ref<boolean> = ref(false);
 
-const avatarInitials = (() => {
-    if (!props.showAvatar) return '';
+const avatarInitials: string = ((): string => {
+    if (!props.showAvatar) {
+        return '';
+    }
     const auth = getAuth();
-    const name = auth?.sales_representative?.name ?? '';
-    const parts = name.trim().split(/\s+/);
+    const name: string = auth?.sales_representative?.name ?? '';
+    const parts: string[] = name.trim().split(/\s+/);
     if (parts.length >= 2) {
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
@@ -46,26 +76,34 @@ const avatarInitials = (() => {
 })();
 
 function getNavFrame(): Frame | null {
-    const topmost = Frame.topmost();
-    if (topmost?.canGoBack()) return topmost;
+    const topmost: Frame | null = Frame.topmost();
+    if (topmost?.canGoBack()) {
+        return topmost;
+    }
     return Frame.getFrameById('root-frame') ?? topmost;
 }
 
 onMounted(() => {
     function updateCanGoBack(): void {
-        const frame = getNavFrame();
+        const frame: Frame | null = getNavFrame();
         canGoBack.value = frame?.canGoBack() ?? false;
     }
     updateCanGoBack();
-    nextTick(() => updateCanGoBack());
+    void nextTick(() => {
+        updateCanGoBack();
+    });
     setTimeout(updateCanGoBack, 50);
 });
 
 function goBack(): void {
-    const frame = getNavFrame();
+    const frame: Frame | null = getNavFrame();
     if (frame?.canGoBack()) {
         frame.goBack();
     }
+}
+
+function onRightAction(): void {
+    emit('rightAction');
 }
 
 function openProfile(): void {

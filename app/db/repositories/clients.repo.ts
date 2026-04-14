@@ -33,6 +33,17 @@ export class ClientsRepository extends RepositoryBase {
         await ClientsComposable.refresh();
     }
 
+    /** Next INTEGER PRIMARY KEY candidate for locally created clients (offline-first). */
+    public static async getNextLocalClientId(): Promise<number> {
+        interface MaxIdRow {
+            n: number;
+        }
+        const row: MaxIdRow | null = await ClientsRepository.queryOne<MaxIdRow>(
+            'SELECT COALESCE(MAX(id), 0) + 1 AS n FROM clients',
+        );
+        return row?.n ?? 1;
+    }
+
     public static async findAll(): Promise<Client[]> {
         const rows: Client[] = await ClientsRepository.queryAll<Client>('SELECT * FROM clients ORDER BY corporate_name ASC');
         return rows.map(

@@ -1,5 +1,6 @@
 const codepoints: Record<string, number> = {
     'user': 0xe19f,
+    'user-plus': 0xe1a2,
     'user-round': 0xe468,
     'circle-user': 0xe461,
     'users': 0xe1a4,

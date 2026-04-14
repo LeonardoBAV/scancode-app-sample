@@ -71,6 +71,10 @@
       "actions": "Actions",
       "view": "View"
     },
+    "clientCreate": {
+      "title": "New client",
+      "initError": "Could not start registration. Please try again."
+    },
     "clientShow": {
       "title": "Client details",
       "segmentView": "View",

@@ -1,13 +1,9 @@
 <template>
     <Page actionBarHidden="true">
-        <GridLayout rows="*" columns="*" class="bg-background">
-            <GridLayout row="0" col="0" rows="auto, *" class="bg-background">
-                <HeaderComponent row="0" :title="$t('pages.clientCreate.title')" :showAvatar="false" />
+        <GridLayout rows="auto, *" class="bg-background">
+            <HeaderComponent row="0" :title="$t('pages.clientCreate.title')" :showAvatar="false" />
 
-                <ClientFormComponent row="1" :client="clientDraft" @save="createClient" />
-            </GridLayout>
-
-            <ToastHostComponent row="0" col="0" verticalAlignment="bottom" horizontalAlignment="stretch" />
+            <ClientFormComponent row="1" :client="clientDraft" @save="createClient" />
         </GridLayout>
     </Page>
 </template>
@@ -20,7 +16,6 @@ import { showToast } from '../../composables/toast-state';
 import { useTranslation } from '../../composables/useTranslation';
 import { useNavigation } from '../../composables/useNavigation';
 import type { Client } from '../../types/schema/client';
-import ToastHostComponent from '../../components/ToastHostComponent.vue';
 import ClientFormComponent from '../../components/ClientFormComponent.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 

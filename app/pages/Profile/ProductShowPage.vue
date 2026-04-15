@@ -1,24 +1,20 @@
 <template>
     <Page actionBarHidden="true">
-        <GridLayout rows="*" columns="*" class="bg-background">
-            <GridLayout row="0" col="0" rows="auto, auto, *" class="bg-background">
-                <HeaderComponent row="0" :title="headerTitle" :showAvatar="false" />
+        <GridLayout rows="auto, auto, *" class="bg-background">
+            <HeaderComponent row="0" :title="headerTitle" :showAvatar="false" />
 
-                <CustomSegmentedBarComponent
-                    v-model="selectedSegment"
-                    row="1"
-                    class="mx-4 mt-2 mb-2"
-                    leftLabelKey="pages.productShow.segmentView"
-                    rightLabelKey="pages.productShow.segmentEdit"
-                />
+            <CustomSegmentedBarComponent
+                v-model="selectedSegment"
+                row="1"
+                class="mx-4 mt-2 mb-2"
+                leftLabelKey="pages.productShow.segmentView"
+                rightLabelKey="pages.productShow.segmentEdit"
+            />
 
-                <ScrollView row="2">
-                    <ProductInfoComponent v-if="selectedSegment === 0" :product="localProduct" />
-                    <ProductFormComponent v-else :product="localProduct" :categories="categories" @save="onProductFormSave" />
-                </ScrollView>
-            </GridLayout>
-
-            <ToastHostComponent row="0" col="0" verticalAlignment="bottom" horizontalAlignment="stretch" />
+            <ScrollView row="2">
+                <ProductInfoComponent v-if="selectedSegment === 0" :product="localProduct" />
+                <ProductFormComponent v-else :product="localProduct" :categories="categories" @save="onProductFormSave" />
+            </ScrollView>
         </GridLayout>
     </Page>
 </template>
@@ -34,7 +30,6 @@ import { Haptics } from '../../utils/haptics';
 import type { Product } from '../../types/schema/product';
 import type { ProductCategory } from '../../types/schema/product-category';
 import CustomSegmentedBarComponent from '../../components/CustomSegmentedBarComponent.vue';
-import ToastHostComponent from '../../components/ToastHostComponent.vue';
 import ProductFormComponent from '../../components/ProductFormComponent.vue';
 import ProductInfoComponent from '../../components/ProductInfoComponent.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';

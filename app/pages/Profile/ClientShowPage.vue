@@ -1,18 +1,14 @@
 <template>
     <Page actionBarHidden="true">
-        <GridLayout rows="*" columns="*" class="bg-background">
-            <GridLayout row="0" col="0" rows="auto, auto, *" class="bg-background">
-                <HeaderComponent row="0" :title="headerTitle" :showAvatar="false" />
+        <GridLayout rows="auto, auto, *" class="bg-background">
+            <HeaderComponent row="0" :title="headerTitle" :showAvatar="false" />
 
-                <CustomSegmentedBarComponent v-model="selectedSegment" row="1" class="mx-4 mt-2 mb-2" />
+            <CustomSegmentedBarComponent v-model="selectedSegment" row="1" class="mx-4 mt-2 mb-2" />
 
-                <ScrollView row="2">
-                    <ClientInfoComponent v-if="selectedSegment === 0" :client="clientPage" />
-                    <ClientFormComponent v-else :client="clientPage" @save="updateClient" />
-                </ScrollView>
-            </GridLayout>
-
-            <ToastHostComponent row="0" col="0" verticalAlignment="bottom" horizontalAlignment="stretch" />
+            <ScrollView row="2">
+                <ClientInfoComponent v-if="selectedSegment === 0" :client="clientPage" />
+                <ClientFormComponent v-else :client="clientPage" @save="updateClient" />
+            </ScrollView>
         </GridLayout>
     </Page>
 </template>
@@ -26,7 +22,6 @@ import { useTranslation } from '../../composables/useTranslation';
 import { Haptics } from '../../utils/haptics';
 import type { Client } from '../../types/schema/client';
 import CustomSegmentedBarComponent from '../../components/CustomSegmentedBarComponent.vue';
-import ToastHostComponent from '../../components/ToastHostComponent.vue';
 import ClientFormComponent from '../../components/ClientFormComponent.vue';
 import ClientInfoComponent from '../../components/ClientInfoComponent.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';

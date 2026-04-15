@@ -182,9 +182,8 @@ interface ClientsRepository {
     upsertMany(clients: Client[]): Promise<void>;
 
     /**
-     * Uma linha. Se `client.id == null`, zera `remote_id` e insere com PK nula para o SQLite (`AUTOINCREMENT`) gerar `id`;
-     * depois lê `last_insert_rowid()` e devolve o `client` com `id` definido.
-     * Dispara `ClientsComposable.refresh()`.
+     * Uma linha. `INSERT OR REPLACE`, depois `ClientsComposable.refresh()`.
+     * Se `client.id == null`, atribui o retorno ao último item de `ClientsComposable.getList()` (detalhe e ressalvas em `specs/01-db-schema.md` → clients → upsertOne).
      */
     upsertOne(client: Client): Promise<Client>;
 

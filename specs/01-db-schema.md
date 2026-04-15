@@ -29,7 +29,7 @@
 | `id INTEGER` PK em `orders` | Ver subseção abaixo (**sempre** inteiro local; autoincrement ao criar offline; no pull, `id` gravado = id da API). |
 | `remote_id` em `orders` | Ver subseção abaixo (espelho do id na API; `NULL` só enquanto o servidor ainda não “conhece” o pedido). |
 | `id INTEGER` PK em `order_items` | **Autoincremento**; `order_id INTEGER` referencia `orders(id)`. |
-| `INTEGER PRIMARY KEY AUTOINCREMENT` (catálogo + `clients`) | `product_categories`, `products`, `clients`, `payment_methods`, `events`: PK com `AUTOINCREMENT` no DDL. **Pull:** `INSERT OR REPLACE` com `id` explícito da API. **Cliente novo offline:** `INSERT` com `id` nulo → SQLite gera o próximo valor; `ClientsRepository.upsertOne` lê `last_insert_rowid()` e devolve o `client` com `id` preenchido. Não se usa `MAX(id)+1` em código. |
+| `INTEGER PRIMARY KEY AUTOINCREMENT` (catálogo + `clients`) | `product_categories`, `products`, `clients`, `payment_methods`, `events`: PK com `AUTOINCREMENT` no DDL. **Pull:** `INSERT OR REPLACE` com `id` explícito da API. **Cliente novo offline:** ver subseção *`ClientsRepository.upsertOne` (resolução de `id`)* abaixo. Não se usa `MAX(id)+1` em código. |
 | `synced_at TEXT NULL` em orders | `NULL` = pendente de sync. ISO 8601 após sync. Itens não têm `synced_at` próprio — são sync atômico com o pedido pai. |
 | `updated_at` em tabelas pull-only | Útil na **V2** (sync incremental na API); na V1 só acompanha o payload da API. |
 | Datas como `TEXT` (ISO 8601) | SQLite não tem tipo `DATETIME` nativo. Padrão: `'2026-03-28T14:00:00Z'`. |
@@ -171,7 +171,24 @@ CREATE INDEX IF NOT EXISTS idx_clients_corporate_name ON clients(corporate_name)
 ```
 
 - **`cpf_cnpj`:** unicidade no SQLite (índice único). A validação de formulário também consulta `ClientsRepository.loadByCpfCnpj` antes de gravar, com `ignoreClientId` na edição para permitir o mesmo registro ao salvar alterações sem mudar o documento.
-- **Cliente novo offline:** com `id` nulo, `ClientsRepository.upsertOne` grava `remote_id = null` e deixa o SQLite gerar a PK (`AUTOINCREMENT`); em seguida lê `last_insert_rowid()` para preencher `client.id` no objeto retornado. `is_sync` fica `false` após salvar pelo formulário até o push.
+- **Cliente novo offline:** `INSERT` com `id` nulo → SQLite gera a PK (`AUTOINCREMENT`). `is_sync` fica `false` após salvar pelo formulário até o push.
+
+#### `ClientsRepository.upsertOne` (resolução de `id` após insert)
+
+Implementação em `app/db/repositories/clients.repo.ts`:
+
+1. `INSERT OR REPLACE` com as colunas de `CLIENT_COLUMNS` (inclui `id` nulo para linha nova).
+2. `ClientsComposable.refresh()` — recarrega a lista a partir de `findAll()` (`ORDER BY corporate_name ASC`).
+3. Se ainda `client.id == null`, substitui o objeto retornado pelo **último elemento** de `ClientsComposable.getList()` (último índice do array após o refresh).
+
+**Intenção:** evitar `last_insert_rowid()` e reaproveitar o estado já materializado no composable.
+
+**Limitações a ter em mente (para evolução ou outras entidades):**
+
+- A lista **não** está ordenada por ordem de inserção nem por `id`; o último item é o **último `corporate_name` na ordenação ASC** — em geral **não** é uma garantia formal de que seja o registro acabado de inserir.
+- Dois `upsertOne` concorrentes com `id` nulo podem cruzar o refresh e o “último da lista” da mesma forma que cruzariam `last_insert_rowid()` em conexão compartilhada.
+
+**Alternativas documentadas para o futuro:** recarregar a linha por chave estável (`loadByCpfCnpj` após o insert); ou `last_insert_rowid()` / transação na mesma conexão; ou fila de escrita serializada.
 
 ---
 

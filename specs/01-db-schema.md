@@ -57,8 +57,10 @@ Ao recolocar um pedido do backup na tabela `orders`, o **`id` salvo no backup po
 
 ## Tabelas Pull-Only
 
-Recebidas da API durante o sync. **Nunca modificadas localmente.**
+Recebidas da API durante o sync. **Nunca modificadas localmente** (exceto onde indicado).
 Estratégia de upsert: `INSERT OR REPLACE INTO`.
+
+**Exceção:** a tabela **`clients`** também aceita **criação e edição offline** no app (`ClientsRepository.upsertOne`, formulário em `ClientFormComponent.vue`). Linhas locais novas usam `remote_id IS NULL` e `is_sync = 0` até existir fluxo de criação na API no push (hoje o push chama apenas `PATCH` por `remote_id` — ver `specs/05-composables.md` secção “Formulário de cliente”).
 
 ---
 
@@ -134,21 +136,31 @@ CREATE INDEX IF NOT EXISTS idx_products_category ON products(product_category_id
 
 ### `clients`
 
+**Tipo TypeScript:** `app/types/schema/client.ts` — `id` e `remote_id` podem ser `null` em rascunho local; `is_sync` espelha o backend após pull/push.
+
+**Fonte de verdade do DDL:** `app/db/migrations.ts` (abaixo espelha o que está no código).
+
 ```sql
 CREATE TABLE IF NOT EXISTS clients (
-    id              INTEGER PRIMARY KEY,
-    cpf_cnpj        TEXT    NOT NULL,
-    corporate_name  TEXT    NOT NULL,
-    fantasy_name    TEXT,
-    email           TEXT,
-    phone           TEXT,
-    carrier         TEXT,
-    updated_at      TEXT    NOT NULL
+    id               INTEGER PRIMARY KEY,
+    remote_id        INTEGER,
+    is_sync          INTEGER NOT NULL DEFAULT 0,
+    cpf_cnpj         TEXT    NOT NULL,
+    corporate_name   TEXT    NOT NULL,
+    fantasy_name     TEXT,
+    email            TEXT,
+    phone            TEXT,
+    carrier          TEXT,
+    created_at       TEXT    NOT NULL DEFAULT '',
+    updated_at       TEXT    NOT NULL
 );
 
-CREATE INDEX IF NOT EXISTS idx_clients_cpf_cnpj      ON clients(cpf_cnpj);
+CREATE UNIQUE INDEX idx_clients_cpf_cnpj ON clients(cpf_cnpj);
 CREATE INDEX IF NOT EXISTS idx_clients_corporate_name ON clients(corporate_name);
 ```
+
+- **`cpf_cnpj`:** unicidade no SQLite (índice único). A validação de formulário também consulta `ClientsRepository.loadByCpfCnpj` antes de gravar, com `ignoreClientId` na edição para permitir o mesmo registro ao salvar alterações sem mudar o documento.
+- **Cliente novo offline:** `ClientsRepository.upsertOne` atribui o próximo `id` via `getNextLocalClientId()` quando `id` é `null`; `is_sync` fica `false` após salvar pelo formulário.
 
 ---
 

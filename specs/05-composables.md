@@ -136,6 +136,40 @@ export class ClientsComposable {
 
 ---
 
+## Formulário de cliente (criar / editar) — UI, validação e API
+
+Referência rápida para IAs e devs: onde está cada peça e como se encaixam.
+
+### Arquivos
+
+| Peça | Caminho | Papel |
+| --- | --- | --- |
+| Schema Zod (trim + limites) | `app/validation/client-form-validation.ts` | `clientFormValidation.clientFormFieldsSchema` — `corporate_name` obrigatório; `email` vazio ou e-mail válido; demais strings com `max` alinhado ao backend. |
+| Erros por campo + duplicata CPF/CNPJ | `app/composables/useClientFormValidation.ts` | **Singleton** (`UseClientFormValidation.getInstance()`). Export `useClientFormValidation`: `fieldErrors` (ref compartilhado), `clearFieldErrors()`, `validateClientForm(raw, { ignoreClientId })`. Mensagens via `i18n.global.t` em `pages.clientForm.errors.*` (não usar `useI18n()` no fluxo de validação). |
+| Formulário reutilizável | `app/components/ClientFormComponent.vue` | Props: `client: Client`. Emite `save` com `Client` já mesclado (campos editados + `is_sync: false`). Campos locais em `ref`; `watch` em `props.client` repõe valores e limpa erros. **Não** chama o repositório — só valida e emite. |
+| Criar | `app/pages/Profile/ClientCreatePage.vue` | `clientDraft` com `id: null`; após `save` → `ClientsRepository.upsertOne` → toast → `navigateBack()`. |
+| Ver / editar | `app/pages/Profile/ClientShowPage.vue` | Aba “info” (`ClientInfoComponent`) vs aba formulário (`ClientFormComponent`). Em `updateClient`, `upsertOne` → haptics + toast + volta segmento 0. |
+| Tipo persistido | `app/types/schema/client.ts` | `Client` com `id \| null`, `remote_id`, `is_sync`, timestamps. |
+| Push / API | `app/integrations/adapters/scancode-adapter.ts` | `getClients()` mapeia DTO → `Client` (`nullableString` para opcionais). **`updateClient`** exige `client.remote_id != null`; senão lança `ApiException` com `common.remoteIdRequired`. Faz `PATCH /clients/{remote_id}` com payload trimado. |
+
+### Fluxo de validação
+
+1. `ClientFormComponent` monta um objeto compatível com `ClientFormSchema` (`app/types/form/client-form-schema.ts`) e chama `useClientFormValidation.validateClientForm(...)`.
+2. Zod `safeParse` — falhas viram `fieldErrors` (primeiro issue por campo).
+3. Se OK, `ClientsRepository.loadByCpfCnpj(parsed.cpf_cnpj)` — se existir outro cliente e `found.id !== ignoreClientId`, erro `cpf_cnpj` duplicata.
+4. `ignoreClientId`: na edição passar `props.client.id` (pode ser o id local); em criação o draft tem `id: null` → `ignoreClientId: null` bloqueia qualquer duplicata.
+
+### Sync e limitação atual do push
+
+- `SyncPushService.pushClients()` itera `findAllUnsynced()` e chama `ScancodeAdapter.updateClient` → **`PATCH` apenas**.
+- Cliente **criado só no app** (`remote_id === null`) continua `is_sync = false` após tentativa conceitual de push: `updateClient` falha cedo sem `remote_id`. **Backlog:** `POST` cliente na API + realinhar `id`/`remote_id` como em outras entidades.
+
+### i18n
+
+Chaves em `app/locales/*.json` sob `pages.clientForm` (títulos, hints, `errors.*`, `save`, `saveSuccess`, `saveError`). Títulos de página: `pages.clientCreate.title`.
+
+---
+
 ## `PaymentMethodsComposable` (formas de pagamento)
 
 **Arquivo:** `app/composables/payment-methods-composable.ts` — mesmo padrão estático que `ProductsComposable` / `ClientsComposable`.

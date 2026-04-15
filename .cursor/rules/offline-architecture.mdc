@@ -17,6 +17,7 @@ Antes de implementar qualquer camada offline, leia a spec correspondente em `spe
 | Pull API → SQLite (`sync-pull-service.ts`) | `specs/03-sync-pull.md` |
 | Push SQLite → API (pedidos alvo; clientes implementados) | `specs/04-sync-push.md` |
 | `app/composables/use*.ts` (dados — events, products, clients, orders) | `specs/05-composables.md` |
+| Formulário de cliente (Zod, duplicata CPF/CNPJ, `ClientFormComponent`, push `PATCH`) | `specs/05-composables.md` — secção **Formulário de cliente** |
 
 ## Resumo das Regras de Ouro
 

@@ -156,34 +156,46 @@ interface ProductsRepository {
 
 ### `ClientsRepository`
 
-Arquivo: `app/db/repositories/clients.repo.ts`
+Arquivo: `app/db/repositories/clients.repo.ts`  
+Tipo: `Client` em `app/types/schema/client.ts`. Classe estática estendendo `RepositoryBase`.
+
+**Implementação atual** (métodos `public static`):
 
 ```typescript
 interface ClientsRepository {
-    /**
-     * Retorna todos os clientes, ordenados por corporate_name ASC.
-     */
+    /** Lista ordenada por corporate_name ASC. */
     findAll(): Promise<Client[]>;
 
     /**
-     * Retorna um cliente pelo ID, ou null se não existir.
+     * Primeira linha com `cpf_cnpj` **igual** ao argumento (match exato na string armazenada), ou null.
+     * Usado por `useClientFormValidation` para bloquear duplicata no formulário.
      */
-    findById(id: number): Promise<Client | null>;
+    loadByCpfCnpj(cpfCnpj: string): Promise<Client | null>;
+
+    /** Clientes com `is_sync = 0`, ordenados por id ASC — entrada do push (`sync-push-service.ts`). */
+    findAllUnsynced(): Promise<Client[]>;
 
     /**
-     * Busca clientes por query de texto (LIKE %query%) em:
-     * corporate_name, fantasy_name e cpf_cnpj.
-     * Retorna no máximo 50 resultados, ordenados por corporate_name ASC.
-     */
-    search(query: string): Promise<Client[]>;
-
-    /**
-     * Insere ou substitui múltiplos clientes (INSERT OR REPLACE).
-     * Usado pela camada de pull (`syncPullService` — `specs/03-sync-pull.md`, `06-sync-services.md`) após receber dados da API.
+     * Pull em massa: INSERT OR REPLACE com colunas alinhadas a `CLIENT_COLUMNS`.
+     * Dispara `ClientsComposable.refresh()`.
      */
     upsertMany(clients: Client[]): Promise<void>;
+
+    /**
+     * Uma linha. Se `client.id == null`, preenche `id` com `getNextLocalClientId()` e zera `remote_id`.
+     * Dispara `ClientsComposable.refresh()`. Retorna o `client` atualizado (com `id` definido após insert local).
+     */
+    upsertOne(client: Client): Promise<Client>;
+
+    /** `COALESCE(MAX(id), 0) + 1` — candidato a PK para registro criado só no device. */
+    getNextLocalClientId(): Promise<number>;
+
+    /** DELETE FROM clients + refresh do composable. */
+    truncate(): Promise<void>;
 }
 ```
+
+> **Não implementados** no repositório atual: `findById`, `search` (busca in-memory/LIKE fica na UI, ex. `ClientListComponent`).
 
 ---
 
@@ -319,37 +331,7 @@ interface OrdersBackupRepository {
 
 Cada repositório segue esta estrutura:
 
-```typescript
-// app/db/repositories/clients.repo.ts
-import { getDatabase } from '../database';
-import type { Client } from '../../types/client';
-
-export async function findAll(): Promise<Client[]> {
-    const db = await getDatabase();
-    const result = await db.all<Client>(
-        'SELECT * FROM clients ORDER BY corporate_name ASC'
-    );
-    return result;
-}
-
-export async function upsertMany(clients: Client[]): Promise<void> {
-    const db = await getDatabase();
-    await db.transaction(async () => {
-        for (const client of clients) {
-            await db.run(
-                `INSERT OR REPLACE INTO clients
-                 (id, cpf_cnpj, corporate_name, fantasy_name, email, phone, carrier, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                [client.id, client.cpf_cnpj, client.corporate_name,
-                 client.fantasy_name, client.email, client.phone,
-                 client.carrier, client.updated_at]
-            );
-        }
-    });
-}
-
-// ... demais métodos
-```
+Ver `clients.repo.ts`: `insertOrReplaceMany` / `insertOrReplaceOne` via `RepositoryBase` com `CLIENT_COLUMNS` explícito (inclui `remote_id`, `is_sync`, `created_at`).
 
 > `Database.getConnection()` devolve o handle SQLite (singleton). Ver `app/db/database.ts`.
 

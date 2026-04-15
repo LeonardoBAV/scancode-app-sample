@@ -1,4 +1,4 @@
-import type { ClientUpdateRequestDTO, PaymentMethodUpdateRequestDTO, ProductUpdateRequestDTO } from '../../types/dtos/scancode-request';
+import type { ClientCreateRequestDTO, ClientUpdateRequestDTO, PaymentMethodUpdateRequestDTO, ProductUpdateRequestDTO } from '../../types/dtos/scancode-request';
 import type { ValidationErrorResponseDTO } from '../../types/dtos/scancode-response';
 import { ApiException } from '../../types/exceptions/api-exception';
 import type { Auth } from '../../types/sessions/auth';
@@ -60,6 +60,37 @@ export class ScancodeAdapter {
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
             }));
+        } catch (err: unknown) {
+            ScancodeAdapter.handleApiError(err);
+        }
+    }
+
+    public static async createClient(client: Client): Promise<Client> {
+        try {
+            const payload: ClientCreateRequestDTO = {
+                carrier: client.carrier.trim(),
+                corporate_name: client.corporate_name.trim(),
+                cpf_cnpj: client.cpf_cnpj.trim(),
+                email: client.email.trim(),
+                fantasy_name: client.fantasy_name.trim(),
+                phone: client.phone.trim(),
+            };
+            const response = await scancodeApi.postClient(payload);
+            const dto = response.data;
+
+            return {
+                id: dto.id,
+                remote_id: dto.id,
+                is_sync: true,
+                carrier: ScancodeAdapter.nullableString(dto.carrier),
+                corporate_name: dto.corporate_name,
+                cpf_cnpj: dto.cpf_cnpj,
+                email: ScancodeAdapter.nullableString(dto.email),
+                fantasy_name: ScancodeAdapter.nullableString(dto.fantasy_name),
+                phone: ScancodeAdapter.nullableString(dto.phone),
+                created_at: dto.created_at,
+                updated_at: dto.updated_at,
+            };
         } catch (err: unknown) {
             ScancodeAdapter.handleApiError(err);
         }

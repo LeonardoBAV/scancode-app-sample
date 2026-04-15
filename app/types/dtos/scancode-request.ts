@@ -4,7 +4,6 @@ export interface LoginRequestDTO {
     device_name: string;
 }
 
-/** PATCH /clients/:id — server sets created_at / updated_at */
 export interface ClientUpdateRequestDTO {
     cpf_cnpj: string;
     corporate_name: string;
@@ -14,7 +13,8 @@ export interface ClientUpdateRequestDTO {
     carrier: string;
 }
 
-/** PATCH /products/:id — server sets created_at / updated_at; price as decimal string */
+export type ClientCreateRequestDTO = ClientUpdateRequestDTO;
+
 export interface ProductUpdateRequestDTO {
     sku: string;
     barcode: string;

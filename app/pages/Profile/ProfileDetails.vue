@@ -48,7 +48,7 @@
                             <Label col="0" :text="lucide('hash')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
                             <StackLayout col="1">
                                 <Label :text="$t('pages.profileDetails.cpf')" class="text-xs text-muted-foreground mb-1" />
-                                <Label :text="formatCPF(rep?.cpf)" class="text-base text-card-foreground" />
+                                <Label :text="Format.formatCPF(rep?.cpf)" class="text-base text-card-foreground" />
                             </StackLayout>
                         </GridLayout>
 
@@ -76,7 +76,7 @@
 import { ref, computed, onMounted, type ComputedRef } from 'vue';
 import { getAuth } from '../../persistence/auth-session';
 import type { AuthProfile } from '../../types/sessions/auth';
-import { formatCPF } from '../../utils/format';
+import { Format } from '../../utils/format';
 import { lucide } from '../../utils/icons';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 

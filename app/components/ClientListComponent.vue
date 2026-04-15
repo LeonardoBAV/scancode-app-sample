@@ -33,7 +33,7 @@
                             verticalAlignment="top"
                         />
                     </GridLayout>
-                    <Label row="1" col="1" :text="formatCPFCNPJ(item.cpf_cnpj)" :class="['text-sm mt-1', selectedClientId === item.id ? 'text-primary-foreground opacity-70' : 'text-muted-foreground']" />
+                    <Label row="1" col="1" :text="Format.formatCPFCNPJ(item.cpf_cnpj)" :class="['text-sm mt-1', selectedClientId === item.id ? 'text-primary-foreground opacity-70' : 'text-muted-foreground']" />
                     <Label row="2" col="1" :text="item.phone" :class="['text-xs mt-1', selectedClientId === item.id ? 'text-primary-foreground opacity-70' : 'text-muted-foreground']" />
                 </GridLayout>
             </template>
@@ -52,7 +52,7 @@
 // --- Imports ---
 import { ref, computed } from 'vue';
 import type { Client } from '../types/schema/client';
-import { formatCPFCNPJ } from '../utils/format';
+import { Format } from '../utils/format';
 import { lucide } from '../utils/icons';
 
 

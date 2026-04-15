@@ -15,7 +15,7 @@
                         <GridLayout rows="auto, auto" columns="*, auto" class="p-4 border-b border-border" @tap="selecctedProduct(item)">
                             <Label row="0" col="0" :text="item.name" class="text-base font-semibold text-card-foreground" textWrap="true" />
                             <Label row="1" col="0" :text="item.sku + ' · ' + item.product_category.name" class="text-xs text-muted-foreground mt-1" />
-                            <Label row="0" col="1" rowSpan="2" :text="formatCurrencyBR(item.price)" class="text-base font-bold text-success" verticalAlignment="center" />
+                            <Label row="0" col="1" rowSpan="2" :text="Format.formatCurrencyBR(item.price)" class="text-base font-bold text-success" verticalAlignment="center" />
                         </GridLayout>
                     </template>
                 </ListView>
@@ -32,9 +32,9 @@
                     <template #default="{ item }">
                         <GridLayout rows="auto, auto, auto" columns="*, auto" class="card m-2 mx-4" androidElevation="2">
                             <Label row="0" col="0" :text="item.product.name" class="text-base font-semibold text-card-foreground" textWrap="true" />
-                            <Label row="0" col="1" :text="formatCurrencyBR(item.product.price * item.quantity)" class="text-base font-bold text-success" verticalAlignment="top" />
+                            <Label row="0" col="1" :text="Format.formatCurrencyBR(item.product.price * item.quantity)" class="text-base font-bold text-success" verticalAlignment="top" />
                             <Label row="1" col="0" :text="item.product.sku + ' · ' + item.product.product_category.name" class="text-xs text-muted-foreground mt-1" />
-                            <Label row="1" col="1" :text="formatCurrencyBR(item.product.price) + ' ' + perUnitLabel" class="text-xs text-muted-foreground" verticalAlignment="center" />
+                            <Label row="1" col="1" :text="Format.formatCurrencyBR(item.product.price) + ' ' + perUnitLabel" class="text-xs text-muted-foreground" verticalAlignment="center" />
                             <GridLayout row="2" col="0" colSpan="2" rows="auto" columns="auto, auto, auto" class="mt-3">
                                 <Button col="0" text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" @tap="decreaseQty(item)" />
                                 <Label col="1" :text="String(item.quantity)" class="text-base font-semibold text-foreground text-center min-w-8 mx-2" verticalAlignment="center" />
@@ -48,7 +48,7 @@
             <!-- Footer -->
             <GridLayout row="3" rows="auto" columns="*, *" class="footer-bar">
                 <Label col="0" :text="totalItemsLabel" class="text-base font-semibold text-foreground" verticalAlignment="center" />
-                <Label col="1" :text="formatCurrencyBR(cartTotal)" class="text-xl font-bold text-success text-right" verticalAlignment="center" />
+                <Label col="1" :text="Format.formatCurrencyBR(cartTotal)" class="text-xl font-bold text-success text-right" verticalAlignment="center" />
             </GridLayout>
         </GridLayout>
     </Page>
@@ -61,7 +61,7 @@ import { Dialogs, type TextField } from '@nativescript/core';
 import { useTranslation } from '../../../composables/useTranslation';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import { vibrateSuccess } from '../../../utils/haptics';
-import { formatCurrencyBR } from '../../../utils/format';
+import { Format } from '../../../utils/format';
 import type { Product } from '../../../types/schema/product';
 import type { CartItem } from '../../../types/cart';
 import { lucide } from '../../../utils/icons';

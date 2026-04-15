@@ -27,7 +27,7 @@
                         <GridLayout columns="auto, *, auto" class="p-4">
                             <Label col="0" :text="lucide('wallet')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                             <Label col="1" :text="$t('pages.eventHome.totalValue')" class="text-base text-card-foreground" verticalAlignment="center" />
-                            <Label col="2" :text="formatCurrencyBR(event.totalValue)" class="text-lg font-bold text-success" verticalAlignment="center" />
+                            <Label col="2" :text="Format.formatCurrencyBR(event.totalValue)" class="text-lg font-bold text-success" verticalAlignment="center" />
                         </GridLayout>
 
                     </StackLayout>
@@ -77,7 +77,7 @@ import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import type { EventItem } from '../../../types/event-item';
 import { lucide } from '../../../utils/icons';
-import { formatCurrencyBR } from '../../../utils/format';
+import { Format } from '../../../utils/format';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import EventsPage from '../../EventsPage.vue';
 

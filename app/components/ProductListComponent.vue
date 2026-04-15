@@ -29,7 +29,7 @@
                     <Label
                         row="0"
                         col="2"
-                        :text="formatCurrencyBR(item.price)"
+                        :text="Format.formatCurrencyBR(item.price)"
                         :class="['text-base font-bold text-right', selectedProductId === item.id ? 'text-primary-foreground' : 'text-success']"
                         verticalAlignment="center"
                         horizontalAlignment="right"
@@ -67,7 +67,7 @@
 // --- Imports ---
 import { ref, computed } from 'vue';
 import type { Product } from '../types/schema/product';
-import { formatCurrencyBR } from '../utils/format';
+import { Format } from '../utils/format';
 import { lucide } from '../utils/icons';
 
 

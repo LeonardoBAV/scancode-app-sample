@@ -30,7 +30,7 @@
             <StackLayout class="bg-border mx-4" style="height: 1" />
             <StackLayout class="p-4">
                 <Label :text="$t('pages.productShow.price')" class="text-xs text-muted-foreground mb-1" />
-                <Label :text="formatCurrencyBR(product?.price ?? 0)" class="text-base font-bold text-success" textWrap="true" />
+                <Label :text="Format.formatCurrencyBR(product?.price ?? 0)" class="text-base font-bold text-success" textWrap="true" />
             </StackLayout>
         </StackLayout>
     </StackLayout>
@@ -39,7 +39,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import type { Product } from '../types/schema/product';
-import { formatCurrencyBR } from '../utils/format';
+import { Format } from '../utils/format';
 
 
 // --- Component logic ---

@@ -80,7 +80,7 @@
 // --- Imports ---
 import { orderCreateClientFantasyName, orderCreateBuyerName } from './order-create-state';
 import { ref, computed, type ComputedRef, type Ref } from 'vue';
-import { formatCurrencyBR } from '../../../utils/format';
+import { Format } from '../../../utils/format';
 import { lucide } from '../../../utils/icons';
 import { useNavigation } from '../../../composables/useNavigation';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
@@ -97,7 +97,7 @@ const props = withDefaults(
     { orderId: undefined },
 );
 
-const displayOrderValue: string = formatCurrencyBR(1250);
+const displayOrderValue: string = Format.formatCurrencyBR(1250);
 const displayTotalItems: string = '5 itens';
 const { navigateTo } = useNavigation();
 

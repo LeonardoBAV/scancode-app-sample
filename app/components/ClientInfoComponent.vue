@@ -20,7 +20,7 @@
             <StackLayout class="bg-border mx-4" style="height: 1" />
             <StackLayout class="p-4">
                 <Label :text="$t('pages.orderClientShow.cpfCnpj')" class="text-xs text-muted-foreground mb-1" />
-                <Label :text="formatCPFCNPJ(client?.cpf_cnpj ?? '')" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                <Label :text="Format.formatCPFCNPJ(client?.cpf_cnpj ?? '')" class="text-base font-semibold text-card-foreground" textWrap="true" />
             </StackLayout>
             <StackLayout class="bg-border mx-4" style="height: 1" />
             <StackLayout class="p-4">
@@ -40,7 +40,7 @@
 // --- Imports ---
 import { computed, type ComputedRef } from 'vue';
 import type { Client } from '../types/schema/client';
-import { formatCPFCNPJ } from '../utils/format';
+import { Format } from '../utils/format';
 
 
 // --- Component logic ---

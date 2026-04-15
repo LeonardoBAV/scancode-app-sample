@@ -21,7 +21,7 @@
                             <Label row="0" col="1" :text="item.clientCompanyName" class="text-base font-semibold text-card-foreground" textWrap="true" />
                             <Label row="0" col="2" :text="statusLabel(item.status)" :class="statusBadgeClass(item.status)" verticalAlignment="top" horizontalAlignment="right" />
                             <Label row="1" col="1" colSpan="2" :text="item.id" class="text-xs text-muted-foreground" />
-                            <Label row="2" col="1" colSpan="2" :text="item.itemCount + ' ' + $t('pages.orderList.items') + ' · ' + formatCurrencyBR(item.totalValue)" class="text-sm text-muted-foreground mt-1" />
+                            <Label row="2" col="1" colSpan="2" :text="item.itemCount + ' ' + $t('pages.orderList.items') + ' · ' + Format.formatCurrencyBR(item.totalValue)" class="text-sm text-muted-foreground mt-1" />
                             <GridLayout row="3" col="1" colSpan="2" columns="auto, *" class="mt-2">
                                 <Label col="0" :text="item.synced ? lucide('circle-check') : lucide('clock')" :class="(item.synced ? 'lucide text-success' : 'lucide text-warning') + ' mr-2'" verticalAlignment="center" />
                                 <Label col="1" :text="item.synced ? $t('pages.orderList.synced') : $t('pages.orderList.notSynced')" class="text-xs" :class="item.synced ? 'text-success' : 'text-warning'" verticalAlignment="center" />
@@ -52,7 +52,7 @@ import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import type { Order, OrderStatus } from '../../../types/order';
 import { lucide } from '../../../utils/icons';
-import { formatCurrencyBR } from '../../../utils/format';
+import { Format } from '../../../utils/format';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderSelectClientPage from './OrderSelectClientPage.vue';
 import OrderShowPage from './OrderShowPage.vue';

@@ -5,37 +5,72 @@
                 <StackLayout class="card p-0" androidElevation="2">
                     <StackLayout class="p-4">
                         <Label :text="$t('pages.orderClientShow.fantasyName')" class="text-xs text-muted-foreground mb-1" />
-                        <TextField v-model="fantasyName" :hint="$t('pages.clientForm.fantasyNameHint')" class="input-field" placeholderColor="#a1a1aa" />
+                        <TextField
+                            v-model="fantasyName"
+                            :hint="$t('pages.clientForm.fantasyNameHint')"
+                            :class="inputFieldClass('fantasy_name')"
+                            placeholderColor="#a1a1aa"
+                        />
                         <Label v-if="fieldErrors.fantasy_name" :text="fieldErrors.fantasy_name" textWrap="true" class="text-xs text-destructive mt-1" />
                     </StackLayout>
                     <StackLayout class="bg-border mx-4" style="height: 1" />
                     <StackLayout class="p-4">
                         <Label :text="$t('pages.orderClientShow.corporateName')" class="text-xs text-muted-foreground mb-1" />
-                        <TextField v-model="corporateName" :hint="$t('pages.clientForm.corporateNameHint')" class="input-field" placeholderColor="#a1a1aa" />
+                        <TextField
+                            v-model="corporateName"
+                            :hint="$t('pages.clientForm.corporateNameHint')"
+                            :class="inputFieldClass('corporate_name')"
+                            placeholderColor="#a1a1aa"
+                        />
                         <Label v-if="fieldErrors.corporate_name" :text="fieldErrors.corporate_name" textWrap="true" class="text-xs text-destructive mt-1" />
                     </StackLayout>
                     <StackLayout class="bg-border mx-4" style="height: 1" />
                     <StackLayout class="p-4">
                         <Label :text="$t('pages.orderClientShow.cpfCnpj')" class="text-xs text-muted-foreground mb-1" />
-                        <TextField v-model="cpfCnpj" :hint="$t('pages.clientForm.cpfCnpjHint')" class="input-field" keyboardType="number" placeholderColor="#a1a1aa" />
+                        <TextField
+                            v-model="cpfCnpj"
+                            :hint="$t('pages.clientForm.cpfCnpjHint')"
+                            :class="inputFieldClass('cpf_cnpj')"
+                            keyboardType="number"
+                            placeholderColor="#a1a1aa"
+                        />
                         <Label v-if="fieldErrors.cpf_cnpj" :text="fieldErrors.cpf_cnpj" textWrap="true" class="text-xs text-destructive mt-1" />
                     </StackLayout>
                     <StackLayout class="bg-border mx-4" style="height: 1" />
                     <StackLayout class="p-4">
                         <Label :text="$t('pages.orderClientShow.email')" class="text-xs text-muted-foreground mb-1" />
-                        <TextField v-model="email" :hint="$t('pages.clientForm.emailHint')" class="input-field" keyboardType="email" autocorrect="false" autocapitalizationType="none" placeholderColor="#a1a1aa" />
+                        <TextField
+                            v-model="email"
+                            :hint="$t('pages.clientForm.emailHint')"
+                            :class="inputFieldClass('email')"
+                            keyboardType="email"
+                            autocorrect="false"
+                            autocapitalizationType="none"
+                            placeholderColor="#a1a1aa"
+                        />
                         <Label v-if="fieldErrors.email" :text="fieldErrors.email" textWrap="true" class="text-xs text-destructive mt-1" />
                     </StackLayout>
                     <StackLayout class="bg-border mx-4" style="height: 1" />
                     <StackLayout class="p-4">
                         <Label :text="$t('pages.orderClientShow.phone')" class="text-xs text-muted-foreground mb-1" />
-                        <TextField v-model="phone" :hint="$t('pages.clientForm.phoneHint')" class="input-field" keyboardType="phone" placeholderColor="#a1a1aa" />
+                        <TextField
+                            v-model="phone"
+                            :hint="$t('pages.clientForm.phoneHint')"
+                            :class="inputFieldClass('phone')"
+                            keyboardType="phone"
+                            placeholderColor="#a1a1aa"
+                        />
                         <Label v-if="fieldErrors.phone" :text="fieldErrors.phone" textWrap="true" class="text-xs text-destructive mt-1" />
                     </StackLayout>
                     <StackLayout class="bg-border mx-4" style="height: 1" />
                     <StackLayout class="p-4">
                         <Label :text="$t('pages.clientForm.carrier')" class="text-xs text-muted-foreground mb-1" />
-                        <TextField v-model="carrier" :hint="$t('pages.clientForm.carrierHint')" class="input-field" placeholderColor="#a1a1aa" />
+                        <TextField
+                            v-model="carrier"
+                            :hint="$t('pages.clientForm.carrierHint')"
+                            :class="inputFieldClass('carrier')"
+                            placeholderColor="#a1a1aa"
+                        />
                         <Label v-if="fieldErrors.carrier" :text="fieldErrors.carrier" textWrap="true" class="text-xs text-destructive mt-1" />
                     </StackLayout>
                 </StackLayout>
@@ -51,7 +86,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { useClientFormValidation } from '../composables/useClientFormValidation';
-import type { ClientFormFields } from '../validation/client-form-validation';
+import type { ClientFormFieldKey, ClientFormFields } from '../validation/client-form-validation';
 import type { Client } from '../types/schema/client';
 import { ref, watch, type Ref } from 'vue';
 
@@ -122,5 +157,10 @@ async function validateForm(): Promise<ClientFormFields | null> {
         },
         { ignoreClientId: props.client.id },
     );
+}
+
+function inputFieldClass(field: ClientFormFieldKey): string {
+    const message: string | undefined = fieldErrors.value[field];
+    return message !== undefined && message !== '' ? 'input-field-invalid' : 'input-field';
 }
 </script>

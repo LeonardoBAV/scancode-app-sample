@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from '@nativescript-community/sqlite';
 
-const SCHEMA_VERSION: number = 5;
+const SCHEMA_VERSION: number = 7;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const currentVersion: number = db.getVersion();
@@ -27,6 +27,14 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
 
     if (currentVersion < 5) {
         await migrateToV5(db);
+    }
+
+    if (currentVersion < 6) {
+        await migrateToV6(db);
+    }
+
+    if (currentVersion < 7) {
+        await migrateToV7(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -182,4 +190,20 @@ async function migrateToV4(db: SQLiteDatabase): Promise<void> {
 
 async function migrateToV5(db: SQLiteDatabase): Promise<void> {
     await db.execute('DROP TABLE IF EXISTS sync_log;');
+}
+
+/** Normalizes `cpf_cnpj` and replaces the non-unique index with a unique one (Laravel-aligned). */
+async function migrateToV6(db: SQLiteDatabase): Promise<void> {
+    await db.execute(`UPDATE clients SET cpf_cnpj = TRIM(cpf_cnpj) WHERE cpf_cnpj != TRIM(cpf_cnpj);`);
+    await db.execute('DROP INDEX IF EXISTS idx_clients_cpf_cnpj;');
+    await db.execute('CREATE UNIQUE INDEX idx_clients_cpf_cnpj ON clients(cpf_cnpj);');
+}
+
+/**
+ * Re-applies unique index on `cpf_cnpj` without `IF NOT EXISTS`, so devices that already
+ * ran v6 still get a guaranteed unique index if the previous create was skipped.
+ */
+async function migrateToV7(db: SQLiteDatabase): Promise<void> {
+    await db.execute('DROP INDEX IF EXISTS idx_clients_cpf_cnpj;');
+    await db.execute('CREATE UNIQUE INDEX idx_clients_cpf_cnpj ON clients(cpf_cnpj);');
 }

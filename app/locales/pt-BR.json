@@ -85,6 +85,18 @@
       "saveSuccess": "Cliente salvo com sucesso.",
       "saveError": "Não foi possível salvar. Tente novamente.",
       "saveErrorNoClient": "Nenhum cliente carregado para salvar.",
+      "errors": {
+        "carrierMax": "Transportadora deve ter no máximo 255 caracteres.",
+        "corporateNameMax": "Razão social deve ter no máximo 255 caracteres.",
+        "corporateNameRequired": "Informe a razão social.",
+        "cpfCnpjMax": "CPF/CNPJ deve ter no máximo 18 caracteres.",
+        "cpfCnpjRequired": "Informe o CPF ou CNPJ.",
+        "emailMax": "E-mail deve ter no máximo 255 caracteres.",
+        "fantasyNameMax": "Nome fantasia deve ter no máximo 255 caracteres.",
+        "generic": "Verifique os campos e tente novamente.",
+        "invalidEmail": "Informe um e-mail válido.",
+        "phoneMax": "Telefone deve ter no máximo 255 caracteres."
+      },
       "carrier": "Transportadora",
       "fantasyNameHint": "Nome fantasia",
       "corporateNameHint": "Razão social",

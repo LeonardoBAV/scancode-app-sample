@@ -85,6 +85,18 @@
       "saveSuccess": "Client saved successfully.",
       "saveError": "Could not save. Please try again.",
       "saveErrorNoClient": "No client loaded to save.",
+      "errors": {
+        "carrierMax": "Carrier must be at most 255 characters.",
+        "corporateNameMax": "Corporate name must be at most 255 characters.",
+        "corporateNameRequired": "Corporate name is required.",
+        "cpfCnpjMax": "CPF/CNPJ must be at most 18 characters.",
+        "cpfCnpjRequired": "CPF or CNPJ is required.",
+        "emailMax": "Email must be at most 255 characters.",
+        "fantasyNameMax": "Trade name must be at most 255 characters.",
+        "generic": "Check the fields and try again.",
+        "invalidEmail": "Enter a valid email address.",
+        "phoneMax": "Phone must be at most 255 characters."
+      },
       "carrier": "Carrier",
       "fantasyNameHint": "Trade name",
       "corporateNameHint": "Corporate name",

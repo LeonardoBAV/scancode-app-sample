@@ -8,7 +8,7 @@ import { i18n } from '../configs/i18n';
 import type { core } from 'zod';
 
 
-export class UseClientFormValidation {
+class UseClientFormValidation {
     private static readonly _instance: UseClientFormValidation = new UseClientFormValidation();
 
     public readonly fieldErrors: Ref<Partial<Record<ClientFormFieldKey, string>>>;

@@ -182,13 +182,11 @@ interface ClientsRepository {
     upsertMany(clients: Client[]): Promise<void>;
 
     /**
-     * Uma linha. Se `client.id == null`, preenche `id` com `getNextLocalClientId()` e zera `remote_id`.
-     * Dispara `ClientsComposable.refresh()`. Retorna o `client` atualizado (com `id` definido após insert local).
+     * Uma linha. Se `client.id == null`, zera `remote_id` e insere com PK nula para o SQLite (`AUTOINCREMENT`) gerar `id`;
+     * depois lê `last_insert_rowid()` e devolve o `client` com `id` definido.
+     * Dispara `ClientsComposable.refresh()`.
      */
     upsertOne(client: Client): Promise<Client>;
-
-    /** `COALESCE(MAX(id), 0) + 1` — candidato a PK para registro criado só no device. */
-    getNextLocalClientId(): Promise<number>;
 
     /** DELETE FROM clients + refresh do composable. */
     truncate(): Promise<void>;

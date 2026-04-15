@@ -1,17 +1,25 @@
 import type { SQLiteDatabase } from '@nativescript-community/sqlite';
 
-/** Single schema revision — full DDL in `migrateToV1`. Bump only when breaking / squashing migrations. */
-const SCHEMA_VERSION: number = 1;
+/**
+ * Schema revision for `SQLiteDatabase.setVersion`.
+ * v1: initial squashed DDL.
+ * v2: INTEGER PRIMARY KEY AUTOINCREMENT on pull tables + clients (upgrade path for DBs created before that DDL).
+ */
+const SCHEMA_VERSION: number = 2;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
-    const currentVersion: number = db.getVersion();
+    const startVersion: number = db.getVersion();
 
-    if (currentVersion >= SCHEMA_VERSION) {
+    if (startVersion >= SCHEMA_VERSION) {
         return;
     }
 
-    if (currentVersion < 1) {
+    if (startVersion < 1) {
         await migrateToV1(db);
+    }
+
+    if (startVersion < 2 && startVersion >= 1) {
+        await migrateToV2AutoincrementPullTables(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -23,7 +31,7 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS product_categories (
-            id          INTEGER PRIMARY KEY,
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
             remote_id   INTEGER,
             is_sync     INTEGER NOT NULL DEFAULT 0,
             name        TEXT    NOT NULL,
@@ -34,7 +42,7 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS products (
-            id                   INTEGER PRIMARY KEY,
+            id                   INTEGER PRIMARY KEY AUTOINCREMENT,
             remote_id            INTEGER,
             is_sync              INTEGER NOT NULL DEFAULT 0,
             sku                  TEXT    NOT NULL,
@@ -52,7 +60,7 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS clients (
-            id               INTEGER PRIMARY KEY,
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
             remote_id        INTEGER,
             is_sync          INTEGER NOT NULL DEFAULT 0,
             cpf_cnpj         TEXT    NOT NULL,
@@ -70,7 +78,7 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS payment_methods (
-            id          INTEGER PRIMARY KEY,
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
             remote_id   INTEGER,
             is_sync     INTEGER NOT NULL DEFAULT 0,
             name        TEXT    NOT NULL,
@@ -81,7 +89,7 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS events (
-            id          INTEGER PRIMARY KEY,
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
             remote_id   INTEGER,
             is_sync     INTEGER NOT NULL DEFAULT 0,
             name        TEXT    NOT NULL,
@@ -154,4 +162,103 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
         );
     `);
     await db.execute('CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);');
+}
+
+/**
+ * Upgrades databases created at schema v1 (INTEGER PRIMARY KEY without AUTOINCREMENT keyword).
+ * Preserves `id` values and FK integrity; recreates indexes.
+ */
+async function migrateToV2AutoincrementPullTables(db: SQLiteDatabase): Promise<void> {
+    await db.execute('PRAGMA foreign_keys = OFF;');
+
+    await db.transaction(async () => {
+        await db.execute(`
+            CREATE TABLE product_categories__ac (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                remote_id   INTEGER,
+                is_sync     INTEGER NOT NULL DEFAULT 0,
+                name        TEXT    NOT NULL,
+                created_at  TEXT    NOT NULL DEFAULT '',
+                updated_at  TEXT    NOT NULL
+            );
+        `);
+        await db.execute('INSERT INTO product_categories__ac SELECT * FROM product_categories;');
+        await db.execute('DROP TABLE product_categories;');
+        await db.execute('ALTER TABLE product_categories__ac RENAME TO product_categories;');
+
+        await db.execute(`
+            CREATE TABLE products__ac (
+                id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+                remote_id            INTEGER,
+                is_sync              INTEGER NOT NULL DEFAULT 0,
+                sku                  TEXT    NOT NULL,
+                barcode              TEXT,
+                name                 TEXT    NOT NULL,
+                price                REAL    NOT NULL,
+                product_category_id  INTEGER NOT NULL REFERENCES product_categories(id),
+                created_at           TEXT    NOT NULL DEFAULT '',
+                updated_at           TEXT    NOT NULL
+            );
+        `);
+        await db.execute('INSERT INTO products__ac SELECT * FROM products;');
+        await db.execute('DROP TABLE products;');
+        await db.execute('ALTER TABLE products__ac RENAME TO products;');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_products_category ON products(product_category_id);');
+
+        await db.execute(`
+            CREATE TABLE clients__ac (
+                id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                remote_id        INTEGER,
+                is_sync          INTEGER NOT NULL DEFAULT 0,
+                cpf_cnpj         TEXT    NOT NULL,
+                corporate_name   TEXT    NOT NULL,
+                fantasy_name     TEXT,
+                email            TEXT,
+                phone            TEXT,
+                carrier          TEXT,
+                created_at       TEXT    NOT NULL DEFAULT '',
+                updated_at       TEXT    NOT NULL
+            );
+        `);
+        await db.execute('INSERT INTO clients__ac SELECT * FROM clients;');
+        await db.execute('DROP TABLE clients;');
+        await db.execute('ALTER TABLE clients__ac RENAME TO clients;');
+        await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_clients_cpf_cnpj ON clients(cpf_cnpj);');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_clients_corporate_name ON clients(corporate_name);');
+
+        await db.execute(`
+            CREATE TABLE payment_methods__ac (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                remote_id   INTEGER,
+                is_sync     INTEGER NOT NULL DEFAULT 0,
+                name        TEXT    NOT NULL,
+                created_at  TEXT    NOT NULL DEFAULT '',
+                updated_at  TEXT    NOT NULL
+            );
+        `);
+        await db.execute('INSERT INTO payment_methods__ac SELECT * FROM payment_methods;');
+        await db.execute('DROP TABLE payment_methods;');
+        await db.execute('ALTER TABLE payment_methods__ac RENAME TO payment_methods;');
+
+        await db.execute(`
+            CREATE TABLE events__ac (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                remote_id   INTEGER,
+                is_sync     INTEGER NOT NULL DEFAULT 0,
+                name        TEXT    NOT NULL,
+                start       TEXT    NOT NULL,
+                end         TEXT    NOT NULL,
+                created_at  TEXT    NOT NULL,
+                updated_at  TEXT    NOT NULL
+            );
+        `);
+        await db.execute('INSERT INTO events__ac SELECT * FROM events;');
+        await db.execute('DROP TABLE events;');
+        await db.execute('ALTER TABLE events__ac RENAME TO events;');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_events_start ON events(start);');
+    });
+
+    await db.execute('PRAGMA foreign_keys = ON;');
 }

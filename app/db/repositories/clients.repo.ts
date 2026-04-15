@@ -29,24 +29,13 @@ export class ClientsRepository extends RepositoryBase {
     }
 
     public static async upsertOne(client: Client): Promise<Client> {
-        if (client.id == null) {
-            client.id = await ClientsRepository.getNextLocalClientId();
-            client.remote_id = null;
-        }
         await ClientsRepository.insertOrReplaceOne('clients', ClientsRepository.CLIENT_COLUMNS, client);
         await ClientsComposable.refresh();
-        return client;
-    }
 
-    /** Next INTEGER PRIMARY KEY candidate for locally created clients (offline-first). */
-    public static async getNextLocalClientId(): Promise<number> {
-        interface MaxIdRow {
-            n: number;
+        if (client.id == null) {
+            client = ClientsComposable.getList().value[ClientsComposable.getList().value.length - 1];
         }
-        const row: MaxIdRow | null = await ClientsRepository.queryOne<MaxIdRow>(
-            'SELECT COALESCE(MAX(id), 0) + 1 AS n FROM clients',
-        );
-        return row?.n ?? 1;
+        return client;
     }
 
     public static async findAll(): Promise<Client[]> {

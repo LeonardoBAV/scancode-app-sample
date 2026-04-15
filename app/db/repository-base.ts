@@ -5,7 +5,7 @@ import { Database } from './database';
 
 
 export abstract class RepositoryBase {
-    protected constructor() {}
+    protected constructor() { }
 
     protected static async connection(): Promise<SQLiteDatabase> {
         return await Database.getConnection();
@@ -102,4 +102,5 @@ export abstract class RepositoryBase {
         const row: T | null = (await db.get(sql, params)) as T | null;
         return row ?? null;
     }
+
 }

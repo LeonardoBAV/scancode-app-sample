@@ -5,6 +5,8 @@
 
 **Versão do schema local:** 3 (`events` definitiva + `orders`/`order_items` inteiros + tabelas de backup)
 
+**Migrations do app (`app/db/migrations.ts`):** `SCHEMA_VERSION` **2** — em instalações que já tinham o arquivo SQLite na revisão 1, `migrateToV2AutoincrementPullTables` recria `product_categories`, `products`, `clients`, `payment_methods` e `events` com `INTEGER PRIMARY KEY AUTOINCREMENT`, copiando linhas e preservando `id` (FKs de `orders` / `order_items` intactas). Instalações novas recebem esse DDL já na `migrateToV1` e não executam a v2.
+
 ---
 
 ## Contexto e Decisões de Design
@@ -27,6 +29,7 @@
 | `id INTEGER` PK em `orders` | Ver subseção abaixo (**sempre** inteiro local; autoincrement ao criar offline; no pull, `id` gravado = id da API). |
 | `remote_id` em `orders` | Ver subseção abaixo (espelho do id na API; `NULL` só enquanto o servidor ainda não “conhece” o pedido). |
 | `id INTEGER` PK em `order_items` | **Autoincremento**; `order_id INTEGER` referencia `orders(id)`. |
+| `INTEGER PRIMARY KEY AUTOINCREMENT` (catálogo + `clients`) | `product_categories`, `products`, `clients`, `payment_methods`, `events`: PK com `AUTOINCREMENT` no DDL. **Pull:** `INSERT OR REPLACE` com `id` explícito da API. **Cliente novo offline:** `INSERT` com `id` nulo → SQLite gera o próximo valor; `ClientsRepository.upsertOne` lê `last_insert_rowid()` e devolve o `client` com `id` preenchido. Não se usa `MAX(id)+1` em código. |
 | `synced_at TEXT NULL` em orders | `NULL` = pendente de sync. ISO 8601 após sync. Itens não têm `synced_at` próprio — são sync atômico com o pedido pai. |
 | `updated_at` em tabelas pull-only | Útil na **V2** (sync incremental na API); na V1 só acompanha o payload da API. |
 | Datas como `TEXT` (ISO 8601) | SQLite não tem tipo `DATETIME` nativo. Padrão: `'2026-03-28T14:00:00Z'`. |
@@ -74,7 +77,9 @@ Estratégia de upsert: `INSERT OR REPLACE INTO`.
 
 ```sql
 CREATE TABLE IF NOT EXISTS events (
-    id          INTEGER PRIMARY KEY,
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    remote_id   INTEGER,
+    is_sync     INTEGER NOT NULL DEFAULT 0,
     name        TEXT    NOT NULL,
     start       TEXT    NOT NULL,   -- date API → 'YYYY-MM-DD'
     end         TEXT    NOT NULL,   -- date API → 'YYYY-MM-DD'
@@ -106,8 +111,11 @@ export interface Event {
 
 ```sql
 CREATE TABLE IF NOT EXISTS product_categories (
-    id          INTEGER PRIMARY KEY,
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    remote_id   INTEGER,
+    is_sync     INTEGER NOT NULL DEFAULT 0,
     name        TEXT    NOT NULL,
+    created_at  TEXT    NOT NULL DEFAULT '',
     updated_at  TEXT    NOT NULL
 );
 ```
@@ -118,12 +126,15 @@ CREATE TABLE IF NOT EXISTS product_categories (
 
 ```sql
 CREATE TABLE IF NOT EXISTS products (
-    id                   INTEGER PRIMARY KEY,
+    id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+    remote_id            INTEGER,
+    is_sync              INTEGER NOT NULL DEFAULT 0,
     sku                  TEXT    NOT NULL,
     barcode              TEXT,
     name                 TEXT    NOT NULL,
     price                REAL    NOT NULL,  -- 4 casas decimais vindas da API
     product_category_id  INTEGER NOT NULL REFERENCES product_categories(id),
+    created_at           TEXT    NOT NULL DEFAULT '',
     updated_at           TEXT    NOT NULL
 );
 
@@ -142,7 +153,7 @@ CREATE INDEX IF NOT EXISTS idx_products_category ON products(product_category_id
 
 ```sql
 CREATE TABLE IF NOT EXISTS clients (
-    id               INTEGER PRIMARY KEY,
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
     remote_id        INTEGER,
     is_sync          INTEGER NOT NULL DEFAULT 0,
     cpf_cnpj         TEXT    NOT NULL,
@@ -160,7 +171,7 @@ CREATE INDEX IF NOT EXISTS idx_clients_corporate_name ON clients(corporate_name)
 ```
 
 - **`cpf_cnpj`:** unicidade no SQLite (índice único). A validação de formulário também consulta `ClientsRepository.loadByCpfCnpj` antes de gravar, com `ignoreClientId` na edição para permitir o mesmo registro ao salvar alterações sem mudar o documento.
-- **Cliente novo offline:** `ClientsRepository.upsertOne` atribui o próximo `id` via `getNextLocalClientId()` quando `id` é `null`; `is_sync` fica `false` após salvar pelo formulário.
+- **Cliente novo offline:** com `id` nulo, `ClientsRepository.upsertOne` grava `remote_id = null` e deixa o SQLite gerar a PK (`AUTOINCREMENT`); em seguida lê `last_insert_rowid()` para preencher `client.id` no objeto retornado. `is_sync` fica `false` após salvar pelo formulário até o push.
 
 ---
 
@@ -168,8 +179,11 @@ CREATE INDEX IF NOT EXISTS idx_clients_corporate_name ON clients(corporate_name)
 
 ```sql
 CREATE TABLE IF NOT EXISTS payment_methods (
-    id          INTEGER PRIMARY KEY,
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    remote_id   INTEGER,
+    is_sync     INTEGER NOT NULL DEFAULT 0,
     name        TEXT    NOT NULL,
+    created_at  TEXT    NOT NULL DEFAULT '',
     updated_at  TEXT    NOT NULL
 );
 ```

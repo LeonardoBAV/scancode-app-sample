@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from '@nativescript-community/sqlite';
 
-const SCHEMA_VERSION: number = 7;
+/** Single schema revision — full DDL in `migrateToV1`. Bump only when breaking / squashing migrations. */
+const SCHEMA_VERSION: number = 1;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const currentVersion: number = db.getVersion();
@@ -13,50 +14,20 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
         await migrateToV1(db);
     }
 
-    if (currentVersion < 2) {
-        await migrateToV2(db);
-    }
-
-    if (currentVersion < 3) {
-        await migrateToV3(db);
-    }
-
-    if (currentVersion < 4) {
-        await migrateToV4(db);
-    }
-
-    if (currentVersion < 5) {
-        await migrateToV5(db);
-    }
-
-    if (currentVersion < 6) {
-        await migrateToV6(db);
-    }
-
-    if (currentVersion < 7) {
-        await migrateToV7(db);
-    }
-
     await db.setVersion(SCHEMA_VERSION);
 }
 
+/** Creates the full database schema (squashed from former v1–v7). */
 async function migrateToV1(db: SQLiteDatabase): Promise<void> {
-    await db.execute(`
-        CREATE TABLE IF NOT EXISTS events (
-            id          INTEGER PRIMARY KEY,
-            name        TEXT    NOT NULL,
-            start       TEXT    NOT NULL,
-            end         TEXT    NOT NULL,
-            created_at  TEXT    NOT NULL,
-            updated_at  TEXT    NOT NULL
-        );
-    `);
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_events_start ON events(start);');
+    await db.execute('DROP TABLE IF EXISTS sync_log;');
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS product_categories (
             id          INTEGER PRIMARY KEY,
+            remote_id   INTEGER,
+            is_sync     INTEGER NOT NULL DEFAULT 0,
             name        TEXT    NOT NULL,
+            created_at  TEXT    NOT NULL DEFAULT '',
             updated_at  TEXT    NOT NULL
         );
     `);
@@ -64,11 +35,14 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
     await db.execute(`
         CREATE TABLE IF NOT EXISTS products (
             id                   INTEGER PRIMARY KEY,
+            remote_id            INTEGER,
+            is_sync              INTEGER NOT NULL DEFAULT 0,
             sku                  TEXT    NOT NULL,
             barcode              TEXT,
             name                 TEXT    NOT NULL,
             price                REAL    NOT NULL,
             product_category_id  INTEGER NOT NULL REFERENCES product_categories(id),
+            created_at           TEXT    NOT NULL DEFAULT '',
             updated_at           TEXT    NOT NULL
         );
     `);
@@ -78,26 +52,46 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS clients (
-            id              INTEGER PRIMARY KEY,
-            cpf_cnpj        TEXT    NOT NULL,
-            corporate_name  TEXT    NOT NULL,
-            fantasy_name    TEXT,
-            email           TEXT,
-            phone           TEXT,
-            carrier         TEXT,
+            id               INTEGER PRIMARY KEY,
+            remote_id        INTEGER,
+            is_sync          INTEGER NOT NULL DEFAULT 0,
+            cpf_cnpj         TEXT    NOT NULL,
+            corporate_name   TEXT    NOT NULL,
+            fantasy_name     TEXT,
+            email            TEXT,
+            phone            TEXT,
+            carrier          TEXT,
+            created_at       TEXT    NOT NULL DEFAULT '',
             updated_at      TEXT    NOT NULL
         );
     `);
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_clients_cpf_cnpj ON clients(cpf_cnpj);');
+    await db.execute('CREATE UNIQUE INDEX idx_clients_cpf_cnpj ON clients(cpf_cnpj);');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_clients_corporate_name ON clients(corporate_name);');
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS payment_methods (
             id          INTEGER PRIMARY KEY,
+            remote_id   INTEGER,
+            is_sync     INTEGER NOT NULL DEFAULT 0,
             name        TEXT    NOT NULL,
+            created_at  TEXT    NOT NULL DEFAULT '',
             updated_at  TEXT    NOT NULL
         );
     `);
+
+    await db.execute(`
+        CREATE TABLE IF NOT EXISTS events (
+            id          INTEGER PRIMARY KEY,
+            remote_id   INTEGER,
+            is_sync     INTEGER NOT NULL DEFAULT 0,
+            name        TEXT    NOT NULL,
+            start       TEXT    NOT NULL,
+            end         TEXT    NOT NULL,
+            created_at  TEXT    NOT NULL,
+            updated_at  TEXT    NOT NULL
+        );
+    `);
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_events_start ON events(start);');
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS orders_backup (
@@ -160,50 +154,4 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
         );
     `);
     await db.execute('CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);');
-}
-
-async function migrateToV2(db: SQLiteDatabase): Promise<void> {
-    await db.execute(`
-        ALTER TABLE clients ADD COLUMN created_at TEXT NOT NULL DEFAULT '';
-    `);
-}
-
-async function migrateToV3(db: SQLiteDatabase): Promise<void> {
-    await db.execute("ALTER TABLE products ADD COLUMN created_at TEXT NOT NULL DEFAULT '';");
-    await db.execute("ALTER TABLE product_categories ADD COLUMN created_at TEXT NOT NULL DEFAULT '';");
-    await db.execute("ALTER TABLE payment_methods ADD COLUMN created_at TEXT NOT NULL DEFAULT '';");
-
-    await db.execute('ALTER TABLE events ADD COLUMN remote_id INTEGER;');
-    await db.execute('ALTER TABLE product_categories ADD COLUMN remote_id INTEGER;');
-    await db.execute('ALTER TABLE products ADD COLUMN remote_id INTEGER;');
-    await db.execute('ALTER TABLE clients ADD COLUMN remote_id INTEGER;');
-    await db.execute('ALTER TABLE payment_methods ADD COLUMN remote_id INTEGER;');
-}
-
-async function migrateToV4(db: SQLiteDatabase): Promise<void> {
-    await db.execute('ALTER TABLE events ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
-    await db.execute('ALTER TABLE product_categories ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
-    await db.execute('ALTER TABLE products ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
-    await db.execute('ALTER TABLE clients ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
-    await db.execute('ALTER TABLE payment_methods ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0;');
-}
-
-async function migrateToV5(db: SQLiteDatabase): Promise<void> {
-    await db.execute('DROP TABLE IF EXISTS sync_log;');
-}
-
-/** Normalizes `cpf_cnpj` and replaces the non-unique index with a unique one (Laravel-aligned). */
-async function migrateToV6(db: SQLiteDatabase): Promise<void> {
-    await db.execute(`UPDATE clients SET cpf_cnpj = TRIM(cpf_cnpj) WHERE cpf_cnpj != TRIM(cpf_cnpj);`);
-    await db.execute('DROP INDEX IF EXISTS idx_clients_cpf_cnpj;');
-    await db.execute('CREATE UNIQUE INDEX idx_clients_cpf_cnpj ON clients(cpf_cnpj);');
-}
-
-/**
- * Re-applies unique index on `cpf_cnpj` without `IF NOT EXISTS`, so devices that already
- * ran v6 still get a guaranteed unique index if the previous create was skipped.
- */
-async function migrateToV7(db: SQLiteDatabase): Promise<void> {
-    await db.execute('DROP INDEX IF EXISTS idx_clients_cpf_cnpj;');
-    await db.execute('CREATE UNIQUE INDEX idx_clients_cpf_cnpj ON clients(cpf_cnpj);');
 }

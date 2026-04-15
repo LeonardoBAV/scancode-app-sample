@@ -23,7 +23,7 @@ import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
 import { ClientsRepository } from '../../db/repositories/clients.repo';
 import { showToast } from '../../composables/toast-state';
 import { useTranslation } from '../../composables/useTranslation';
-import { vibrateSuccess } from '../../utils/haptics';
+import { Haptics } from '../../utils/haptics';
 import type { Client } from '../../types/schema/client';
 import CustomSegmentedBarComponent from '../../components/CustomSegmentedBarComponent.vue';
 import ToastHostComponent from '../../components/ToastHostComponent.vue';
@@ -57,7 +57,7 @@ const headerTitle: ComputedRef<string> = computed(() => {
 async function updateClient(client: Client): Promise<void> {
     try {
         clientPage.value = await ClientsRepository.upsertOne(client);
-        vibrateSuccess();
+        Haptics.vibrateSuccess();
         showToast({
             message: t('pages.clientForm.saveSuccess'),
             variant: 'success',

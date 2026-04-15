@@ -1,11 +1,15 @@
-import { Haptics, HapticNotificationType } from '@nativescript/haptics';
+import { Haptics as NativeHaptics, HapticNotificationType } from '@nativescript/haptics';
 
-export function vibrateSuccess(): void {
-    try {
-        if (Haptics.isSupported()) {
-            Haptics.notification(HapticNotificationType.SUCCESS);
+export class Haptics {
+
+    public static vibrateSuccess(): void {
+        try {
+            if (NativeHaptics.isSupported()) {
+                NativeHaptics.notification(HapticNotificationType.SUCCESS);
+            }
+        } catch {
+            // ignore if haptics fails
         }
-    } catch {
-        // ignore if haptics fails
     }
+
 }

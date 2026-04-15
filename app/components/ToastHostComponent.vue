@@ -67,14 +67,14 @@ import {
     toastVariant,
     toastVisible,
 } from '../composables/toast-state';
-import { lucide } from '../utils/icons';
+import { Icons } from '../utils/icons';
 
 
 // --- Component logic ---
 const fillRef: Ref<{ nativeView?: View } | null> = ref(null);
 
 const iconChar: ComputedRef<string> = computed(() =>
-    toastVariant.value === 'success' ? lucide('circle-check') : lucide('circle-x'),
+    toastVariant.value === 'success' ? Icons.lucide('circle-check') : Icons.lucide('circle-x'),
 );
 
 const trackWidthDip: Ref<number> = ref(0);

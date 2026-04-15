@@ -43,4 +43,5 @@ export class Format {
         }
         return value.replace(/\D/g, '');
     }
+
 }

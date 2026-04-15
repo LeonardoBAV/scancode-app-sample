@@ -11,7 +11,7 @@
             <ClientListComponent row="1" :clients="clients" :selected-client-id="selectedClient?.id ?? null" @select="onSelectClient" />
 
             <StackLayout v-if="selectedClient" row="2" class="footer-bar">
-                <Button :text="lucide('eye')" class="btn-icon lucide" @tap="onViewTap" />
+                <Button :text="Icons.lucide('eye')" class="btn-icon lucide" @tap="onViewTap" />
             </StackLayout>
         </GridLayout>
     </Page>
@@ -22,7 +22,7 @@
 import { computed, type ComputedRef, ref, type Ref } from 'vue';
 import type { Client } from '../../types/schema/client';
 import { ClientsComposable } from '../../composables/clients-composable';
-import { lucide } from '../../utils/icons';
+import { Icons } from '../../utils/icons';
 import { useNavigation } from '../../composables/useNavigation';
 import ClientListComponent from '../../components/ClientListComponent.vue';
 import ClientCreatePage from './ClientCreatePage.vue';

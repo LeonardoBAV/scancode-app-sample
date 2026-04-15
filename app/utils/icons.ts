@@ -79,15 +79,18 @@ const codepoints: Record<string, number> = {
 export type LucideIcon = keyof typeof codepoints;
 
 /**
- * Returns the unicode character for a Lucide icon name.
- * Use with `class="lucide"` on a Label.
+ * Lucide icon font helpers. Use `class="lucide"` on a Label.
  *
  * @example
  * ```xml
- * <Label :text="lucide('user')" class="lucide text-xl text-foreground" />
+ * <Label :text="Icons.lucide('user')" class="lucide text-xl text-foreground" />
  * ```
  */
-export function lucide(name: LucideIcon): string {
-    const cp = codepoints[name];
-    return String.fromCharCode(cp);
+export class Icons {
+
+    public static lucide(name: LucideIcon): string {
+        const cp: number = codepoints[name];
+        return String.fromCharCode(cp);
+    }
+
 }

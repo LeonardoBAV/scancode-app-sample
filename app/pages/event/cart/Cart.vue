@@ -7,7 +7,7 @@
             <!-- Search -->
             <StackLayout row="1" class="px-4 pt-4 pb-2">
                 <GridLayout columns="auto, *" class="input-search">
-                    <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+                    <Label col="0" :text="Icons.lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
                     <TextField ref="searchFieldRef" col="1" v-model="searchQuery" :hint="$t('pages.cart.searchHint')" class="text-base text-foreground p-0" placeholderColor="#71717a" />
                 </GridLayout>
                 <ListView v-if="searchQuery.length > 0 && searchResults.length > 0" :items="searchResults" separatorColor="transparent" class="mt-2 rounded-xl border border-border bg-card" height="180">
@@ -24,7 +24,7 @@
             <!-- Cart list or empty state -->
             <GridLayout row="2" rows="*">
                 <StackLayout v-if="cartItems.length === 0" class="p-8" verticalAlignment="center" horizontalAlignment="center">
-                    <Label :text="lucide('shopping-cart')" class="lucide text-4xl text-muted-foreground mb-4" />
+                    <Label :text="Icons.lucide('shopping-cart')" class="lucide text-4xl text-muted-foreground mb-4" />
                     <Label :text="$t('pages.cart.empty')" class="text-lg font-semibold text-foreground text-center mb-2" />
                     <Label :text="$t('pages.cart.emptyHint')" class="text-sm text-muted-foreground text-center" textWrap="true" />
                 </StackLayout>
@@ -60,11 +60,11 @@ import { ref, computed, type Ref, type ComputedRef } from 'vue';
 import { Dialogs, type TextField } from '@nativescript/core';
 import { useTranslation } from '../../../composables/useTranslation';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
-import { vibrateSuccess } from '../../../utils/haptics';
+import { Haptics } from '../../../utils/haptics';
 import { Format } from '../../../utils/format';
 import type { Product } from '../../../types/schema/product';
 import type { CartItem } from '../../../types/cart';
-import { lucide } from '../../../utils/icons';
+import { Icons } from '../../../utils/icons';
 
 
 // --- Component logic ---
@@ -115,7 +115,7 @@ function selecctedProduct(product: Product): void {
     addProduct(product);
 
     closeKeyboard();
-    vibrateSuccess();
+    Haptics.vibrateSuccess();
     searchQuery.value = '';
 }
 

@@ -13,7 +13,7 @@
         >
             <StackLayout orientation="horizontal" horizontalAlignment="center" verticalAlignment="center">
                 <Label
-                    :text="lucide(leftIcon)"
+                    :text="Icons.lucide(leftIcon)"
                     class="lucide text-base mr-2"
                     :class="modelValue === 0 ? 'text-primary-foreground' : 'text-muted-foreground'"
                     verticalAlignment="center"
@@ -37,7 +37,7 @@
         >
             <StackLayout orientation="horizontal" horizontalAlignment="center" verticalAlignment="center">
                 <Label
-                    :text="lucide(rightIcon)"
+                    :text="Icons.lucide(rightIcon)"
                     class="lucide text-base mr-2"
                     :class="modelValue === 1 ? 'text-primary-foreground' : 'text-muted-foreground'"
                     verticalAlignment="center"
@@ -56,8 +56,7 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import type { LucideIcon } from '../utils/icons';
-import { lucide } from '../utils/icons';
+import { Icons, type LucideIcon } from '../utils/icons';
 
 
 // --- Component logic ---

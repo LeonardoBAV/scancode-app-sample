@@ -12,7 +12,7 @@
 
                         <!-- Name -->
                         <GridLayout columns="auto, *" class="p-4">
-                            <Label col="0" :text="lucide('user')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <Label col="0" :text="Icons.lucide('user')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
                             <StackLayout col="1">
                                 <Label :text="$t('pages.profileDetails.name')" class="text-xs text-muted-foreground mb-1" />
                                 <Label :text="rep?.name ?? '—'" class="text-base text-card-foreground" textWrap="true" />
@@ -23,7 +23,7 @@
 
                         <!-- Username -->
                         <GridLayout columns="auto, *" class="p-4">
-                            <Label col="0" :text="lucide('at-sign')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <Label col="0" :text="Icons.lucide('at-sign')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
                             <StackLayout col="1">
                                 <Label :text="$t('pages.profileDetails.username')" class="text-xs text-muted-foreground mb-1" />
                                 <Label :text="rep?.name ?? '—'" class="text-base text-card-foreground" />
@@ -34,7 +34,7 @@
 
                         <!-- Email -->
                         <GridLayout columns="auto, *" class="p-4">
-                            <Label col="0" :text="lucide('mail')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <Label col="0" :text="Icons.lucide('mail')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
                             <StackLayout col="1">
                                 <Label :text="$t('pages.profileDetails.email')" class="text-xs text-muted-foreground mb-1" />
                                 <Label :text="rep?.email ?? '—'" class="text-base text-card-foreground" />
@@ -45,7 +45,7 @@
 
                         <!-- CPF -->
                         <GridLayout columns="auto, *" class="p-4">
-                            <Label col="0" :text="lucide('hash')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <Label col="0" :text="Icons.lucide('hash')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
                             <StackLayout col="1">
                                 <Label :text="$t('pages.profileDetails.cpf')" class="text-xs text-muted-foreground mb-1" />
                                 <Label :text="Format.formatCPF(rep?.cpf)" class="text-base text-card-foreground" />
@@ -56,7 +56,7 @@
 
                         <!-- Distributor -->
                         <GridLayout columns="auto, *" class="p-4">
-                            <Label col="0" :text="lucide('store')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <Label col="0" :text="Icons.lucide('store')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
                             <StackLayout col="1">
                                 <Label :text="$t('pages.profileDetails.distributor')" class="text-xs text-muted-foreground mb-1" />
                                 <Label :text="distributorLabel" class="text-base text-card-foreground" textWrap="true" />
@@ -77,7 +77,7 @@ import { ref, computed, onMounted, type ComputedRef } from 'vue';
 import { getAuth } from '../../persistence/auth-session';
 import type { AuthProfile } from '../../types/sessions/auth';
 import { Format } from '../../utils/format';
-import { lucide } from '../../utils/icons';
+import { Icons } from '../../utils/icons';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
 const profile = ref<ReturnType<typeof getAuth>>(null);

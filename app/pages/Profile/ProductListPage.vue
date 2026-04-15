@@ -5,7 +5,7 @@
             <ProductListComponent row="1" :products="products" :selected-product-id="selectedProduct?.id ?? null" @select="onSelectProduct" />
 
             <StackLayout v-if="selectedProduct" row="2" class="footer-bar">
-                <Button :text="lucide('eye')" class="btn-icon lucide" @tap="onViewTap" />
+                <Button :text="Icons.lucide('eye')" class="btn-icon lucide" @tap="onViewTap" />
             </StackLayout>
         </GridLayout>
     </Page>
@@ -16,7 +16,7 @@
 import { computed, type ComputedRef, ref, type Ref } from 'vue';
 import type { Product } from '../../types/schema/product';
 import { ProductsComposable } from '../../composables/products-composable';
-import { lucide } from '../../utils/icons';
+import { Icons } from '../../utils/icons';
 import { useNavigation } from '../../composables/useNavigation';
 import ProductListComponent from '../../components/ProductListComponent.vue';
 import ProductShowPage from './ProductShowPage.vue';

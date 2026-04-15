@@ -2,7 +2,7 @@
     <GridLayout columns="auto, *, auto" class="px-4 py-3 border-b border-border bg-card">
 
         <!-- Left: Back button or spacer -->
-        <Label v-if="canGoBack" col="0" :text="lucide('arrow-left')" class="lucide text-foreground w-10 h-10 text-center" verticalAlignment="center" @tap="goBack" />
+        <Label v-if="canGoBack" col="0" :text="Icons.lucide('arrow-left')" class="lucide text-foreground w-10 h-10 text-center" verticalAlignment="center" @tap="goBack" />
         <Label v-else col="0" text="" class="w-10" />
 
         <!-- Center: Title -->
@@ -12,7 +12,7 @@
         <Label
             v-if="rightActionIcon"
             col="2"
-            :text="lucide(rightActionIcon)"
+            :text="Icons.lucide(rightActionIcon)"
             class="lucide text-primary w-10 h-10 text-center"
             verticalAlignment="center"
             @tap="onRightAction"
@@ -34,10 +34,9 @@
 // --- Imports ---
 import { nextTick, onMounted, ref, type Ref } from 'vue';
 import { Frame } from '@nativescript/core';
-import type { LucideIcon } from '../utils/icons';
 import { useNavigation } from '../composables/useNavigation';
 import { getAuth } from '../persistence/auth-session';
-import { lucide } from '../utils/icons';
+import { Icons, type LucideIcon } from '../utils/icons';
 import Profile from '../pages/Profile/Profile.vue';
 
 

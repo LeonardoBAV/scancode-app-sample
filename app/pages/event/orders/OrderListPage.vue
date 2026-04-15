@@ -7,7 +7,7 @@
             <!-- Search -->
             <StackLayout row="1" class="px-4 pt-4 pb-2">
                 <GridLayout columns="auto, *" class="input-search">
-                    <Label col="0" :text="lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+                    <Label col="0" :text="Icons.lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
                     <TextField col="1" v-model="searchQuery" :hint="$t('common.search')" class="text-base text-foreground p-0" placeholderColor="#a1a1aa" />
                 </GridLayout>
             </StackLayout>
@@ -17,13 +17,13 @@
                 <template #default="{ item }">
                     <StackLayout class="px-4 pt-2 pb-3" @tap="onOrderTap(item)">
                         <GridLayout rows="auto, auto, auto, auto" columns="auto, *, auto" class="p-4 bg-card border border-border rounded-lg">
-                            <Label row="0" col="0" rowSpan="4" :text="lucide('receipt')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
+                            <Label row="0" col="0" rowSpan="4" :text="Icons.lucide('receipt')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
                             <Label row="0" col="1" :text="item.clientCompanyName" class="text-base font-semibold text-card-foreground" textWrap="true" />
                             <Label row="0" col="2" :text="statusLabel(item.status)" :class="statusBadgeClass(item.status)" verticalAlignment="top" horizontalAlignment="right" />
                             <Label row="1" col="1" colSpan="2" :text="item.id" class="text-xs text-muted-foreground" />
                             <Label row="2" col="1" colSpan="2" :text="item.itemCount + ' ' + $t('pages.orderList.items') + ' · ' + Format.formatCurrencyBR(item.totalValue)" class="text-sm text-muted-foreground mt-1" />
                             <GridLayout row="3" col="1" colSpan="2" columns="auto, *" class="mt-2">
-                                <Label col="0" :text="item.synced ? lucide('circle-check') : lucide('clock')" :class="(item.synced ? 'lucide text-success' : 'lucide text-warning') + ' mr-2'" verticalAlignment="center" />
+                                <Label col="0" :text="item.synced ? Icons.lucide('circle-check') : Icons.lucide('clock')" :class="(item.synced ? 'lucide text-success' : 'lucide text-warning') + ' mr-2'" verticalAlignment="center" />
                                 <Label col="1" :text="item.synced ? $t('pages.orderList.synced') : $t('pages.orderList.notSynced')" class="text-xs" :class="item.synced ? 'text-success' : 'text-warning'" verticalAlignment="center" />
                             </GridLayout>
                         </GridLayout>
@@ -32,7 +32,7 @@
             </ListView>
 
             <StackLayout v-else row="2" class="p-8" verticalAlignment="center" horizontalAlignment="center">
-                <Label :text="lucide('receipt')" class="lucide text-muted-foreground text-4xl text-center mb-4" />
+                <Label :text="Icons.lucide('receipt')" class="lucide text-muted-foreground text-4xl text-center mb-4" />
                 <Label :text="$t('pages.orderList.empty')" class="text-lg font-semibold text-foreground text-center mb-2" />
                 <Label :text="$t('pages.orderList.emptyHint')" class="text-sm text-muted-foreground text-center" textWrap="true" />
             </StackLayout>
@@ -51,7 +51,7 @@ import { ref, computed } from 'vue';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import type { Order, OrderStatus } from '../../../types/order';
-import { lucide } from '../../../utils/icons';
+import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderSelectClientPage from './OrderSelectClientPage.vue';

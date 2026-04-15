@@ -5,7 +5,7 @@
             <PaymentMethodListComponent row="1" :payment-methods="paymentMethods" :selected-payment-method-id="selectedPaymentMethod?.id ?? null" @select="onSelectPaymentMethod" />
 
             <StackLayout v-if="selectedPaymentMethod" row="2" class="footer-bar">
-                <Button :text="lucide('eye')" class="btn-icon lucide" @tap="onViewTap" />
+                <Button :text="Icons.lucide('eye')" class="btn-icon lucide" @tap="onViewTap" />
             </StackLayout>
         </GridLayout>
     </Page>
@@ -16,7 +16,7 @@
 import { computed, type ComputedRef, ref, type Ref } from 'vue';
 import type { PaymentMethod } from '../../types/schema/payment-method';
 import { PaymentMethodsComposable } from '../../composables/payment-methods-composable';
-import { lucide } from '../../utils/icons';
+import { Icons } from '../../utils/icons';
 import { useNavigation } from '../../composables/useNavigation';
 import PaymentMethodListComponent from '../../components/PaymentMethodListComponent.vue';
 import PaymentMethodShowPage from './PaymentMethodShowPage.vue';

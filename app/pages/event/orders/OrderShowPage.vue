@@ -25,9 +25,9 @@
                     <StackLayout class="px-4 pt-4 pb-8">
                         <StackLayout class="card mb-4" androidElevation="2">
                             <GridLayout columns="auto, *, auto" class="mb-3">
-                                <Label col="0" :text="lucide('circle-user')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+                                <Label col="0" :text="Icons.lucide('circle-user')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.orderShow.client')" class="text-sm font-medium text-muted-foreground" verticalAlignment="center" />
-                                <Button col="2" :text="lucide('eye')" class="lucide btn-icon-sm bg-secondary text-secondary-foreground" @tap="goToClientShow" />
+                                <Button col="2" :text="Icons.lucide('eye')" class="lucide btn-icon-sm bg-secondary text-secondary-foreground" @tap="goToClientShow" />
                             </GridLayout>
                             <Label :text="clientFantasyName || '—'" class="text-lg font-semibold text-card-foreground mb-2" textWrap="true" />
                             <Label :text="buyerName ? ($t('pages.orderShow.buyer') + ': ' + buyerName) : '—'" class="text-sm text-muted-foreground" textWrap="true" />
@@ -36,9 +36,9 @@
                         <!-- Payment -->
                         <StackLayout class="card mb-4" androidElevation="2">
                             <GridLayout columns="auto, *, auto" class="mb-3">
-                                <Label col="0" :text="lucide('credit-card')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+                                <Label col="0" :text="Icons.lucide('credit-card')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.orderShow.paymentMethod')" class="text-sm font-medium text-muted-foreground" verticalAlignment="center" />
-                                <Button col="2" :text="lucide('pencil')" class="lucide btn-icon-sm bg-secondary text-secondary-foreground" @tap="goToPayment" />
+                                <Button col="2" :text="Icons.lucide('pencil')" class="lucide btn-icon-sm bg-secondary text-secondary-foreground" @tap="goToPayment" />
                             </GridLayout>
                             <Label :text="paymentMethodName || '—'" class="text-lg font-semibold text-card-foreground" textWrap="true" />
                         </StackLayout>
@@ -46,7 +46,7 @@
                         <!-- Observation -->
                         <StackLayout class="card" androidElevation="2">
                             <GridLayout columns="auto, *" class="mb-3">
-                                <Label col="0" :text="lucide('clipboard-list')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
+                                <Label col="0" :text="Icons.lucide('clipboard-list')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.orderShow.observation')" class="text-sm font-medium text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
                             <TextView v-model="observation" :hint="$t('pages.orderShow.observationHint')" class="input-field" height="100" />
@@ -60,16 +60,16 @@
                 <GridLayout rows="auto" columns="*, *" class="mb-3" verticalAlignment="center">
                     <Label col="0" :text="orderStatus === 'Open' ? $t('pages.orderShow.statusOpen') : $t('pages.orderShow.statusCompleted')" :class="(orderStatus === 'Open' ? 'badge-success' : 'badge-secondary') + ' mr-2'" verticalAlignment="center" horizontalAlignment="center" />
                     <GridLayout col="1" columns="auto, *" class="ml-2" verticalAlignment="center" horizontalAlignment="center">
-                        <Label col="0" :text="synced ? lucide('circle-check') : lucide('clock')" :class="(synced ? 'lucide text-success' : 'lucide text-warning') + ' mr-2'" verticalAlignment="center" />
+                        <Label col="0" :text="synced ? Icons.lucide('circle-check') : Icons.lucide('clock')" :class="(synced ? 'lucide text-success' : 'lucide text-warning') + ' mr-2'" verticalAlignment="center" />
                         <Label col="1" :text="synced ? $t('pages.orderList.synced') : $t('pages.orderList.notSynced')" class="text-sm" :class="synced ? 'text-success' : 'text-warning'" verticalAlignment="center" />
                     </GridLayout>
                 </GridLayout>
                 <GridLayout v-if="orderStatus === 'Open'" rows="auto" columns="*, *" columnSpacing="12">
                     <Button row="0" col="0" :text="$t('pages.orderShow.signature')" class="btn-primary" @tap="onFinish" />
-                    <Button row="0" col="1" :text="lucide('printer')" class="lucide btn-secondary" @tap="onPrint" />
+                    <Button row="0" col="1" :text="Icons.lucide('printer')" class="lucide btn-secondary" @tap="onPrint" />
                 </GridLayout>
                 <GridLayout v-else rows="auto" columns="*, auto">
-                    <Button row="0" col="1" :text="lucide('printer')" class="lucide btn-icon bg-secondary text-secondary-foreground" @tap="onPrint" />
+                    <Button row="0" col="1" :text="Icons.lucide('printer')" class="lucide btn-icon bg-secondary text-secondary-foreground" @tap="onPrint" />
                 </GridLayout>
             </StackLayout>
         </GridLayout>
@@ -81,7 +81,7 @@
 import { orderCreateClientFantasyName, orderCreateBuyerName } from './order-create-state';
 import { ref, computed, type ComputedRef, type Ref } from 'vue';
 import { Format } from '../../../utils/format';
-import { lucide } from '../../../utils/icons';
+import { Icons } from '../../../utils/icons';
 import { useNavigation } from '../../../composables/useNavigation';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderClientShowPage from './OrderClientShowPage.vue';

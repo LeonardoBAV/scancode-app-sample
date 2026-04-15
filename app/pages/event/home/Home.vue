@@ -25,7 +25,7 @@
 
                         <!-- Total -->
                         <GridLayout columns="auto, *, auto" class="p-4">
-                            <Label col="0" :text="lucide('wallet')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                            <Label col="0" :text="Icons.lucide('wallet')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                             <Label col="1" :text="$t('pages.eventHome.totalValue')" class="text-base text-card-foreground" verticalAlignment="center" />
                             <Label col="2" :text="Format.formatCurrencyBR(event.totalValue)" class="text-lg font-bold text-success" verticalAlignment="center" />
                         </GridLayout>
@@ -39,7 +39,7 @@
 
                         <!-- Total Orders -->
                         <GridLayout columns="auto, *, auto" class="p-4">
-                            <Label col="0" :text="lucide('receipt')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                            <Label col="0" :text="Icons.lucide('receipt')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                             <Label col="1" :text="$t('pages.eventHome.orders')" class="text-base text-card-foreground" verticalAlignment="center" />
                             <Label col="2" :text="String(event.orderCount)" class="text-base font-semibold text-card-foreground" verticalAlignment="center" />
                         </GridLayout>
@@ -48,7 +48,7 @@
 
                         <!-- Synced -->
                         <GridLayout columns="auto, *, auto" class="p-4">
-                            <Label col="0" :text="lucide('circle-check')" class="lucide text-success mr-4" verticalAlignment="center" />
+                            <Label col="0" :text="Icons.lucide('circle-check')" class="lucide text-success mr-4" verticalAlignment="center" />
                             <Label col="1" :text="$t('pages.eventHome.synced')" class="text-base text-card-foreground" verticalAlignment="center" />
                             <Label col="2" :text="String(event.ordersSynced)" class="text-base font-semibold text-success" verticalAlignment="center" />
                         </GridLayout>
@@ -57,7 +57,7 @@
 
                         <!-- Unsynced -->
                         <GridLayout columns="auto, *, auto" class="p-4">
-                            <Label col="0" :text="lucide('clock')" class="lucide text-warning mr-4" verticalAlignment="center" />
+                            <Label col="0" :text="Icons.lucide('clock')" class="lucide text-warning mr-4" verticalAlignment="center" />
                             <Label col="1" :text="$t('pages.eventHome.unsynced')" class="text-base text-card-foreground" verticalAlignment="center" />
                             <Label col="2" :text="String(event.ordersUnsynced)" class="text-base font-semibold text-warning" verticalAlignment="center" />
                         </GridLayout>
@@ -76,7 +76,7 @@
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import type { EventItem } from '../../../types/event-item';
-import { lucide } from '../../../utils/icons';
+import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import EventsPage from '../../EventsPage.vue';

@@ -29,7 +29,7 @@ import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
 import { PaymentMethodsRepository } from '../../db/repositories/payment-methods.repo';
 import { showToast } from '../../composables/toast-state';
 import { useTranslation } from '../../composables/useTranslation';
-import { vibrateSuccess } from '../../utils/haptics';
+import { Haptics } from '../../utils/haptics';
 import type { PaymentMethod } from '../../types/schema/payment-method';
 import CustomSegmentedBarComponent from '../../components/CustomSegmentedBarComponent.vue';
 import ToastHostComponent from '../../components/ToastHostComponent.vue';
@@ -65,7 +65,7 @@ async function onPaymentMethodFormSave(method: PaymentMethod): Promise<void> {
     try {
         await PaymentMethodsRepository.upsertOne(method);
         localPaymentMethod.value = method;
-        vibrateSuccess();
+        Haptics.vibrateSuccess();
         showToast({
             message: t('pages.paymentMethodForm.saveSuccess'),
             variant: 'success',

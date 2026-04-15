@@ -19,9 +19,9 @@
                     <StackLayout class="px-4 mt-6">
                         <StackLayout class="card p-0" androidElevation="2">
                             <GridLayout columns="auto, *, auto" class="p-4" @tap="goToProfileDetails">
-                                <Label col="0" :text="lucide('circle-user')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                                <Label col="0" :text="Icons.lucide('circle-user')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.profile.details')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
+                                <Label col="2" :text="Icons.lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
                         </StackLayout>
                     </StackLayout>
@@ -32,25 +32,25 @@
 
                         <StackLayout class="card p-0" androidElevation="2">
                             <GridLayout columns="auto, *, auto" class="p-4" @tap="onClientList">
-                                <Label col="0" :text="lucide('users')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                                <Label col="0" :text="Icons.lucide('users')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.profile.clientList')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
+                                <Label col="2" :text="Icons.lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
 
                             <StackLayout class="bg-border mx-4" style="height: 1" />
 
                             <GridLayout columns="auto, *, auto" class="p-4" @tap="onProductList">
-                                <Label col="0" :text="lucide('package')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                                <Label col="0" :text="Icons.lucide('package')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.profile.productList')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
+                                <Label col="2" :text="Icons.lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
 
                             <StackLayout class="bg-border mx-4" style="height: 1" />
 
                             <GridLayout columns="auto, *, auto" class="p-4" @tap="onPaymentMethodList">
-                                <Label col="0" :text="lucide('credit-card')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                                <Label col="0" :text="Icons.lucide('credit-card')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.profile.paymentMethods')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
+                                <Label col="2" :text="Icons.lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
                         </StackLayout>
                     </StackLayout>
@@ -59,9 +59,9 @@
                     <StackLayout class="px-4 mt-6">
                         <StackLayout class="card p-0" androidElevation="2" :isEnabled="!isSyncing" @tap="onSync">
                             <GridLayout columns="auto, *, auto" class="p-4">
-                                <Label col="0" :text="isSyncing ? lucide('loader-2') : lucide('refresh-cw')" :class="['lucide', 'text-muted-foreground', 'mr-4', isSyncing ? 'lucide-spin' : '']" verticalAlignment="center" />
+                                <Label col="0" :text="isSyncing ? Icons.lucide('loader-2') : Icons.lucide('refresh-cw')" :class="['lucide', 'text-muted-foreground', 'mr-4', isSyncing ? 'lucide-spin' : '']" verticalAlignment="center" />
                                 <Label col="1" :text="isSyncing ? $t('common.loading') : $t('pages.profile.sync')" class="text-base text-card-foreground" verticalAlignment="center" />
-                                <Label v-if="!isSyncing" col="2" :text="lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
+                                <Label v-if="!isSyncing" col="2" :text="Icons.lucide('chevron-right')" class="lucide text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
                         </StackLayout>
                     </StackLayout>
@@ -70,7 +70,7 @@
                     <StackLayout class="px-4 mt-6">
                         <StackLayout class="bg-primary border border-border rounded-lg p-0" androidElevation="1">
                             <GridLayout columns="auto, *" class="p-4" @tap="logout">
-                                <Label col="0" :text="lucide('log-out')" class="lucide text-primary-foreground mr-4" verticalAlignment="center" />
+                                <Label col="0" :text="Icons.lucide('log-out')" class="lucide text-primary-foreground mr-4" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.profile.logout')" class="text-base font-semibold text-primary-foreground" verticalAlignment="center" />
                             </GridLayout>
                         </StackLayout>
@@ -98,7 +98,7 @@ import { useTranslation } from '../../composables/useTranslation';
 import { useNavigation } from '../../composables/useNavigation';
 import { useAppVersion } from '../../composables/useAppVersion';
 import { getAuth, clearAuth } from '../../persistence/auth-session';
-import { lucide } from '../../utils/icons';
+import { Icons } from '../../utils/icons';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 import ClientListPage from './ClientListPage.vue';
 import PaymentMethodListPage from './PaymentMethodListPage.vue';

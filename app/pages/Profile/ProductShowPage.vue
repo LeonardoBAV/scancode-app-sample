@@ -30,7 +30,7 @@ import { ProductCategoriesRepository } from '../../db/repositories/product-categ
 import { ProductsRepository } from '../../db/repositories/products.repo';
 import { showToast } from '../../composables/toast-state';
 import { useTranslation } from '../../composables/useTranslation';
-import { vibrateSuccess } from '../../utils/haptics';
+import { Haptics } from '../../utils/haptics';
 import type { Product } from '../../types/schema/product';
 import type { ProductCategory } from '../../types/schema/product-category';
 import CustomSegmentedBarComponent from '../../components/CustomSegmentedBarComponent.vue';
@@ -76,7 +76,7 @@ async function onProductFormSave(product: Product): Promise<void> {
     try {
         await ProductsRepository.upsertOne(product);
         localProduct.value = product;
-        vibrateSuccess();
+        Haptics.vibrateSuccess();
         showToast({
             message: t('pages.productForm.saveSuccess'),
             variant: 'success',

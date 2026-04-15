@@ -7,8 +7,8 @@
                 <CustomSegmentedBarComponent v-model="selectedSegment" row="1" class="mx-4 mt-2 mb-2" />
 
                 <ScrollView row="2">
-                    <ClientInfoComponent v-if="selectedSegment === 0" :client="localClient" />
-                    <ClientFormComponent v-else :client="localClient" @save="onClientFormSave" />
+                    <ClientInfoComponent v-if="selectedSegment === 0" :client="clientPage" />
+                    <ClientFormComponent v-else :client="clientPage" @save="updateClient" />
                 </ScrollView>
             </GridLayout>
 
@@ -40,25 +40,23 @@ const props = defineProps<{
 const { t } = useTranslation();
 
 const selectedSegment: Ref<number> = ref(0);
-const localClient: Ref<Client> = ref(props.client);
+const clientPage: Ref<Client> = ref(props.client);
 
 watch(
     () => props.client,
-    (c: Client) => {
-        localClient.value = c;
+    (client: Client) => {
+        clientPage.value = client;
     },
     { immediate: true },
 );
 
 const headerTitle: ComputedRef<string> = computed(() => {
-    const name: string = localClient.value.fantasy_name.trim();
-    return name;
+    return clientPage.value.fantasy_name;
 });
 
-async function onClientFormSave(client: Client): Promise<void> {
+async function updateClient(client: Client): Promise<void> {
     try {
-        await ClientsRepository.upsertOne(client);
-        localClient.value = client;
+        clientPage.value = await ClientsRepository.upsertOne(client);
         vibrateSuccess();
         showToast({
             message: t('pages.clientForm.saveSuccess'),
@@ -66,7 +64,7 @@ async function onClientFormSave(client: Client): Promise<void> {
         });
         selectedSegment.value = 0;
     } catch (e: unknown) {
-        console.error('[ClientShowPage] save failed:', e);
+        console.error('[ClientShowPage] update client failed:', e);
         showToast({
             message: t('pages.clientForm.saveError'),
             variant: 'error',

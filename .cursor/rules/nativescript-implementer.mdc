@@ -173,6 +173,7 @@ nav?.$navigateBack();
 | `format.ts`  | `formatCPF(value)`                             | Aplica máscara `000.000.000-00`. Retorna `'—'` se nulo/vazio, ou o valor original se não tiver 11 dígitos.                     |
 | `format.ts`  | `formatCNPJ(value)`                            | Aplica máscara `00.000.000/0000-00`. Retorna `'—'` se nulo/vazio, ou o valor original se não tiver 14 dígitos.                 |
 | `format.ts`  | `formatCPFCNPJ(value)`                         | Auto-detecta CPF (11 dígitos) ou CNPJ (14 dígitos) e aplica a máscara correspondente. **Usar como padrão** ao exibir CPF/CNPJ. |
+| `format.ts`  | `digitsOnly(value)`                            | Retorna só os dígitos da string (ex.: CPF/CNPJ para comparação / unicidade).                                                   |
 | `icons.ts`   | `lucide(name)`                                 | Retorna caractere unicode do ícone Lucide. Usar com `class="lucide"`.                                                          |
 | `haptics.ts` | `vibrateSuccess()`                             | Feedback háptico de sucesso (vibração curta). Seguro em qualquer dispositivo.                                                  |
 | `persistence/auth-session.ts` | `getAuth()`, `setAuth(session)`, `clearAuth()`, `getToken()`, `getSalesRepresentative()` | Sessão: `{ token, sales_representative }` (igual ao JSON do login Laravel).                                                |

@@ -1,8 +1,10 @@
 // --- Imports ---
 import { clientFormValidation, type ClientFormFieldKey, type ClientFormFields } from '../validation/client-form-validation';
 import type { ClientFormSchema } from '../types/form/client-form-schema';
-import { i18n } from '../configs/i18n';
+import type { Client } from '../types/schema/client';
+import { ClientsRepository } from '../db/repositories/clients.repo';
 import { ref, type Ref } from 'vue';
+import { i18n } from '../configs/i18n';
 import type { core } from 'zod';
 
 
@@ -66,26 +68,41 @@ export class UseClientFormValidation {
     }
 
 
-    public validateClientForm(raw: ClientFormSchema): ClientFormFields | null {
+    public async validateClientForm(
+        raw: ClientFormSchema,
+        options: { ignoreClientId: number | null },
+    ): Promise<ClientFormFields | null> {
         this.clearFieldErrors();
         const parsed = clientFormValidation.clientFormFieldsSchema.safeParse(raw);
-        if (parsed.success) {
-            return parsed.data;
-        }
-        const nextErrors: Partial<Record<ClientFormFieldKey, string>> = {};
-        for (const issue of parsed.error.issues) {
-            const pathKey: unknown = issue.path[0];
-            if (typeof pathKey !== 'string') {
-                continue;
+        if (!parsed.success) {
+            const nextErrors: Partial<Record<ClientFormFieldKey, string>> = {};
+            for (const issue of parsed.error.issues) {
+                const pathKey: unknown = issue.path[0];
+                if (typeof pathKey !== 'string') {
+                    continue;
+                }
+                const fieldKey: ClientFormFieldKey = pathKey as ClientFormFieldKey;
+                if (nextErrors[fieldKey] !== undefined) {
+                    continue;
+                }
+                nextErrors[fieldKey] = this.mapIssueToMessage(issue);
             }
-            const fieldKey: ClientFormFieldKey = pathKey as ClientFormFieldKey;
-            if (nextErrors[fieldKey] !== undefined) {
-                continue;
-            }
-            nextErrors[fieldKey] = this.mapIssueToMessage(issue);
+            this.fieldErrors.value = nextErrors;
+            return null;
         }
-        this.fieldErrors.value = nextErrors;
-        return null;
+        const data: ClientFormFields = parsed.data;
+        const found: Client | null = await ClientsRepository.loadByCpfCnpj(data.cpf_cnpj);
+        const duplicate: boolean =
+            found != null &&
+            (options.ignoreClientId == null || found.id !== options.ignoreClientId);
+        if (duplicate) {
+            const t = i18n.global.t;
+            this.fieldErrors.value = {
+                cpf_cnpj: String(t('pages.clientForm.errors.cpfCnpjDuplicate')),
+            };
+            return null;
+        }
+        return data;
     }
 }
 

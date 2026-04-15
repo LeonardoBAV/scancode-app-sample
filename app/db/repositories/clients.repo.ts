@@ -1,7 +1,7 @@
 // --- Imports ---
 import type { Client } from '../../types/schema/client';
-import { RepositoryBase } from '../repository-base';
 import { ClientsComposable } from '../../composables/clients-composable';
+import { RepositoryBase } from '../repository-base';
 
 
 export class ClientsRepository extends RepositoryBase {
@@ -28,9 +28,14 @@ export class ClientsRepository extends RepositoryBase {
         await ClientsComposable.refresh();
     }
 
-    public static async upsertOne(client: Client): Promise<void> {
+    public static async upsertOne(client: Client): Promise<Client> {
+        if (client.id == null) {
+            client.id = await ClientsRepository.getNextLocalClientId();
+            client.remote_id = null;
+        }
         await ClientsRepository.insertOrReplaceOne('clients', ClientsRepository.CLIENT_COLUMNS, client);
         await ClientsComposable.refresh();
+        return client;
     }
 
     /** Next INTEGER PRIMARY KEY candidate for locally created clients (offline-first). */
@@ -46,24 +51,32 @@ export class ClientsRepository extends RepositoryBase {
 
     public static async findAll(): Promise<Client[]> {
         const rows: Client[] = await ClientsRepository.queryAll<Client>('SELECT * FROM clients ORDER BY corporate_name ASC');
-        return rows.map(
-            (row: Client): Client => ({
-                ...row,
-                is_sync: ClientsRepository.readSqliteBool(row.is_sync as unknown),
-            }),
+        return rows.map((row: Client): Client => ClientsRepository.mapSqliteClientRow(row));
+    }
+
+    /**
+     * First client with the same stored `cpf_cnpj` string (exact match), or null.
+     */
+    public static async loadByCpfCnpj(cpfCnpj: string): Promise<Client | null> {
+        const row: Client | null = await ClientsRepository.queryOne<Client>(
+            'SELECT * FROM clients WHERE cpf_cnpj = ? LIMIT 1',
+            [cpfCnpj],
         );
+        return row == null ? null : ClientsRepository.mapSqliteClientRow(row);
     }
 
     public static async findAllUnsynced(): Promise<Client[]> {
         const rows: Client[] = await ClientsRepository.queryAll<Client>(
             'SELECT * FROM clients WHERE is_sync = 0 ORDER BY id ASC',
         );
-        return rows.map(
-            (row: Client): Client => ({
-                ...row,
-                is_sync: ClientsRepository.readSqliteBool(row.is_sync as unknown),
-            }),
-        );
+        return rows.map((row: Client): Client => ClientsRepository.mapSqliteClientRow(row));
+    }
+
+    private static mapSqliteClientRow(row: Client): Client {
+        return {
+            ...row,
+            is_sync: ClientsRepository.readSqliteBool(row.is_sync as unknown),
+        };
     }
 
     public static async truncate(): Promise<void> {

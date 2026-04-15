@@ -51,6 +51,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { useClientFormValidation } from '../composables/useClientFormValidation';
+import type { ClientFormFields } from '../validation/client-form-validation';
 import type { Client } from '../types/schema/client';
 import { ref, watch, type Ref } from 'vue';
 
@@ -73,39 +74,22 @@ const email: Ref<string> = ref('');
 const phone: Ref<string> = ref('');
 const carrier: Ref<string> = ref('');
 
-function applyClientToFields(c: Client): void {
-    fantasyName.value = c.fantasy_name ?? '';
-    corporateName.value = c.corporate_name ?? '';
-    cpfCnpj.value = c.cpf_cnpj ?? '';
-    email.value = c.email ?? '';
-    phone.value = c.phone ?? '';
-    carrier.value = c.carrier ?? '';
-}
-
 watch(
     () => props.client,
-    (c: Client) => {
-        applyClientToFields(c);
+    (client: Client) => {
+        applyClientToFields(client);
         useClientFormValidation.clearFieldErrors();
     },
     { immediate: true },
 );
 
-function onSave(): void {
-    const validated = useClientFormValidation.validateClientForm({
-        carrier: carrier.value,
-        corporate_name: corporateName.value,
-        cpf_cnpj: cpfCnpj.value,
-        email: email.value,
-        fantasy_name: fantasyName.value,
-        phone: phone.value,
-    });
+async function onSave(): Promise<void> {
+    const validated: ClientFormFields | null = await validateForm();
     if (!validated) {
         return;
     }
-    const base: Client = props.client;
-    const next: Client = {
-        ...base,
+    const client: Client = {
+        ...props.client,
         fantasy_name: validated.fantasy_name,
         corporate_name: validated.corporate_name,
         cpf_cnpj: validated.cpf_cnpj,
@@ -114,6 +98,29 @@ function onSave(): void {
         carrier: validated.carrier,
         is_sync: false,
     };
-    emit('save', next);
+    emit('save', client);
+}
+
+function applyClientToFields(client: Client): void {
+    fantasyName.value = client.fantasy_name ?? '';
+    corporateName.value = client.corporate_name ?? '';
+    cpfCnpj.value = client.cpf_cnpj ?? '';
+    email.value = client.email ?? '';
+    phone.value = client.phone ?? '';
+    carrier.value = client.carrier ?? '';
+}
+
+async function validateForm(): Promise<ClientFormFields | null> {
+    return await useClientFormValidation.validateClientForm(
+        {
+            carrier: carrier.value,
+            corporate_name: corporateName.value,
+            cpf_cnpj: cpfCnpj.value,
+            email: email.value,
+            fantasy_name: fantasyName.value,
+            phone: phone.value,
+        },
+        { ignoreClientId: props.client.id },
+    );
 }
 </script>

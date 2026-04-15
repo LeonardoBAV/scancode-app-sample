@@ -66,8 +66,11 @@ export class ScancodeAdapter {
     }
 
     public static async updateClient(client: Client): Promise<Client> {
+        if (client.remote_id == null) {
+            throw new ApiException({ message: String(i18n.global.t('common.remoteIdRequired')) });
+        }
+
         try {
-            const remoteId: number = client.remote_id ?? client.id;
             const payload: ClientUpdateRequestDTO = {
                 carrier: client.carrier.trim(),
                 corporate_name: client.corporate_name.trim(),
@@ -76,11 +79,11 @@ export class ScancodeAdapter {
                 fantasy_name: client.fantasy_name.trim(),
                 phone: client.phone.trim(),
             };
-            const response = await scancodeApi.patchClient(remoteId, payload);
+            const response = await scancodeApi.patchClient(client.remote_id, payload);
             const dto = response.data;
 
             return {
-                id: client.id,
+                id: dto.id,
                 remote_id: dto.id,
                 is_sync: true,
                 carrier: ScancodeAdapter.nullableString(dto.carrier),

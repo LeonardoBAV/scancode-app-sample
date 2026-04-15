@@ -52,3 +52,10 @@ export function formatCPFCNPJ(value: string | null | undefined): string {
     if (digits.length === 14) return formatCNPJ(value);
     return value;
 }
+
+export function digitsOnly(value: string | null | undefined): string {
+    if (!value) {
+        return '';
+    }
+    return value.replace(/\D/g, '');
+}

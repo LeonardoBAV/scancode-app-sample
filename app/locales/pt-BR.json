@@ -90,6 +90,7 @@
         "corporateNameMax": "Razão social deve ter no máximo 255 caracteres.",
         "corporateNameRequired": "Informe a razão social.",
         "cpfCnpjMax": "CPF/CNPJ deve ter no máximo 18 caracteres.",
+        "cpfCnpjDuplicate": "Já existe um cliente com este CPF/CNPJ.",
         "cpfCnpjRequired": "Informe o CPF ou CNPJ.",
         "emailMax": "E-mail deve ter no máximo 255 caracteres.",
         "fantasyNameMax": "Nome fantasia deve ter no máximo 255 caracteres.",

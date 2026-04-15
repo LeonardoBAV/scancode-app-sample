@@ -90,6 +90,7 @@
         "corporateNameMax": "Corporate name must be at most 255 characters.",
         "corporateNameRequired": "Corporate name is required.",
         "cpfCnpjMax": "CPF/CNPJ must be at most 18 characters.",
+        "cpfCnpjDuplicate": "A client with this CPF/CNPJ already exists.",
         "cpfCnpjRequired": "CPF or CNPJ is required.",
         "emailMax": "Email must be at most 255 characters.",
         "fantasyNameMax": "Trade name must be at most 255 characters.",

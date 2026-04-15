@@ -1,6 +1,6 @@
 export interface Client {
-    id: number;
-    remote_id: number;
+    id: number | null;
+    remote_id: number | null;
     is_sync: boolean;
     cpf_cnpj: string;
     corporate_name: string;

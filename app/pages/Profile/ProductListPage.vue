@@ -1,7 +1,13 @@
 <template>
     <Page actionBarHidden="true">
         <GridLayout :rows="selectedProduct ? 'auto, *, auto' : 'auto, *'" class="bg-background">
-            <HeaderComponent row="0" :title="$t('pages.productList.title')" :showAvatar="false" />
+            <HeaderComponent
+                row="0"
+                :title="$t('pages.productList.title')"
+                :showAvatar="false"
+                right-action-icon="plus"
+                @rightAction="onNewProductTap"
+            />
             <ProductListComponent row="1" :products="products" :selected-product-id="selectedProduct?.id ?? null" @select="onSelectProduct" />
 
             <StackLayout v-if="selectedProduct" row="2" class="footer-bar">
@@ -19,6 +25,7 @@ import { ProductsComposable } from '../../composables/products-composable';
 import { Icons } from '../../utils/icons';
 import { useNavigation } from '../../composables/useNavigation';
 import ProductListComponent from '../../components/ProductListComponent.vue';
+import ProductCreatePage from './ProductCreatePage.vue';
 import ProductShowPage from './ProductShowPage.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
@@ -47,6 +54,12 @@ function onViewTap(): void {
     if (!selectedProduct.value) return;
     navigateTo(ProductShowPage, {
         props: { product: selectedProduct.value },
+        transition: { name: 'slideLeft', duration: 300 },
+    });
+}
+
+function onNewProductTap(): void {
+    navigateTo(ProductCreatePage, {
         transition: { name: 'slideLeft', duration: 300 },
     });
 }

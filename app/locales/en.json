@@ -106,6 +106,10 @@
       "phoneHint": "Phone",
       "carrierHint": "Carrier"
     },
+    "productCreate": {
+      "title": "New product",
+      "initError": "Could not start registration. Sync categories or try again."
+    },
     "productList": {
       "title": "Products",
       "searchHint": "Search by SKU, name or category...",

@@ -4,8 +4,9 @@ import type { SQLiteDatabase } from '@nativescript-community/sqlite';
  * Schema revision for `SQLiteDatabase.setVersion`.
  * v1: initial squashed DDL.
  * v2: INTEGER PRIMARY KEY AUTOINCREMENT on pull tables + clients (upgrade path for DBs created before that DDL).
+ * v3: UNIQUE indexes on products.sku and products.barcode.
  */
-const SCHEMA_VERSION: number = 2;
+const SCHEMA_VERSION: number = 3;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const startVersion: number = db.getVersion();
@@ -20,6 +21,10 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
 
     if (startVersion < 2 && startVersion >= 1) {
         await migrateToV2AutoincrementPullTables(db);
+    }
+
+    if (startVersion < 3) {
+        await migrateToV3ProductsSkuBarcodeUnique(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -54,8 +59,8 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
             updated_at           TEXT    NOT NULL
         );
     `);
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);');
+    await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_sku ON products(sku);');
+    await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_products_category ON products(product_category_id);');
 
     await db.execute(`
@@ -203,8 +208,8 @@ async function migrateToV2AutoincrementPullTables(db: SQLiteDatabase): Promise<v
         await db.execute('INSERT INTO products__ac SELECT * FROM products;');
         await db.execute('DROP TABLE products;');
         await db.execute('ALTER TABLE products__ac RENAME TO products;');
-        await db.execute('CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);');
-        await db.execute('CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);');
+        await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_sku ON products(sku);');
+        await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);');
         await db.execute('CREATE INDEX IF NOT EXISTS idx_products_category ON products(product_category_id);');
 
         await db.execute(`
@@ -261,4 +266,12 @@ async function migrateToV2AutoincrementPullTables(db: SQLiteDatabase): Promise<v
     });
 
     await db.execute('PRAGMA foreign_keys = ON;');
+}
+
+/** Replaces non-unique sku/barcode indexes with UNIQUE (existing v2 DBs). */
+async function migrateToV3ProductsSkuBarcodeUnique(db: SQLiteDatabase): Promise<void> {
+    await db.execute('DROP INDEX IF EXISTS idx_products_sku;');
+    await db.execute('DROP INDEX IF EXISTS idx_products_barcode;');
+    await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_sku ON products(sku);');
+    await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);');
 }

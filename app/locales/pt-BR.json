@@ -106,6 +106,10 @@
       "phoneHint": "Telefone",
       "carrierHint": "Transportadora"
     },
+    "productCreate": {
+      "title": "Novo produto",
+      "initError": "Não foi possível iniciar o cadastro. Sincronize as categorias ou tente novamente."
+    },
     "productList": {
       "title": "Produtos",
       "searchHint": "Buscar por SKU, nome ou categoria...",

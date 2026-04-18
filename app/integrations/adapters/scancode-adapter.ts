@@ -96,10 +96,6 @@ export class ScancodeAdapter {
     }
 
     public static async updateClient(client: Client): Promise<Client> {
-        if (client.remote_id == null) {
-            throw new ApiException({ message: String(i18n.global.t('common.remoteIdRequired')) });
-        }
-
         try {
             const payload: ClientUpdateRequestDTO = {
                 carrier: client.carrier.trim(),
@@ -109,7 +105,7 @@ export class ScancodeAdapter {
                 fantasy_name: client.fantasy_name.trim(),
                 phone: client.phone.trim(),
             };
-            const response = await scancodeApi.patchClient(client.remote_id, payload);
+            const response = await scancodeApi.patchClient(client.remote_id as number, payload);
             const dto = response.data;
 
             return {
@@ -160,7 +156,6 @@ export class ScancodeAdapter {
 
     public static async updateProduct(product: Product): Promise<Product> {
         try {
-            const remoteId: number = product.remote_id ?? product.id;
             const payload: ProductUpdateRequestDTO = {
                 sku: product.sku.trim(),
                 barcode: product.barcode.trim(),
@@ -168,7 +163,7 @@ export class ScancodeAdapter {
                 price: product.price.toFixed(2),
                 product_category_id: product.product_category_id,
             };
-            const response = await scancodeApi.patchProduct(remoteId, payload);
+            const response = await scancodeApi.patchProduct(product.remote_id as number, payload);
             const dto = response.data;
 
             let category: ProductCategory;

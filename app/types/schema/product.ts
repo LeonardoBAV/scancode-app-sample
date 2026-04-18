@@ -1,8 +1,8 @@
 import type { ProductCategory } from './product-category';
 
 export interface Product {
-    id: number;
-    remote_id: number;
+    id: number | null;
+    remote_id: number | null;
     is_sync: boolean;
     sku: string;
     barcode: string;

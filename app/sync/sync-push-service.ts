@@ -23,26 +23,39 @@ export class SyncPushService {
     }
 
     private async pushClients(): Promise<void> {
-        const pending: Client[] = await ClientsRepository.findAllUnsynced();
-        for (const client of pending) {
-            const updated: Client = await ScancodeAdapter.updateClient(client);
-            await ClientsRepository.upsertOne(updated);
+        const clientsPending: Client[] = await ClientsRepository.findAllUnsynced();
+
+        for (const clientPending of clientsPending) {
+            let client: Client;
+
+            if (clientPending.remote_id == null) {
+                client = await ScancodeAdapter.createClient(clientPending);
+            } else {
+                client = await ScancodeAdapter.updateClient(clientPending);
+            }
+
+            client.is_sync = true;
+            client.remote_id = client.id;
+
+            await ClientsRepository.upsertOne(client);
         }
     }
 
     private async pushProducts(): Promise<void> {
-        const pending: Product[] = await ProductsRepository.findAllUnsynced();
-        for (const product of pending) {
-            const updated: Product = await ScancodeAdapter.updateProduct(product);
-            await ProductsRepository.upsertOne(updated);
+        const productsPending: Product[] = await ProductsRepository.findAllUnsynced();
+
+        for (const productPending of productsPending) {
+            const product: Product = await ScancodeAdapter.updateProduct(productPending);
+            await ProductsRepository.upsertOne(product);
         }
     }
 
     private async pushPaymentMethods(): Promise<void> {
-        const pending: PaymentMethod[] = await PaymentMethodsRepository.findAllUnsynced();
-        for (const method of pending) {
-            const updated: PaymentMethod = await ScancodeAdapter.updatePaymentMethod(method);
-            await PaymentMethodsRepository.upsertOne(updated);
+        const paymentMethodsPending: PaymentMethod[] = await PaymentMethodsRepository.findAllUnsynced();
+
+        for (const paymentMethodPending of paymentMethodsPending) {
+            const paymentMethod: PaymentMethod = await ScancodeAdapter.updatePaymentMethod(paymentMethodPending);
+            await PaymentMethodsRepository.upsertOne(paymentMethod);
         }
     }
 }

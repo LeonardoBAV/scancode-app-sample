@@ -79,9 +79,8 @@ export class ScancodeAdapter {
             const dto = response.data;
 
             return {
+                ...client,
                 id: dto.id,
-                remote_id: dto.id,
-                is_sync: true,
                 carrier: ScancodeAdapter.nullableString(dto.carrier),
                 corporate_name: dto.corporate_name,
                 cpf_cnpj: dto.cpf_cnpj,
@@ -114,9 +113,8 @@ export class ScancodeAdapter {
             const dto = response.data;
 
             return {
+                ...client,
                 id: dto.id,
-                remote_id: dto.id,
-                is_sync: true,
                 carrier: ScancodeAdapter.nullableString(dto.carrier),
                 corporate_name: dto.corporate_name,
                 cpf_cnpj: dto.cpf_cnpj,

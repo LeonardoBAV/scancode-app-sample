@@ -30,6 +30,31 @@ export class ProductsRepository extends RepositoryBase {
         super();
     }
 
+    private static mapJoinRow(row: ProductJoinRow): Product {
+        const category: ProductCategory = {
+            id: row.category_id,
+            remote_id: row.category_remote_id ?? row.category_id,
+            is_sync: ProductsRepository.readSqliteBool(row.category_is_sync),
+            name: row.category_name,
+            created_at: row.category_created_at,
+            updated_at: row.category_updated_at,
+        };
+        const remoteId: number = row.remote_id ?? row.id;
+        return {
+            id: row.id,
+            remote_id: remoteId,
+            is_sync: ProductsRepository.readSqliteBool(row.is_sync),
+            sku: row.sku,
+            barcode: row.barcode ?? '',
+            name: row.name,
+            price: row.price,
+            product_category_id: row.product_category_id,
+            product_category: category,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        };
+    }
+
     private static readonly PRODUCT_COLUMNS: readonly (keyof Product)[] = [
         'id',
         'remote_id',
@@ -76,30 +101,69 @@ export class ProductsRepository extends RepositoryBase {
             ORDER BY p.name COLLATE NOCASE ASC
         `;
         const rows: ProductJoinRow[] = await ProductsRepository.queryAll<ProductJoinRow>(sql);
-        return rows.map((row: ProductJoinRow): Product => {
-            const category: ProductCategory = {
-                id: row.category_id,
-                remote_id: row.category_remote_id ?? row.category_id,
-                is_sync: ProductsRepository.readSqliteBool(row.category_is_sync),
-                name: row.category_name,
-                created_at: row.category_created_at,
-                updated_at: row.category_updated_at,
-            };
-            const remoteId: number = row.remote_id ?? row.id;
-            return {
-                id: row.id,
-                remote_id: remoteId,
-                is_sync: ProductsRepository.readSqliteBool(row.is_sync),
-                sku: row.sku,
-                barcode: row.barcode ?? '',
-                name: row.name,
-                price: row.price,
-                product_category_id: row.product_category_id,
-                product_category: category,
-                created_at: row.created_at,
-                updated_at: row.updated_at,
-            };
-        });
+        return rows.map((row: ProductJoinRow): Product => ProductsRepository.mapJoinRow(row));
+    }
+
+    /**
+     * First product with exact SKU match (case-sensitive), or null.
+     */
+    public static async loadBySku(sku: string): Promise<Product | null> {
+        const sql: string = `
+            SELECT
+                p.id AS id,
+                p.remote_id AS remote_id,
+                p.is_sync AS is_sync,
+                p.sku AS sku,
+                p.barcode AS barcode,
+                p.name AS name,
+                p.price AS price,
+                p.product_category_id AS product_category_id,
+                p.created_at AS created_at,
+                p.updated_at AS updated_at,
+                c.id AS category_id,
+                c.remote_id AS category_remote_id,
+                c.is_sync AS category_is_sync,
+                c.name AS category_name,
+                c.created_at AS category_created_at,
+                c.updated_at AS category_updated_at
+            FROM products p
+            INNER JOIN product_categories c ON c.id = p.product_category_id
+            WHERE p.sku = ?
+            LIMIT 1
+        `;
+        const row: ProductJoinRow | null = await ProductsRepository.queryOne<ProductJoinRow>(sql, [sku]);
+        return row == null ? null : ProductsRepository.mapJoinRow(row);
+    }
+
+    /**
+     * First product with exact barcode match (non-empty barcode only), or null.
+     */
+    public static async loadByBarcode(barcode: string): Promise<Product | null> {
+        const sql: string = `
+            SELECT
+                p.id AS id,
+                p.remote_id AS remote_id,
+                p.is_sync AS is_sync,
+                p.sku AS sku,
+                p.barcode AS barcode,
+                p.name AS name,
+                p.price AS price,
+                p.product_category_id AS product_category_id,
+                p.created_at AS created_at,
+                p.updated_at AS updated_at,
+                c.id AS category_id,
+                c.remote_id AS category_remote_id,
+                c.is_sync AS category_is_sync,
+                c.name AS category_name,
+                c.created_at AS category_created_at,
+                c.updated_at AS category_updated_at
+            FROM products p
+            INNER JOIN product_categories c ON c.id = p.product_category_id
+            WHERE p.barcode = ?
+            LIMIT 1
+        `;
+        const row: ProductJoinRow | null = await ProductsRepository.queryOne<ProductJoinRow>(sql, [barcode]);
+        return row == null ? null : ProductsRepository.mapJoinRow(row);
     }
 
     public static async findAllUnsynced(): Promise<Product[]> {
@@ -127,30 +191,7 @@ export class ProductsRepository extends RepositoryBase {
             ORDER BY p.id ASC
         `;
         const rows: ProductJoinRow[] = await ProductsRepository.queryAll<ProductJoinRow>(sql);
-        return rows.map((row: ProductJoinRow): Product => {
-            const category: ProductCategory = {
-                id: row.category_id,
-                remote_id: row.category_remote_id ?? row.category_id,
-                is_sync: ProductsRepository.readSqliteBool(row.category_is_sync),
-                name: row.category_name,
-                created_at: row.category_created_at,
-                updated_at: row.category_updated_at,
-            };
-            const remoteId: number = row.remote_id ?? row.id;
-            return {
-                id: row.id,
-                remote_id: remoteId,
-                is_sync: ProductsRepository.readSqliteBool(row.is_sync),
-                sku: row.sku,
-                barcode: row.barcode ?? '',
-                name: row.name,
-                price: row.price,
-                product_category_id: row.product_category_id,
-                product_category: category,
-                created_at: row.created_at,
-                updated_at: row.updated_at,
-            };
-        });
+        return rows.map((row: ProductJoinRow): Product => ProductsRepository.mapJoinRow(row));
     }
 
     public static async truncate(): Promise<void> {

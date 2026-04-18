@@ -134,7 +134,22 @@
       "skuHint": "SKU",
       "barcodeHint": "Barcode",
       "priceHint": "Price (e.g. 999.00)",
-      "noCategories": "No categories available. Sync your data."
+      "noCategories": "No categories available. Sync your data.",
+      "errors": {
+        "barcodeDuplicate": "A product with this barcode already exists.",
+        "barcodeMax": "Barcode must be at most 255 characters.",
+        "barcodeRequired": "Barcode is required.",
+        "categoryInvalid": "Select a valid category.",
+        "generic": "Check the fields and try again.",
+        "nameMax": "Name must be at most 255 characters.",
+        "nameRequired": "Product name is required.",
+        "priceInvalid": "Enter a valid numeric price.",
+        "priceMin": "Price must be greater than or equal to zero.",
+        "priceRequired": "Price is required.",
+        "skuDuplicate": "A product with this SKU already exists.",
+        "skuMax": "SKU must be at most 255 characters.",
+        "skuRequired": "SKU is required."
+      }
     },
     "paymentMethodList": {
       "title": "Payment methods",

@@ -134,7 +134,22 @@
       "skuHint": "SKU",
       "barcodeHint": "Código de barras",
       "priceHint": "Preço (ex.: 999.00)",
-      "noCategories": "Nenhuma categoria disponível. Sincronize os dados."
+      "noCategories": "Nenhuma categoria disponível. Sincronize os dados.",
+      "errors": {
+        "barcodeDuplicate": "Já existe um produto com este código de barras.",
+        "barcodeMax": "Código de barras deve ter no máximo 255 caracteres.",
+        "barcodeRequired": "Informe o código de barras.",
+        "categoryInvalid": "Selecione uma categoria válida.",
+        "generic": "Verifique os campos e tente novamente.",
+        "nameMax": "Nome deve ter no máximo 255 caracteres.",
+        "nameRequired": "Informe o nome do produto.",
+        "priceInvalid": "Informe um preço numérico válido.",
+        "priceMin": "O preço deve ser maior ou igual a zero.",
+        "priceRequired": "Informe o preço.",
+        "skuDuplicate": "Já existe um produto com este SKU.",
+        "skuMax": "SKU deve ter no máximo 255 caracteres.",
+        "skuRequired": "Informe o SKU."
+      }
     },
     "paymentMethodList": {
       "title": "Formas de pagamento",

@@ -170,6 +170,47 @@ Chaves em `app/locales/*.json` sob `pages.clientForm` (títulos, hints, `errors.
 
 ---
 
+## Formulário de produto (criar / editar) — UI, validação e SQLite
+
+Mesmo padrão do cliente: Zod → composable singleton → erros por campo + unicidade no repositório. Referência alinhada às regras da API (SKU, barcode, nome, preço, categoria).
+
+### Arquivos
+
+| Peça | Caminho | Papel |
+| --- | --- | --- |
+| Schema Zod (trim + limites) | `app/validation/product-form-validation.ts` | `productFormValidation.productFormFieldsSchema` — `sku`, `name`, `barcode` obrigatórios após trim; `max(255)` nesses campos; `price` a partir de string (vírgula/ponto), numérico finito e `≥ 0`; `product_category_id` inteiro. |
+| Payload bruto do form | `app/types/form/product-form-schema.ts` | `ProductFormSchema`: strings de UI + `product_category_id`. |
+| Erros por campo + duplicatas | `app/composables/useProductFormValidation.ts` | **Singleton**. `useProductFormValidation`: `fieldErrors`, `clearFieldErrors()`, `validateProductForm(raw, { allowedCategoryIds, ignoreProductId })`. Mensagens em `pages.productForm.errors.*` via `i18n.global.t` (não usar `useI18n()` no fluxo de validação). |
+| Formulário reutilizável | `app/components/ProductFormComponent.vue` | Props: `product: Product`, `categories: ProductCategory[]`. `onSave` async; `input-field` / `input-field-invalid`; emite `save` após validação. **Não** chama o repositório. |
+| Criar | `app/pages/Profile/ProductCreatePage.vue` | Carrega categorias; `productDraft` com `id: null`, `remote_id: null`; após `save` → `ProductsRepository.upsertOne` → toast → `navigateBack()`. |
+| Ver / editar | `app/pages/Profile/ProductShowPage.vue` | Segmentos info vs formulário (`ProductFormComponent`); `upsertOne` após save. |
+| Lista + atalho criar | `app/pages/Profile/ProductListPage.vue` | Header `right-action-icon="plus"` → `ProductCreatePage`. |
+| Tipo persistido | `app/types/schema/product.ts` | `Product` com `id \| null`, `remote_id \| null`, `is_sync`, `product_category` aninhada. |
+| Duplicatas no SQLite | `app/db/repositories/products.repo.ts` | `loadBySku(sku)` e `loadByBarcode(barcode)` — comparação exata (SKU case-sensitive). Usados só após Zod ok. |
+
+### Fluxo de validação
+
+1. `ProductFormComponent` monta `ProductFormSchema` e chama `validateProductForm(..., { allowedCategoryIds: categories.map(c => c.id), ignoreProductId: props.product.id })`.
+2. Zod `safeParse` — falhas viram `fieldErrors` (primeiro issue por campo; preço com `mapPriceIssueToMessage` para `origin` string vs number).
+3. Se OK, `product_category_id` deve estar em `allowedCategoryIds`; senão erro em `product_category_id`.
+4. `ProductsRepository.loadBySku(parsed.sku)` — se existir outro produto e `found.id !== ignoreProductId`, erro `sku` duplicata.
+5. `ProductsRepository.loadByBarcode(parsed.barcode)` — sempre após validação (barcode obrigatório no app); mesma regra de `ignoreProductId` para duplicata.
+
+### Regras de negócio (app vs API)
+
+- **Barcode obrigatório** no formulário (API pode marcar `nullable`; o app exige valor para alinhar ao uso offline e unicidade local).
+- Categoria: SQLite exige `product_category_id NOT NULL`; a lista vem de `ProductCategoriesRepository.findAll()` na criação e nas telas de edição.
+
+### Sync / push
+
+- `SyncPushService.pushProducts()` usa `findAllUnsynced()` e `ScancodeAdapter.updateProduct` (PATCH). Criação só-local segue as mesmas limitações de `remote_id` que outras entidades até existir `POST` na API.
+
+### i18n
+
+Chaves em `app/locales/*.json` sob `pages.productForm` (`errors.*`, hints, `save`, …) e `pages.productCreate` (título / erro de init sem categorias).
+
+---
+
 ## `PaymentMethodsComposable` (formas de pagamento)
 
 **Arquivo:** `app/composables/payment-methods-composable.ts` — mesmo padrão estático que `ProductsComposable` / `ClientsComposable`.

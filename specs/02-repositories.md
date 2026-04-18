@@ -124,31 +124,34 @@ Arquivo: `app/db/repositories/products.repo.ts`
 
 Tipos **`Product`** e **`ProductCategory`**: `app/types/schema/product.ts` e `app/types/schema/product-category.ts` (produto com relação aninhada após JOIN em `findAll()`).
 
+Implementação: `mapJoinRow` privado monta `Product` + `product_category` a partir do JOIN.
+
 ```typescript
 interface ProductsRepository {
-    /**
-     * Retorna todos os produtos com sua categoria, ordenados por name ASC.
-     * Faz JOIN com product_categories para popular o campo product_category.
-     */
     findAll(): Promise<Product[]>;
 
     /**
-     * Busca produto pelo barcode exato. Usado no scan de código de barras.
-     * Retorna null se não encontrado.
+     * Primeiro produto com SKU exato (case-sensitive), ou null.
+     * Usado por `useProductFormValidation` para bloquear duplicata no formulário.
      */
-    findByBarcode(barcode: string): Promise<Product | null>;
+    loadBySku(sku: string): Promise<Product | null>;
 
     /**
-     * Busca produtos por query de texto (LIKE %query%) em name e sku.
-     * Retorna no máximo 50 resultados, ordenados por name ASC.
+     * Primeiro produto com barcode exato, ou null.
+     * Usado por `useProductFormValidation` para duplicata; o formulário exige barcode preenchido.
      */
-    search(query: string): Promise<Product[]>;
+    loadByBarcode(barcode: string): Promise<Product | null>;
+
+    findAllUnsynced(): Promise<Product[]>;
+
+    upsertOne(product: Product): Promise<void>;
 
     /**
-     * Insere ou substitui múltiplos produtos (INSERT OR REPLACE).
-     * Usado pela camada de pull (`syncPullService` — `specs/03-sync-pull.md`, `06-sync-services.md`) após receber dados da API.
+     * Usado pela camada de pull após receber dados da API.
      */
     upsertMany(products: Product[]): Promise<void>;
+
+    truncate(): Promise<void>;
 }
 ```
 

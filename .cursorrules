@@ -29,7 +29,7 @@ app/
 │   ├── App.vue          # Root component
 │   └── fonts/           # Icon fonts (lucide.ttf) — copiados pelo CopyPlugin
 ├── components/          # Componentes reutilizáveis
-├── composables/         # Estado reativo + leitura SQLite (ver specs/05-composables.md)
+├── composables/         # Estado reativo + leitura SQLite; validação de formulários cliente/produto (ver specs/05-composables.md)
 ├── db/                  # SQLite: database, migrations, repositories (offline-first)
 ├── integrations/        # HTTP, APIs, adapters (sem Vue/SQLite nos adapters)
 ├── layouts/             # Layouts (Default com TabView)
@@ -69,6 +69,7 @@ Colocar em `app/fonts/` ou `app/assets/` **não funciona** — o webpack ignora 
 4. **`nativescript-implementer.mdc`** — Implementação: arquitetura, navegação, code style
 5. **`NATIVESCRIPT.md`** — Referência completa da plataforma NativeScript
 6. **`offline-architecture.mdc`** — Offline-first, SQLite, sync (`specs/` como fonte detalhada)
+7. **`specs/05-composables.md`** — Padrão de formulários offline (Zod, `useClientFormValidation` / `useProductFormValidation`, duplicatas no SQLite, chaves `pages.*Form.errors`)
 
 ## Sistema de cores (referência rápida)
 

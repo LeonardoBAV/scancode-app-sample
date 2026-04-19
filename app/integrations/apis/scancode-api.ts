@@ -6,6 +6,7 @@ import type {
     ClientUpdateRequestDTO,
     LoginRequestDTO,
     PaymentMethodUpdateRequestDTO,
+    ProductCreateRequestDTO,
     ProductUpdateRequestDTO,
 } from '../../types/dtos/scancode-request';
 import type {
@@ -68,6 +69,11 @@ export class ScancodeApi extends HttpClient {
 
     public async getProducts(): Promise<ProductsResponseDTO> {
         const { data } = await this.get<ProductsResponseDTO>('/products', { relations: ['productCategory'] });
+        return data;
+    }
+
+    public async postProduct(body: ProductCreateRequestDTO): Promise<ProductResponseDTO> {
+        const { data } = await this.post<ProductResponseDTO>('/products', body);
         return data;
     }
 

@@ -203,7 +203,7 @@ Mesmo padrão do cliente: Zod → composable singleton → erros por campo + uni
 
 ### Sync / push
 
-- `SyncPushService.pushProducts()` usa `findAllUnsynced()` e `ScancodeAdapter.updateProduct` (PATCH). Criação só-local segue as mesmas limitações de `remote_id` que outras entidades até existir `POST` na API.
+- `SyncPushService.pushProducts()` usa `findAllUnsynced()`: se `remote_id == null` → `ScancodeAdapter.createProduct` (`POST /products`); senão → `updateProduct` (`PATCH`). Depois `is_sync = true` e, na criação, `remote_id = product.id` (id remoto devolvido pela API), como em `pushClients`.
 
 ### i18n
 

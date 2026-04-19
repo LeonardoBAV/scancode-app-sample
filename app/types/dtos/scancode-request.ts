@@ -23,6 +23,9 @@ export interface ProductUpdateRequestDTO {
     product_category_id: number;
 }
 
+/** POST /products — same body shape as PATCH */
+export type ProductCreateRequestDTO = ProductUpdateRequestDTO;
+
 /** PATCH /payment-methods/:id — server sets created_at / updated_at */
 export interface PaymentMethodUpdateRequestDTO {
     name: string;

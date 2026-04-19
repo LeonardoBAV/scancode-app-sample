@@ -1,4 +1,10 @@
-import type { ClientCreateRequestDTO, ClientUpdateRequestDTO, PaymentMethodUpdateRequestDTO, ProductUpdateRequestDTO } from '../../types/dtos/scancode-request';
+import type {
+    ClientCreateRequestDTO,
+    ClientUpdateRequestDTO,
+    PaymentMethodUpdateRequestDTO,
+    ProductCreateRequestDTO,
+    ProductUpdateRequestDTO,
+} from '../../types/dtos/scancode-request';
 import type { ValidationErrorResponseDTO } from '../../types/dtos/scancode-response';
 import { ApiException } from '../../types/exceptions/api-exception';
 import type { Auth } from '../../types/sessions/auth';
@@ -149,6 +155,60 @@ export class ScancodeAdapter {
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
             }));
+        } catch (err: unknown) {
+            ScancodeAdapter.handleApiError(err);
+        }
+    }
+
+    public static async createProduct(product: Product): Promise<Product> {
+        try {
+            const payload: ProductCreateRequestDTO = {
+                barcode: product.barcode.trim(),
+                name: product.name.trim(),
+                price: product.price.toFixed(2),
+                product_category_id: product.product_category_id,
+                sku: product.sku.trim(),
+            };
+            console.log('payload', payload);
+            const response = await scancodeApi.postProduct(payload);
+            const dto = response.data;
+
+            let category: ProductCategory;
+            if (dto.product_category) {
+                category = {
+                    id: dto.product_category.id,
+                    remote_id: dto.product_category.id,
+                    is_sync: true,
+                    name: dto.product_category.name,
+                    created_at: product.product_category.created_at,
+                    updated_at: dto.updated_at,
+                };
+            } else {
+                const fromDb: ProductCategory | null = await ProductCategoriesRepository.findById(dto.product_category_id);
+                category =
+                    fromDb ??
+                    ({
+                        id: dto.product_category_id,
+                        remote_id: dto.product_category_id,
+                        is_sync: true,
+                        name: product.product_category.name,
+                        created_at: product.product_category.created_at,
+                        updated_at: dto.updated_at,
+                    } as ProductCategory);
+            }
+
+            return {
+                ...product,
+                id: dto.id,
+                barcode: ScancodeAdapter.nullableString(dto.barcode),
+                created_at: dto.created_at,
+                name: dto.name,
+                price: Number.parseFloat(dto.price),
+                product_category: category,
+                product_category_id: dto.product_category_id,
+                sku: dto.sku,
+                updated_at: dto.updated_at,
+            };
         } catch (err: unknown) {
             ScancodeAdapter.handleApiError(err);
         }

@@ -45,7 +45,18 @@ export class SyncPushService {
         const productsPending: Product[] = await ProductsRepository.findAllUnsynced();
 
         for (const productPending of productsPending) {
-            const product: Product = await ScancodeAdapter.updateProduct(productPending);
+            console.log('productPending', productPending);
+            let product: Product;
+
+            if (productPending.remote_id == null) {
+                product = await ScancodeAdapter.createProduct(productPending);
+            } else {
+                product = await ScancodeAdapter.updateProduct(productPending);
+            }
+
+            product.is_sync = true;
+            product.remote_id = product.id;
+
             await ProductsRepository.upsertOne(product);
         }
     }

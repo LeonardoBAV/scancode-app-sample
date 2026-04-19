@@ -39,10 +39,9 @@ export class ProductsRepository extends RepositoryBase {
             created_at: row.category_created_at,
             updated_at: row.category_updated_at,
         };
-        const remoteId: number = row.remote_id ?? row.id;
         return {
             id: row.id,
-            remote_id: remoteId,
+            remote_id: row.remote_id,
             is_sync: ProductsRepository.readSqliteBool(row.is_sync),
             sku: row.sku,
             barcode: row.barcode ?? '',

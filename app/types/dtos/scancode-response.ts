@@ -54,18 +54,12 @@ export interface ClientResponseDTO {
 export interface ProductCategoryDTO {
     id: number;
     name: string;
-}
-
-export interface ProductCategoryListItemDTO {
-    id: number;
-    name: string;
-    distributor_id: number;
     created_at: string;
     updated_at: string;
 }
 
 export interface ProductCategoriesResponseDTO {
-    data: ProductCategoryListItemDTO[];
+    data: ProductCategoryDTO[];
 }
 
 export interface ProductDTO {

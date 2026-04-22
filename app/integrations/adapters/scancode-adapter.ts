@@ -168,8 +168,8 @@ export class ScancodeAdapter {
                     remote_id: dto.product_category.id,
                     is_sync: true,
                     name: dto.product_category.name,
-                    created_at: '',
-                    updated_at: dto.updated_at,
+                    created_at: dto.product_category.created_at,
+                    updated_at: dto.product_category.updated_at,
                 },
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
@@ -191,30 +191,7 @@ export class ScancodeAdapter {
             console.log('payload', payload);
             const response = await scancodeApi.postProduct(payload);
             const dto = response.data;
-
-            let category: ProductCategory;
-            if (dto.product_category) {
-                category = {
-                    id: dto.product_category.id,
-                    remote_id: dto.product_category.id,
-                    is_sync: true,
-                    name: dto.product_category.name,
-                    created_at: product.product_category.created_at,
-                    updated_at: dto.updated_at,
-                };
-            } else {
-                const fromDb: ProductCategory | null = await ProductCategoriesRepository.findById(dto.product_category_id);
-                category =
-                    fromDb ??
-                    ({
-                        id: dto.product_category_id,
-                        remote_id: dto.product_category_id,
-                        is_sync: true,
-                        name: product.product_category.name,
-                        created_at: product.product_category.created_at,
-                        updated_at: dto.updated_at,
-                    } as ProductCategory);
-            }
+            
 
             return {
                 ...product,
@@ -223,7 +200,7 @@ export class ScancodeAdapter {
                 created_at: dto.created_at,
                 name: dto.name,
                 price: Number.parseFloat(dto.price),
-                product_category: category,
+                product_category: product.product_category,
                 product_category_id: dto.product_category_id,
                 sku: dto.sku,
                 updated_at: dto.updated_at,
@@ -245,34 +222,7 @@ export class ScancodeAdapter {
             const response = await scancodeApi.patchProduct(product.remote_id as number, payload);
             const dto = response.data;
 
-            let category: ProductCategory;
-            if (dto.product_category) {
-                category = {
-                    id: dto.product_category.id,
-                    remote_id: dto.product_category.id,
-                    is_sync: true,
-                    name: dto.product_category.name,
-                    created_at: product.product_category.created_at,
-                    updated_at: dto.updated_at,
-                };
-            } else if (dto.product_category_id === product.product_category_id) {
-                category = {
-                    ...product.product_category,
-                    updated_at: dto.updated_at,
-                };
-            } else {
-                const fromDb: ProductCategory | null = await ProductCategoriesRepository.findById(dto.product_category_id);
-                category =
-                    fromDb ??
-                    ({
-                        id: dto.product_category_id,
-                        remote_id: dto.product_category_id,
-                        is_sync: true,
-                        name: '',
-                        created_at: '',
-                        updated_at: dto.updated_at,
-                    } as ProductCategory);
-            }
+            
 
             return {
                 id: product.id,
@@ -283,7 +233,7 @@ export class ScancodeAdapter {
                 name: dto.name,
                 price: Number.parseFloat(dto.price),
                 product_category_id: dto.product_category_id,
-                product_category: category,
+                product_category: product.product_category,
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
             };

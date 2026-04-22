@@ -1,4 +1,5 @@
 // --- Imports ---
+import { EventsComposable } from '../../composables/event-composable';
 import type { Event } from '../../types/schema/event';
 import { RepositoryBase } from '../repository-base';
 
@@ -21,6 +22,7 @@ export class EventsRepository extends RepositoryBase {
 
     public static async upsertMany(events: Event[]): Promise<void> {
         await EventsRepository.insertOrReplaceMany('events', EventsRepository.EVENT_COLUMNS, events);
+        await EventsComposable.refresh();
     }
 
     public static async findAll(): Promise<Event[]> {

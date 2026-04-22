@@ -69,6 +69,7 @@ export class ProductsRepository extends RepositoryBase {
 
     public static async upsertMany(products: Product[]): Promise<void> {
         await ProductsRepository.insertOrReplaceMany('products', ProductsRepository.PRODUCT_COLUMNS, products);
+        await ProductsComposable.refresh();
     }
 
     public static async upsertOne(product: Product): Promise<void> {

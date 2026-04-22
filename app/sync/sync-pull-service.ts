@@ -40,7 +40,6 @@ export class SyncPullService {
     private async pullEvents(): Promise<void> {
         const events = await ScancodeAdapter.getEvents();
         await EventsRepository.upsertMany(events);
-        await EventsComposable.refresh();
     }
 
     private async pullProductCategories(): Promise<void> {
@@ -51,7 +50,6 @@ export class SyncPullService {
     private async pullProducts(): Promise<void> {
         const products: Product[] = await ScancodeAdapter.getProducts();
         await ProductsRepository.upsertMany(products);
-        await ProductsComposable.refresh();
     }
 
     private async pullClients(): Promise<void> {

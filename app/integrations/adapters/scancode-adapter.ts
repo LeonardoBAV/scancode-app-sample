@@ -131,6 +131,25 @@ export class ScancodeAdapter {
         }
     }
 
+    public static async getProductCategories(): Promise<ProductCategory[]> {
+        try {
+            const response = await scancodeApi.getProductCategories();
+
+            return response.data.map(
+                (dto): ProductCategory => ({
+                    id: dto.id,
+                    remote_id: dto.id,
+                    is_sync: true,
+                    name: dto.name,
+                    created_at: dto.created_at,
+                    updated_at: dto.updated_at,
+                }),
+            );
+        } catch (err: unknown) {
+            ScancodeAdapter.handleApiError(err);
+        }
+    }
+
     public static async getProducts(): Promise<Product[]> {
         try {
             const response = await scancodeApi.getProducts();

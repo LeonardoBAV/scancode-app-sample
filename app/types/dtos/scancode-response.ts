@@ -56,6 +56,18 @@ export interface ProductCategoryDTO {
     name: string;
 }
 
+export interface ProductCategoryListItemDTO {
+    id: number;
+    name: string;
+    distributor_id: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ProductCategoriesResponseDTO {
+    data: ProductCategoryListItemDTO[];
+}
+
 export interface ProductDTO {
     id: number;
     sku: string;

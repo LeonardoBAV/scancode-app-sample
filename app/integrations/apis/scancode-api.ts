@@ -16,6 +16,7 @@ import type {
     LoginResponseDTO,
     PaymentMethodResponseDTO,
     PaymentMethodsResponseDTO,
+    ProductCategoriesResponseDTO,
     ProductResponseDTO,
     ProductsResponseDTO,
 } from '../../types/dtos/scancode-response';
@@ -64,6 +65,11 @@ export class ScancodeApi extends HttpClient {
 
     public async patchClient(remoteId: number, body: ClientUpdateRequestDTO): Promise<ClientResponseDTO> {
         const { data } = await this.patch<ClientResponseDTO>(`/clients/${remoteId}`, body);
+        return data;
+    }
+
+    public async getProductCategories(): Promise<ProductCategoriesResponseDTO> {
+        const { data } = await this.get<ProductCategoriesResponseDTO>('/product-categories');
         return data;
     }
 

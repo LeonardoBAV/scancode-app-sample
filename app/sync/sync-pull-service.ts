@@ -50,13 +50,6 @@ export class SyncPullService {
 
     private async pullProducts(): Promise<void> {
         const products: Product[] = await ScancodeAdapter.getProducts();
-
-        const categoryById: Map<number, ProductCategory> = new Map<number, ProductCategory>();
-        for (const product of products) {
-            categoryById.set(product.product_category.id, product.product_category);
-        }
-
-        await ProductCategoriesRepository.upsertMany([...categoryById.values()]);
         await ProductsRepository.upsertMany(products);
         await ProductsComposable.refresh();
     }

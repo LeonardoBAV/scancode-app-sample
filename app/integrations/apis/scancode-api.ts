@@ -50,7 +50,7 @@ export class ScancodeApi extends HttpClient {
     }
 
     public async getEvents(): Promise<EventsResponseDTO> {
-        const { data } = await this.get<EventsResponseDTO>('/events');
+        const { data } = await this.get<EventsResponseDTO>('/events', { relations: ['orders', 'orders.orderItems'] });
         return data;
     }
 

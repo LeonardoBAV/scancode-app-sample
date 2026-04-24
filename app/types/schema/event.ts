@@ -1,3 +1,5 @@
+import type { Order } from './order';
+
 export interface Event {
     id: number;
     remote_id: number;
@@ -7,4 +9,5 @@ export interface Event {
     end: string;
     created_at: string;
     updated_at: string;
+    orders?: Order[];
 }

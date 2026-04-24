@@ -39,6 +39,12 @@ export class SyncPullService {
     private async pullEvents(): Promise<void> {
         const events = await ScancodeAdapter.getEvents();
         await EventsRepository.upsertMany(events);
+
+        const orders = events.flatMap((e) => e.orders ?? []);
+        await OrdersRepository.upsertMany(orders);
+
+        const orderItems = orders.flatMap((o) => o.order_items ?? []);
+        await OrderItemsRepository.upsertMany(orderItems);
     }
 
     private async pullProductCategories(): Promise<void> {

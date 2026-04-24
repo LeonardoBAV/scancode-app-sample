@@ -18,6 +18,32 @@ export interface LoginResponseDTO {
     sales_representative: ProfileDTO;
 }
 
+export interface OrderItemDTO {
+    id: number;
+    distributor_id: number;
+    order_id: number;
+    product_id: number;
+    price: string;
+    qty: number;
+    notes: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface OrderDTO {
+    id: number;
+    distributor_id: number;
+    event_id: number;
+    status: string;
+    notes: string | null;
+    client_id: number;
+    sales_representative_id: number;
+    payment_method_id: number;
+    created_at: string;
+    updated_at: string;
+    order_items: OrderItemDTO[];
+}
+
 export interface EventDTO {
     id: number;
     name: string;
@@ -25,6 +51,7 @@ export interface EventDTO {
     end: string;
     created_at: string;
     updated_at: string;
+    orders?: OrderDTO[];
 }
 
 export interface EventsResponseDTO {

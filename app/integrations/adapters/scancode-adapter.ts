@@ -11,6 +11,8 @@ import { ApiException } from '../../types/exceptions/api-exception';
 import type { Auth } from '../../types/sessions/auth';
 import type { Client } from '../../types/schema/client';
 import type { Event } from '../../types/schema/event';
+import type { Order } from '../../types/schema/order';
+import type { OrderItem } from '../../types/schema/order-item';
 import type { PaymentMethod } from '../../types/schema/payment-method';
 import type { ProductCategory } from '../../types/schema/product-category';
 import type { Product } from '../../types/schema/product';
@@ -44,6 +46,27 @@ export class ScancodeAdapter {
                 end: dto.end,
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
+                orders: (dto.orders ?? []).map((orderDto): Order => ({
+                    id: orderDto.id,
+                    remote_id: orderDto.id,
+                    event_id: orderDto.event_id,
+                    status: orderDto.status,
+                    notes: orderDto.notes,
+                    client_id: orderDto.client_id,
+                    sales_representative_id: orderDto.sales_representative_id,
+                    payment_method_id: orderDto.payment_method_id,
+                    is_sync: true,
+                    created_at: orderDto.created_at,
+                    updated_at: orderDto.updated_at,
+                    order_items: orderDto.order_items.map((itemDto): OrderItem => ({
+                        id: itemDto.id,
+                        order_id: itemDto.order_id,
+                        product_id: itemDto.product_id,
+                        price: Number.parseFloat(itemDto.price),
+                        qty: itemDto.qty,
+                        notes: itemDto.notes,
+                    })),
+                })),
             }));
         } catch (err: unknown) {
             ScancodeAdapter.handleApiError(err);

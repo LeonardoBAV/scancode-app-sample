@@ -5,8 +5,9 @@ import type { SQLiteDatabase } from '@nativescript-community/sqlite';
  * v1: initial squashed DDL.
  * v2: INTEGER PRIMARY KEY AUTOINCREMENT on pull tables + clients (upgrade path for DBs created before that DDL).
  * v3: UNIQUE indexes on products.sku and products.barcode.
+ * v4: orders — replace synced_at (TEXT) with is_sync (INTEGER).
  */
-const SCHEMA_VERSION: number = 3;
+const SCHEMA_VERSION: number = 4;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const startVersion: number = db.getVersion();
@@ -25,6 +26,10 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
 
     if (startVersion < 3) {
         await migrateToV3ProductsSkuBarcodeUnique(db);
+    }
+
+    if (startVersion < 4) {
+        await migrateToV4OrdersIsSyncColumn(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -148,13 +153,12 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
             client_id                 INTEGER NOT NULL REFERENCES clients(id),
             sales_representative_id   INTEGER NOT NULL,
             payment_method_id         INTEGER NOT NULL REFERENCES payment_methods(id),
-            synced_at                 TEXT,
+            is_sync                   INTEGER NOT NULL DEFAULT 0,
             created_at                TEXT    NOT NULL,
             updated_at                TEXT    NOT NULL
         );
     `);
     await db.execute('CREATE INDEX IF NOT EXISTS idx_orders_event_id ON orders(event_id);');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_orders_synced_at ON orders(synced_at);');
 
     await db.execute(`
         CREATE TABLE IF NOT EXISTS order_items (
@@ -274,4 +278,47 @@ async function migrateToV3ProductsSkuBarcodeUnique(db: SQLiteDatabase): Promise<
     await db.execute('DROP INDEX IF EXISTS idx_products_barcode;');
     await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_sku ON products(sku);');
     await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_products_barcode ON products(barcode);');
+}
+
+/**
+ * Replaces `synced_at TEXT` with `is_sync INTEGER` on the orders table.
+ * Existing rows with synced_at IS NOT NULL are migrated as is_sync = 1.
+ */
+async function migrateToV4OrdersIsSyncColumn(db: SQLiteDatabase): Promise<void> {
+    await db.execute('PRAGMA foreign_keys = OFF;');
+
+    await db.transaction(async () => {
+        await db.execute(`
+            CREATE TABLE orders__v4 (
+                id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+                remote_id                 INTEGER UNIQUE,
+                event_id                  INTEGER NOT NULL REFERENCES events(id),
+                status                    TEXT    NOT NULL DEFAULT 'Pending',
+                notes                     TEXT,
+                client_id                 INTEGER NOT NULL REFERENCES clients(id),
+                sales_representative_id   INTEGER NOT NULL,
+                payment_method_id         INTEGER NOT NULL REFERENCES payment_methods(id),
+                is_sync                   INTEGER NOT NULL DEFAULT 0,
+                created_at                TEXT    NOT NULL,
+                updated_at                TEXT    NOT NULL
+            );
+        `);
+
+        await db.execute(`
+            INSERT INTO orders__v4
+                (id, remote_id, event_id, status, notes, client_id,
+                 sales_representative_id, payment_method_id, is_sync, created_at, updated_at)
+            SELECT id, remote_id, event_id, status, notes, client_id,
+                   sales_representative_id, payment_method_id,
+                   CASE WHEN synced_at IS NOT NULL THEN 1 ELSE 0 END,
+                   created_at, updated_at
+            FROM orders;
+        `);
+
+        await db.execute('DROP TABLE orders;');
+        await db.execute('ALTER TABLE orders__v4 RENAME TO orders;');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_orders_event_id ON orders(event_id);');
+    });
+
+    await db.execute('PRAGMA foreign_keys = ON;');
 }

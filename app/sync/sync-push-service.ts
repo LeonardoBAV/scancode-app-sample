@@ -65,7 +65,17 @@ export class SyncPushService {
         const paymentMethodsPending: PaymentMethod[] = await PaymentMethodsRepository.findAllUnsynced();
 
         for (const paymentMethodPending of paymentMethodsPending) {
-            const paymentMethod: PaymentMethod = await ScancodeAdapter.updatePaymentMethod(paymentMethodPending);
+            let paymentMethod: PaymentMethod;
+
+            if (paymentMethodPending.remote_id == null) {
+                paymentMethod = await ScancodeAdapter.createPaymentMethod(paymentMethodPending);
+            } else {
+                paymentMethod = await ScancodeAdapter.updatePaymentMethod(paymentMethodPending);
+            }
+
+            paymentMethod.is_sync = true;
+            paymentMethod.remote_id = paymentMethod.id;
+
             await PaymentMethodsRepository.upsertOne(paymentMethod);
         }
     }

@@ -1,6 +1,7 @@
 import type {
     ClientCreateRequestDTO,
     ClientUpdateRequestDTO,
+    PaymentMethodCreateRequestDTO,
     PaymentMethodUpdateRequestDTO,
     ProductCreateRequestDTO,
     ProductUpdateRequestDTO,
@@ -259,13 +260,32 @@ export class ScancodeAdapter {
         }
     }
 
+    public static async createPaymentMethod(method: PaymentMethod): Promise<PaymentMethod> {
+        try {
+            const payload: PaymentMethodCreateRequestDTO = {
+                name: method.name.trim(),
+            };
+            const response = await scancodeApi.postPaymentMethod(payload);
+            const dto = response.data;
+
+            return {
+                ...method,
+                id: dto.id,
+                name: dto.name,
+                created_at: dto.created_at,
+                updated_at: dto.updated_at,
+            };
+        } catch (err: unknown) {
+            ScancodeAdapter.handleApiError(err);
+        }
+    }
+
     public static async updatePaymentMethod(method: PaymentMethod): Promise<PaymentMethod> {
         try {
-            const remoteId: number = method.remote_id ?? method.id;
             const payload: PaymentMethodUpdateRequestDTO = {
                 name: method.name.trim(),
             };
-            const response = await scancodeApi.patchPaymentMethod(remoteId, payload);
+            const response = await scancodeApi.patchPaymentMethod(method.remote_id as number, payload);
             const dto = response.data;
 
             return {

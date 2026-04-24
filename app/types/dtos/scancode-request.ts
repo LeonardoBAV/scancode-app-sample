@@ -30,3 +30,6 @@ export type ProductCreateRequestDTO = ProductUpdateRequestDTO;
 export interface PaymentMethodUpdateRequestDTO {
     name: string;
 }
+
+/** POST /payment-methods — same body shape as PATCH */
+export type PaymentMethodCreateRequestDTO = PaymentMethodUpdateRequestDTO;

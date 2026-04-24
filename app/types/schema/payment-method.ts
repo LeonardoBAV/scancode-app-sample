@@ -1,6 +1,6 @@
 export interface PaymentMethod {
-    id: number;
-    remote_id: number;
+    id: number | null;
+    remote_id: number | null;
     is_sync: boolean;
     name: string;
     created_at: string;

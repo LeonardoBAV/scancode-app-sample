@@ -1,7 +1,13 @@
 <template>
     <Page actionBarHidden="true">
         <GridLayout :rows="selectedPaymentMethod ? 'auto, *, auto' : 'auto, *'" class="bg-background">
-            <HeaderComponent row="0" :title="$t('pages.paymentMethodList.title')" :showAvatar="false" />
+            <HeaderComponent
+                row="0"
+                :title="$t('pages.paymentMethodList.title')"
+                :showAvatar="false"
+                right-action-icon="plus"
+                @rightAction="onNewPaymentMethodTap"
+            />
             <PaymentMethodListComponent row="1" :payment-methods="paymentMethods" :selected-payment-method-id="selectedPaymentMethod?.id ?? null" @select="onSelectPaymentMethod" />
 
             <StackLayout v-if="selectedPaymentMethod" row="2" class="footer-bar">
@@ -19,6 +25,7 @@ import { PaymentMethodsComposable } from '../../composables/payment-methods-comp
 import { Icons } from '../../utils/icons';
 import { useNavigation } from '../../composables/useNavigation';
 import PaymentMethodListComponent from '../../components/PaymentMethodListComponent.vue';
+import PaymentMethodCreatePage from './PaymentMethodCreatePage.vue';
 import PaymentMethodShowPage from './PaymentMethodShowPage.vue';
 import HeaderComponent from '../../components/HeaderComponent.vue';
 
@@ -42,6 +49,12 @@ function onViewTap(): void {
     if (!selectedPaymentMethod.value) return;
     navigateTo(PaymentMethodShowPage, {
         props: { paymentMethod: selectedPaymentMethod.value },
+        transition: { name: 'slideLeft', duration: 300 },
+    });
+}
+
+function onNewPaymentMethodTap(): void {
+    navigateTo(PaymentMethodCreatePage, {
         transition: { name: 'slideLeft', duration: 300 },
     });
 }

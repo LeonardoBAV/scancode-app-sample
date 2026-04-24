@@ -5,6 +5,7 @@ import type {
     ClientCreateRequestDTO,
     ClientUpdateRequestDTO,
     LoginRequestDTO,
+    PaymentMethodCreateRequestDTO,
     PaymentMethodUpdateRequestDTO,
     ProductCreateRequestDTO,
     ProductUpdateRequestDTO,
@@ -90,6 +91,11 @@ export class ScancodeApi extends HttpClient {
 
     public async getPaymentMethods(): Promise<PaymentMethodsResponseDTO> {
         const { data } = await this.get<PaymentMethodsResponseDTO>('/payment-methods');
+        return data;
+    }
+
+    public async postPaymentMethod(body: PaymentMethodCreateRequestDTO): Promise<PaymentMethodResponseDTO> {
+        const { data } = await this.post<PaymentMethodResponseDTO>('/payment-methods', body);
         return data;
     }
 

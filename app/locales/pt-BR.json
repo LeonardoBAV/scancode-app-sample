@@ -157,6 +157,10 @@
       "empty": "Nenhuma forma de pagamento encontrada",
       "emptyHint": "Tente buscar com outro termo"
     },
+    "paymentMethodCreate": {
+      "title": "Nova forma de pagamento",
+      "initError": "Não foi possível iniciar o cadastro. Tente novamente."
+    },
     "paymentMethodShow": {
       "title": "Detalhes da forma de pagamento",
       "segmentView": "Visualizar",
@@ -167,7 +171,13 @@
       "save": "Salvar",
       "saveSuccess": "Forma de pagamento salva com sucesso.",
       "saveError": "Não foi possível salvar. Tente novamente.",
-      "nameHint": "Nome da forma de pagamento"
+      "nameHint": "Nome da forma de pagamento",
+      "errors": {
+        "generic": "Verifique os campos e tente novamente.",
+        "nameRequired": "Informe o nome da forma de pagamento.",
+        "nameMax": "Nome deve ter no máximo 255 caracteres.",
+        "nameDuplicate": "Já existe uma forma de pagamento com este nome."
+      }
     },
     "eventLayout": {
       "tabHome": "Evento",

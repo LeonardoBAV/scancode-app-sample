@@ -157,6 +157,10 @@
       "empty": "No payment methods found",
       "emptyHint": "Try a different search term"
     },
+    "paymentMethodCreate": {
+      "title": "New payment method",
+      "initError": "Could not start registration. Please try again."
+    },
     "paymentMethodShow": {
       "title": "Payment method details",
       "segmentView": "View",
@@ -167,7 +171,13 @@
       "save": "Save",
       "saveSuccess": "Payment method saved successfully.",
       "saveError": "Could not save. Please try again.",
-      "nameHint": "Payment method name"
+      "nameHint": "Payment method name",
+      "errors": {
+        "generic": "Check the fields and try again.",
+        "nameRequired": "Payment method name is required.",
+        "nameMax": "Name must be at most 255 characters.",
+        "nameDuplicate": "A payment method with this name already exists."
+      }
     },
     "eventLayout": {
       "tabHome": "Event",

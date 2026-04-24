@@ -9,7 +9,6 @@ import { ClientsRepository } from '../db/repositories/clients.repo';
 import { EventsRepository } from '../db/repositories/events.repo';
 import { OrdersRepository } from '../db/repositories/orders.repo';
 import { EventsComposable } from '../composables/event-composable';
-import { PaymentMethodsComposable } from '../composables/payment-methods-composable';
 import { ProductsComposable } from '../composables/products-composable';
 
 export class SyncPullService {
@@ -60,7 +59,6 @@ export class SyncPullService {
     private async pullPaymentMethods(): Promise<void> {
         const methods = await ScancodeAdapter.getPaymentMethods();
         await PaymentMethodsRepository.upsertMany(methods);
-        await PaymentMethodsComposable.refresh();
     }
 
     private async truncateAllEntities(): Promise<void> {

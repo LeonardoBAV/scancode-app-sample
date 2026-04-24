@@ -24,6 +24,7 @@ export class PaymentMethodsRepository extends RepositoryBase {
             PaymentMethodsRepository.PAYMENT_METHOD_COLUMNS,
             methods,
         );
+        await PaymentMethodsComposable.refresh();
     }
 
     public static async upsertOne(method: PaymentMethod): Promise<void> {
@@ -39,24 +40,32 @@ export class PaymentMethodsRepository extends RepositoryBase {
         const rows: PaymentMethod[] = await PaymentMethodsRepository.queryAll<PaymentMethod>(
             'SELECT * FROM payment_methods ORDER BY name COLLATE NOCASE ASC',
         );
-        return rows.map(
-            (row: PaymentMethod): PaymentMethod => ({
-                ...row,
-                is_sync: PaymentMethodsRepository.readSqliteBool(row.is_sync as unknown),
-            }),
+        return rows.map((row: PaymentMethod): PaymentMethod => PaymentMethodsRepository.mapSqlitePaymentMethodRow(row));
+    }
+
+    /**
+     * First payment method with the same stored `name` string (exact match), or null.
+     */
+    public static async loadByName(name: string): Promise<PaymentMethod | null> {
+        const row: PaymentMethod | null = await PaymentMethodsRepository.queryOne<PaymentMethod>(
+            'SELECT * FROM payment_methods WHERE name = ? LIMIT 1',
+            [name],
         );
+        return row == null ? null : PaymentMethodsRepository.mapSqlitePaymentMethodRow(row);
     }
 
     public static async findAllUnsynced(): Promise<PaymentMethod[]> {
         const rows: PaymentMethod[] = await PaymentMethodsRepository.queryAll<PaymentMethod>(
             'SELECT * FROM payment_methods WHERE is_sync = 0 ORDER BY id ASC',
         );
-        return rows.map(
-            (row: PaymentMethod): PaymentMethod => ({
-                ...row,
-                is_sync: PaymentMethodsRepository.readSqliteBool(row.is_sync as unknown),
-            }),
-        );
+        return rows.map((row: PaymentMethod): PaymentMethod => PaymentMethodsRepository.mapSqlitePaymentMethodRow(row));
+    }
+
+    private static mapSqlitePaymentMethodRow(row: PaymentMethod): PaymentMethod {
+        return {
+            ...row,
+            is_sync: PaymentMethodsRepository.readSqliteBool(row.is_sync as unknown),
+        };
     }
 
     public static async truncate(): Promise<void> {

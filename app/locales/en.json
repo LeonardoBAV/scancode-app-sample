@@ -250,6 +250,7 @@
       "confirm": "Confirm"
     },
     "eventHome": {
+      "noEvent": "Could not load this event.",
       "status": "Status",
       "date": "Date",
       "totalValue": "Total value",

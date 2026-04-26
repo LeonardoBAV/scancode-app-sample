@@ -249,6 +249,7 @@
       "confirm": "Confirmar"
     },
     "eventHome": {
+      "noEvent": "Não foi possível carregar este evento.",
       "status": "Status",
       "date": "Data",
       "totalValue": "Valor total",

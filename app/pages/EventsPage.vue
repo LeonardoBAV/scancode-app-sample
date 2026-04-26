@@ -49,6 +49,7 @@
 import { computed, type ComputedRef } from 'vue';
 import { Format } from '../utils/format';
 import { EventsComposable } from '../composables/event-composable';
+import { useCurrentEvent } from '../composables/repository/useCurrentEvent';
 import { useTranslation } from '../composables/useTranslation';
 import { useNavigation } from '../composables/useNavigation';
 import HeaderComponent from '../components/HeaderComponent.vue';
@@ -64,7 +65,6 @@ const isLoading = EventsComposable.getIsLoading();
 
 const items: ComputedRef<EventItem[]> = computed(() =>
     events.value.map((row: Event): EventItem => {
-        console.log(row);
         const orders = row.orders ?? [];
         const totalValue = orders.reduce((sum, order) => {
             const orderTotal = (order.order_items ?? []).reduce(
@@ -125,7 +125,8 @@ function deriveEventStatus(start: string, end: string): 'scheduled' | 'in_progre
     return 'in_progress';
 }
 
-function openEvent(event: EventItem): void {
-    navigateTo(DefaultLayout, { frame: 'root-frame', props: { event }, clearHistory: true });
+async function openEvent(event: EventItem): Promise<void> {
+    await useCurrentEvent.setEvent(event.id);
+    navigateTo(DefaultLayout, { frame: 'root-frame', clearHistory: true });
 }
 </script>

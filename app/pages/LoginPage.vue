@@ -91,12 +91,8 @@ async function onLogin(): Promise<void> {
         syncStatus.value = '';
         goToEvents();
     } catch (err: unknown) {
-        if (isSyncing.value) {
-            syncStatus.value = '';
-            goToEvents();
-        } else {
-            errorMessage.value = (err as ApiException).message;
-        }
+        console.error('[Login] sync failed:', err);
+        errorMessage.value = (err as ApiException).message;
     } finally {
         isLoading.value = false;
         isSyncing.value = false;

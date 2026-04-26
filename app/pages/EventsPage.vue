@@ -63,17 +63,29 @@ const events = EventsComposable.getList();
 const isLoading = EventsComposable.getIsLoading();
 
 const items: ComputedRef<EventItem[]> = computed(() =>
-    events.value.map((row: Event): EventItem => ({
-        id: row.id,
-        name: row.name,
-        status: deriveEventStatus(row.start, row.end),
-        totalValue: 0,
-        startDate: Format.formatIsoDateToBR(row.start),
-        endDate: Format.formatIsoDateToBR(row.end),
-        orderCount: 0,
-        ordersSynced: 0,
-        ordersUnsynced: 0,
-    })),
+    events.value.map((row: Event): EventItem => {
+        console.log(row);
+        const orders = row.orders ?? [];
+        const totalValue = orders.reduce((sum, order) => {
+            const orderTotal = (order.order_items ?? []).reduce(
+                (s, item) => s + item.price * item.qty,
+                0,
+            );
+            return sum + orderTotal;
+        }, 0);
+
+        return {
+            id: row.id,
+            name: row.name,
+            status: deriveEventStatus(row.start, row.end),
+            totalValue,
+            startDate: Format.formatIsoDateToBR(row.start),
+            endDate: Format.formatIsoDateToBR(row.end),
+            orderCount: orders.length,
+            ordersSynced: orders.filter((o) => o.is_sync).length,
+            ordersUnsynced: orders.filter((o) => !o.is_sync).length,
+        };
+    }),
 );
 
 function statusLabel(status: string): string {

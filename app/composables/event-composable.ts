@@ -21,7 +21,7 @@ export class EventsComposable {
     public static async refresh(): Promise<void> {
         EventsComposable.isLoading.value = true;
         try {
-            EventsComposable.events.value = await EventsRepository.findAll();
+            EventsComposable.events.value = await EventsRepository.findAll(true);
         } catch (error: unknown) {
             console.error('[EventsComposable] refresh failed:', error);
         } finally {

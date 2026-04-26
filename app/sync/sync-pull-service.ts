@@ -22,11 +22,12 @@ export class SyncPullService {
 
     public async refresh(): Promise<void> {
         await this.truncateAllEntities();
-        await this.pullEvents();
         await this.pullProductCategories();
         await this.pullProducts();
         await this.pullClients();
-        await this.pullPaymentMethods();
+        await this.pullPaymentMethods();        
+        await this.pullEvents();
+
     }
 
     public async updateEntities(): Promise<void> {
@@ -38,6 +39,7 @@ export class SyncPullService {
 
     private async pullEvents(): Promise<void> {
         const events = await ScancodeAdapter.getEvents();
+        console.log(events);
         await EventsRepository.upsertMany(events);
 
         const orders = events.flatMap((e) => e.orders ?? []);
@@ -45,10 +47,13 @@ export class SyncPullService {
 
         const orderItems = orders.flatMap((o) => o.order_items ?? []);
         await OrderItemsRepository.upsertMany(orderItems);
+
+        await EventsComposable.refresh();
     }
 
     private async pullProductCategories(): Promise<void> {
         const categories: ProductCategory[] = await ScancodeAdapter.getProductCategories();
+        console.log(categories);
         await ProductCategoriesRepository.upsertMany(categories);
     }
 

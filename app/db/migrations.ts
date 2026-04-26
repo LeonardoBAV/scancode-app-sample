@@ -1,11 +1,11 @@
-import type { SQLiteDatabase } from '@nativescript-community/sqlite';
+import type { SQLiteDatabase, SqliteRow } from '@nativescript-community/sqlite/sqlite.common';
 
 /**
  * Schema revision for `SQLiteDatabase.setVersion`.
  * v1: initial squashed DDL.
  * v2: INTEGER PRIMARY KEY AUTOINCREMENT on pull tables + clients (upgrade path for DBs created before that DDL).
  * v3: UNIQUE indexes on products.sku and products.barcode.
- * v4: orders — replace synced_at (TEXT) with is_sync (INTEGER).
+ * v4: orders — ensure is_sync (INTEGER); migrate from legacy synced_at when present.
  */
 const SCHEMA_VERSION: number = 4;
 
@@ -281,10 +281,27 @@ async function migrateToV3ProductsSkuBarcodeUnique(db: SQLiteDatabase): Promise<
 }
 
 /**
- * Replaces `synced_at TEXT` with `is_sync INTEGER` on the orders table.
- * Existing rows with synced_at IS NOT NULL are migrated as is_sync = 1.
+ * Ensures `orders` has `is_sync INTEGER` (replacing legacy `synced_at TEXT` when present).
+ * - DBs created by current `migrateToV1` already have `is_sync` and no `synced_at`: no-op.
+ * - Older DBs with `synced_at`: table rebuild + copy `is_sync` from non-null `synced_at`.
+ * - Rare broken shapes without either column: `ALTER TABLE ... ADD COLUMN is_sync`.
  */
 async function migrateToV4OrdersIsSyncColumn(db: SQLiteDatabase): Promise<void> {
+    const columns = await db.select('PRAGMA table_info(orders)');
+    if (columns.length === 0) {
+        return;
+    }
+
+    const columnNames = new Set(columns.map((row: SqliteRow) => String(row.name)));
+    if (columnNames.has('is_sync')) {
+        return;
+    }
+
+    if (!columnNames.has('synced_at')) {
+        await db.execute('ALTER TABLE orders ADD COLUMN is_sync INTEGER NOT NULL DEFAULT 0');
+        return;
+    }
+
     await db.execute('PRAGMA foreign_keys = OFF;');
 
     await db.transaction(async () => {

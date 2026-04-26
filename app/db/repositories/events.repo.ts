@@ -1,5 +1,4 @@
 // --- Imports ---
-import { EventsComposable } from '../../composables/event-composable';
 import type { Event } from '../../types/schema/event';
 import type { Order } from '../../types/schema/order';
 import type { OrderItem } from '../../types/schema/order-item';
@@ -76,6 +75,63 @@ export class EventsRepository extends RepositoryBase {
         return {
             ...row,
             is_sync: EventsRepository.readSqliteBool(row.is_sync as unknown),
+        };
+    }
+
+    /**
+     * Event row plus `orders` for this event and each order's `order_items` (schema `Event` / `Order` / `OrderItem`).
+     */
+    public static async findByIdWithRelations(id: number): Promise<Event | null> {
+        const base: Event | null = await EventsRepository.findById(id);
+        if (!base) {
+            return null;
+        }
+
+        const orderRows: Order[] = await EventsRepository.queryAll<Order>(
+            'SELECT * FROM orders WHERE event_id = ? ORDER BY created_at ASC',
+            [id],
+        );
+        const orders: Order[] = orderRows.map((o: Order): Order => ({
+            ...o,
+            is_sync: EventsRepository.readSqliteBool(o.is_sync as unknown),
+        }));
+
+        if (orders.length === 0) {
+            return { ...base, orders: [] };
+        }
+
+        const orderIds: number[] = orders
+            .map((o: Order) => o.id)
+            .filter((oid: number | null): oid is number => oid !== null && oid !== undefined);
+
+        if (orderIds.length === 0) {
+            return {
+                ...base,
+                orders: orders.map((o: Order): Order => ({ ...o, order_items: [] })),
+            };
+        }
+
+        const placeholders: string = orderIds.map(() => '?').join(', ');
+        const orderItems: OrderItem[] = await EventsRepository.queryAll<OrderItem>(
+            `SELECT * FROM order_items WHERE order_id IN (${placeholders})`,
+            orderIds,
+        );
+
+        const itemsByOrderId = new Map<number, OrderItem[]>();
+        for (const item of orderItems) {
+            const list: OrderItem[] = itemsByOrderId.get(item.order_id) ?? [];
+            list.push(item);
+            itemsByOrderId.set(item.order_id, list);
+        }
+
+        const enrichedOrders: Order[] = orders.map((order: Order): Order => ({
+            ...order,
+            order_items: itemsByOrderId.get(order.id as number) ?? [],
+        }));
+
+        return {
+            ...base,
+            orders: enrichedOrders,
         };
     }
 

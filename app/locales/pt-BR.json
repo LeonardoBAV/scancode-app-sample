@@ -199,6 +199,8 @@
     "cart": {
       "title": "Sacola",
       "searchHint": "Buscar produto por nome ou SKU...",
+      "noOrderTitle": "Pedido ainda não selecionado",
+      "noOrderHint": "Selecione um pedido para ver os itens na sacola",
       "empty": "Sacola vazia",
       "emptyHint": "Busque produtos acima para adicionar",
       "item": "item",

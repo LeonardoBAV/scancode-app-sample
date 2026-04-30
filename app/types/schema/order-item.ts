@@ -1,3 +1,5 @@
+import type { Product } from './product';
+
 export interface OrderItem {
     id: number | null;
     order_id: number;
@@ -5,4 +7,5 @@ export interface OrderItem {
     price: number;
     qty: number;
     notes: string | null;
+    product?: Product | null;
 }

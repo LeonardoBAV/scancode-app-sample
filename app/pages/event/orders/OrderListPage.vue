@@ -159,13 +159,10 @@ function goToEvents(): void {
 }
 
 function onOrderTap(order: OrderListRow): void {
-    navigateTo(OrderSelectClientPage, {
-        props: { targetPage: 'OrderShowPage' as const, orderId: String(order.id) },
-        backstackVisible: false,
-    });
+    navigateTo(OrderShowPage, { props: { orderId: String(order.id) } });
 }
 
 function onAddNewOrder(): void {
-    navigateTo(OrderShowPage);
+    navigateTo(OrderSelectClientPage, { props: { targetPage: 'OrderShowPage' as const } });
 }
 </script>

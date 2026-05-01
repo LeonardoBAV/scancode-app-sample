@@ -14,15 +14,13 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import {
-    orderCreateSelectedClient,
-    orderCreateClientFantasyName,
-    orderCreateClientCpfCnpj,
-} from './order-create-state';
 import { computed, ref, type ComputedRef, type Ref } from 'vue';
 import type { Client } from '../../../types/schema/client';
 import { ClientsComposable } from '../../../composables/clients-composable';
 import { useNavigation } from '../../../composables/useNavigation';
+import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
+import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import ClientListComponent from '../../../components/ClientListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderShowPage from './OrderShowPage.vue';
@@ -54,11 +52,7 @@ function onSelectClient(client: Client): void {
     selectedClient.value = selectedClient.value?.id === client.id ? null : client;
 }
 
-function onClientConfirmed(client: Client): void {
-    orderCreateSelectedClient.value = client;
-    orderCreateClientFantasyName.value = client.fantasy_name;
-    orderCreateClientCpfCnpj.value = client.cpf_cnpj;
-
+function onClientConfirmed(): void {
     if (props.targetPage === 'back') {
         void navigateBack();
     } else {
@@ -66,8 +60,27 @@ function onClientConfirmed(client: Client): void {
     }
 }
 
-function onConfirm(): void {
+async function onConfirm(): Promise<void> {
     if (!selectedClient.value) return;
-    onClientConfirmed(selectedClient.value);
+
+    // When coming from "New order" flow (no orderId), create the order first.
+    if (props.targetPage === 'OrderShowPage' && !props.orderId) {
+        const eventId: number | undefined = useCurrentEvent.getEvent().value?.id;
+        const clientId: number | null | undefined = selectedClient.value.id;
+
+        const created = await OrdersRepository.createOne({
+            event_id: eventId as number,
+            client_id: clientId as number,
+            sales_representative_id: 0,
+            payment_method_id: null,
+            status: 'Open',
+            notes: null,
+        });
+
+        await useCurrentOrder.setOrder(created.id as number);
+        navigateTo(OrderShowPage, { props: { orderId: String(created.id) } });
+    }
+
+    onClientConfirmed();
 }
 </script>

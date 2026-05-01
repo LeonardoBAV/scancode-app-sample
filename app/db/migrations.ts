@@ -6,8 +6,9 @@ import type { SQLiteDatabase, SqliteRow } from '@nativescript-community/sqlite/s
  * v2: INTEGER PRIMARY KEY AUTOINCREMENT on pull tables + clients (upgrade path for DBs created before that DDL).
  * v3: UNIQUE indexes on products.sku and products.barcode.
  * v4: orders — ensure is_sync (INTEGER); migrate from legacy synced_at when present.
+ * v5: orders — allow NULL payment_method_id.
  */
-const SCHEMA_VERSION: number = 4;
+const SCHEMA_VERSION: number = 5;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const startVersion: number = db.getVersion();
@@ -30,6 +31,10 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
 
     if (startVersion < 4) {
         await migrateToV4OrdersIsSyncColumn(db);
+    }
+
+    if (startVersion < 5) {
+        await migrateToV5OrdersNullablePaymentMethod(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -123,7 +128,7 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
             notes                     TEXT,
             client_id                 INTEGER NOT NULL,
             sales_representative_id   INTEGER NOT NULL,
-            payment_method_id         INTEGER NOT NULL,
+            payment_method_id         INTEGER REFERENCES payment_methods(id),
             synced_at                 TEXT,
             created_at                TEXT    NOT NULL,
             updated_at                TEXT    NOT NULL
@@ -152,7 +157,7 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
             notes                     TEXT,
             client_id                 INTEGER NOT NULL REFERENCES clients(id),
             sales_representative_id   INTEGER NOT NULL,
-            payment_method_id         INTEGER NOT NULL REFERENCES payment_methods(id),
+            payment_method_id         INTEGER REFERENCES payment_methods(id),
             is_sync                   INTEGER NOT NULL DEFAULT 0,
             created_at                TEXT    NOT NULL,
             updated_at                TEXT    NOT NULL
@@ -314,7 +319,7 @@ async function migrateToV4OrdersIsSyncColumn(db: SQLiteDatabase): Promise<void> 
                 notes                     TEXT,
                 client_id                 INTEGER NOT NULL REFERENCES clients(id),
                 sales_representative_id   INTEGER NOT NULL,
-                payment_method_id         INTEGER NOT NULL REFERENCES payment_methods(id),
+                payment_method_id         INTEGER REFERENCES payment_methods(id),
                 is_sync                   INTEGER NOT NULL DEFAULT 0,
                 created_at                TEXT    NOT NULL,
                 updated_at                TEXT    NOT NULL
@@ -334,6 +339,57 @@ async function migrateToV4OrdersIsSyncColumn(db: SQLiteDatabase): Promise<void> 
 
         await db.execute('DROP TABLE orders;');
         await db.execute('ALTER TABLE orders__v4 RENAME TO orders;');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_orders_event_id ON orders(event_id);');
+    });
+
+    await db.execute('PRAGMA foreign_keys = ON;');
+}
+
+/**
+ * Allows `orders.payment_method_id` to be NULL (removes NOT NULL constraint).
+ * SQLite requires a table rebuild to change column constraints.
+ */
+async function migrateToV5OrdersNullablePaymentMethod(db: SQLiteDatabase): Promise<void> {
+    const columns = await db.select('PRAGMA table_info(orders)');
+    if (columns.length === 0) {
+        return;
+    }
+
+    const columnNames = new Set(columns.map((row: SqliteRow) => String(row.name)));
+    if (!columnNames.has('payment_method_id')) {
+        return;
+    }
+
+    await db.execute('PRAGMA foreign_keys = OFF;');
+
+    await db.transaction(async () => {
+        await db.execute(`
+            CREATE TABLE orders__v5 (
+                id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+                remote_id                 INTEGER UNIQUE,
+                event_id                  INTEGER NOT NULL REFERENCES events(id),
+                status                    TEXT    NOT NULL DEFAULT 'Pending',
+                notes                     TEXT,
+                client_id                 INTEGER NOT NULL REFERENCES clients(id),
+                sales_representative_id   INTEGER NOT NULL,
+                payment_method_id         INTEGER REFERENCES payment_methods(id),
+                is_sync                   INTEGER NOT NULL DEFAULT 0,
+                created_at                TEXT    NOT NULL,
+                updated_at                TEXT    NOT NULL
+            );
+        `);
+
+        await db.execute(`
+            INSERT INTO orders__v5
+                (id, remote_id, event_id, status, notes, client_id,
+                 sales_representative_id, payment_method_id, is_sync, created_at, updated_at)
+            SELECT id, remote_id, event_id, status, notes, client_id,
+                   sales_representative_id, payment_method_id, is_sync, created_at, updated_at
+            FROM orders;
+        `);
+
+        await db.execute('DROP TABLE orders;');
+        await db.execute('ALTER TABLE orders__v5 RENAME TO orders;');
         await db.execute('CREATE INDEX IF NOT EXISTS idx_orders_event_id ON orders(event_id);');
     });
 

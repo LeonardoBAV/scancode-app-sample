@@ -9,7 +9,7 @@ export interface Order {
     notes: string | null;
     client_id: number;
     sales_representative_id: number;
-    payment_method_id: number;
+    payment_method_id: number | null;
     is_sync: boolean;
     created_at: string;
     updated_at: string;

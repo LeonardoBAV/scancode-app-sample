@@ -151,6 +151,62 @@ export class OrdersRepository extends RepositoryBase {
         await OrdersRepository.insertOrReplaceMany('orders', OrdersRepository.ORDER_COLUMNS, orders);
     }
 
+    public static async createOne(input: {
+        event_id: number;
+        client_id: number;
+        sales_representative_id: number;
+        payment_method_id: number | null;
+        status?: string;
+        notes?: string | null;
+    }): Promise<Order> {
+        const now: string = new Date().toISOString();
+        const status: string = input.status ?? 'Open';
+        const notes: string | null = input.notes ?? null;
+
+        await OrdersRepository.execute(
+            `
+                INSERT INTO orders (
+                    remote_id,
+                    event_id,
+                    status,
+                    notes,
+                    client_id,
+                    sales_representative_id,
+                    payment_method_id,
+                    is_sync,
+                    created_at,
+                    updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `,
+            [
+                null,
+                input.event_id,
+                status,
+                notes,
+                input.client_id,
+                input.sales_representative_id,
+                input.payment_method_id,
+                0,
+                now,
+                now,
+            ],
+        );
+
+        const row: { id: number } | null = await OrdersRepository.queryOne<{ id: number }>(
+            'SELECT last_insert_rowid() as id',
+        );
+        const id: number = row?.id ?? 0;
+        if (!Number.isFinite(id) || id <= 0) {
+            throw new Error('Failed to create order (missing last_insert_rowid)');
+        }
+
+        const created: Order | null = await OrdersRepository.findByIdWithRelations(id);
+        if (!created) {
+            throw new Error('Failed to load newly created order');
+        }
+        return created;
+    }
+
     public static async truncate(): Promise<void> {
         await OrdersRepository.truncateTable('orders');
     }

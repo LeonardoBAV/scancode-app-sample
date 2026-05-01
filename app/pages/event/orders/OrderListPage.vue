@@ -62,6 +62,7 @@ import { computed, ref, type DeepReadonly } from 'vue';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
+import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
 import type { Order as SchemaOrder } from '../../../types/schema/order';
 import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
@@ -158,7 +159,8 @@ function goToEvents(): void {
     navigateTo(EventsPage, { frame: 'root-frame', clearHistory: true });
 }
 
-function onOrderTap(order: OrderListRow): void {
+async function onOrderTap(order: OrderListRow): Promise<void> {
+    await useCurrentOrder.setOrder(order.id);
     navigateTo(OrderShowPage, { props: { orderId: String(order.id) } });
 }
 

@@ -1,7 +1,9 @@
 // --- Imports ---
+import type { Client } from '../../types/schema/client';
 import type { Event } from '../../types/schema/event';
 import type { Order } from '../../types/schema/order';
 import type { OrderItem } from '../../types/schema/order-item';
+import { ClientsRepository } from './clients.repo';
 import { RepositoryBase } from '../repository-base';
 
 
@@ -53,9 +55,15 @@ export class EventsRepository extends RepositoryBase {
             itemsByOrderId.set(item.order_id, list);
         }
 
+        const clientsById: Map<number, Client> = await EventsRepository.clientsMapForOrders(orders);
+
         const ordersByEventId = new Map<number, Order[]>();
         for (const order of orders) {
-            const enriched: Order = { ...order, order_items: itemsByOrderId.get(order.id as number) ?? [] };
+            const enriched: Order = {
+                ...order,
+                order_items: itemsByOrderId.get(order.id as number) ?? [],
+                client: clientsById.get(order.client_id) ?? null,
+            };
             const list = ordersByEventId.get(order.event_id) ?? [];
             list.push(enriched);
             ordersByEventId.set(order.event_id, list);
@@ -100,6 +108,8 @@ export class EventsRepository extends RepositoryBase {
             return { ...base, orders: [] };
         }
 
+        const clientsById: Map<number, Client> = await EventsRepository.clientsMapForOrders(orders);
+
         const orderIds: number[] = orders
             .map((o: Order) => o.id)
             .filter((oid: number | null): oid is number => oid !== null && oid !== undefined);
@@ -107,7 +117,13 @@ export class EventsRepository extends RepositoryBase {
         if (orderIds.length === 0) {
             return {
                 ...base,
-                orders: orders.map((o: Order): Order => ({ ...o, order_items: [] })),
+                orders: orders.map(
+                    (o: Order): Order => ({
+                        ...o,
+                        order_items: [],
+                        client: clientsById.get(o.client_id) ?? null,
+                    }),
+                ),
             };
         }
 
@@ -127,12 +143,31 @@ export class EventsRepository extends RepositoryBase {
         const enrichedOrders: Order[] = orders.map((order: Order): Order => ({
             ...order,
             order_items: itemsByOrderId.get(order.id as number) ?? [],
+            client: clientsById.get(order.client_id) ?? null,
         }));
 
         return {
             ...base,
             orders: enrichedOrders,
         };
+    }
+
+    private static async clientsMapForOrders(orders: Order[]): Promise<Map<number, Client>> {
+        const clientIds: number[] = [
+            ...new Set(
+                orders
+                    .map((o: Order) => o.client_id)
+                    .filter((cid: number): cid is number => Number.isFinite(cid)),
+            ),
+        ];
+        const clients: Client[] = await ClientsRepository.findManyByIds(clientIds);
+        const byId = new Map<number, Client>();
+        for (const client of clients) {
+            if (client.id != null) {
+                byId.set(client.id, client);
+            }
+        }
+        return byId;
     }
 
     public static async truncate(): Promise<void> {

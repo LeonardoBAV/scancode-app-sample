@@ -12,15 +12,26 @@
                 </GridLayout>
             </StackLayout>
 
+            <!-- Loading -->
+            <StackLayout v-if="loading" row="2" class="p-8" verticalAlignment="center" horizontalAlignment="center">
+                <Label :text="$t('common.loading')" class="text-base text-muted-foreground text-center" textWrap="true" />
+            </StackLayout>
+
+            <!-- No event -->
+            <StackLayout v-else-if="!currentEvent" row="2" class="p-8" verticalAlignment="center" horizontalAlignment="center">
+                <Label :text="$t('pages.eventHome.noEvent')" class="text-base text-muted-foreground text-center mb-4" textWrap="true" />
+                <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary" @tap="goToEvents" />
+            </StackLayout>
+
             <!-- List or Empty -->
-            <ListView v-if="filteredOrders.length > 0" row="2" :items="filteredOrders" separatorColor="transparent">
+            <ListView v-else-if="filteredOrders.length > 0" row="2" :items="filteredOrders" separatorColor="transparent">
                 <template #default="{ item }">
                     <StackLayout class="px-4 pt-2 pb-3" @tap="onOrderTap(item)">
                         <GridLayout rows="auto, auto, auto, auto" columns="auto, *, auto" class="p-4 bg-card border border-border rounded-lg">
                             <Label row="0" col="0" rowSpan="4" :text="Icons.lucide('receipt')" class="lucide text-muted-foreground mr-4" verticalAlignment="top" />
                             <Label row="0" col="1" :text="item.clientCompanyName" class="text-base font-semibold text-card-foreground" textWrap="true" />
-                            <Label row="0" col="2" :text="statusLabel(item.status)" :class="statusBadgeClass(item.status)" verticalAlignment="top" horizontalAlignment="right" />
-                            <Label row="1" col="1" colSpan="2" :text="item.id" class="text-xs text-muted-foreground" />
+                            <Label row="0" col="2" :text="item.statusLabel" :class="item.statusBadgeClass" verticalAlignment="top" horizontalAlignment="right" />
+                            <Label row="1" col="1" colSpan="2" :text="String(item.id)" class="text-xs text-muted-foreground" />
                             <Label row="2" col="1" colSpan="2" :text="item.itemCount + ' ' + $t('pages.orderList.items') + ' · ' + Format.formatCurrencyBR(item.totalValue)" class="text-sm text-muted-foreground mt-1" />
                             <GridLayout row="3" col="1" colSpan="2" columns="auto, *" class="mt-2">
                                 <Label col="0" :text="item.synced ? Icons.lucide('circle-check') : Icons.lucide('clock')" :class="(item.synced ? 'lucide text-success' : 'lucide text-warning') + ' mr-2'" verticalAlignment="center" />
@@ -38,7 +49,7 @@
             </StackLayout>
 
             <!-- Footer: add order -->
-            <GridLayout row="3" rows="auto" class="footer-bar">
+            <GridLayout v-if="currentEvent && !loading" row="3" rows="auto" class="footer-bar">
                 <Button :text="$t('pages.orderList.addOrder')" class="btn-primary" @tap="onAddNewOrder" />
             </GridLayout>
 
@@ -47,66 +58,109 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed, ref, type DeepReadonly } from 'vue';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
-import type { Order, OrderStatus } from '../../../types/order';
+import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
+import type { Order as SchemaOrder } from '../../../types/schema/order';
 import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
+import EventsPage from '../../EventsPage.vue';
 import OrderSelectClientPage from './OrderSelectClientPage.vue';
 import OrderShowPage from './OrderShowPage.vue';
+
+interface OrderListRow {
+    id: number;
+    clientCompanyName: string;
+    statusLabel: string;
+    statusBadgeClass: string;
+    itemCount: number;
+    totalValue: number;
+    synced: boolean;
+}
 
 const { t } = useTranslation();
 const { navigateTo } = useNavigation();
 
+const currentEventRef = useCurrentEvent.getEvent();
+const loadingRef = useCurrentEvent.getIsLoading();
+
+const currentEvent = computed(() => currentEventRef.value);
+const loading = computed(() => loadingRef.value);
+
 const searchQuery = ref('');
 
-const orders = ref<Order[]>([
-    { id: 'ORD-001', clientCompanyName: 'Empresa Alpha Ltda', status: 'Open', itemCount: 5, totalValue: 1250, synced: false },
-    { id: 'ORD-002', clientCompanyName: 'Beta Comércio S.A.', status: 'Closed', itemCount: 12, totalValue: 3400, synced: true },
-    { id: 'ORD-003', clientCompanyName: 'Gamma Serviços ME', status: 'Open', itemCount: 3, totalValue: 480, synced: false },
-    { id: 'ORD-004', clientCompanyName: 'Delta Indústria Ltda', status: 'Canceled', itemCount: 0, totalValue: 0, synced: true },
-    { id: 'ORD-005', clientCompanyName: 'Epsilon Solutions', status: 'Closed', itemCount: 8, totalValue: 2100, synced: true },
-    { id: 'ORD-006', clientCompanyName: 'Zeta Distribuidora', status: 'Open', itemCount: 15, totalValue: 5200, synced: false },
-    { id: 'ORD-007', clientCompanyName: 'Eta Logística S.A.', status: 'Closed', itemCount: 4, totalValue: 890, synced: true },
-    { id: 'ORD-008', clientCompanyName: 'Theta Tech Ltda', status: 'Open', itemCount: 7, totalValue: 1650, synced: false },
-    { id: 'ORD-009', clientCompanyName: 'Iota Alimentos ME', status: 'Closed', itemCount: 22, totalValue: 4100, synced: true },
-    { id: 'ORD-010', clientCompanyName: 'Kappa Construção', status: 'Open', itemCount: 6, totalValue: 2800, synced: false },
-    { id: 'ORD-011', clientCompanyName: 'Lambda Consultoria', status: 'Closed', itemCount: 2, totalValue: 650, synced: true },
-]);
+function clientDisplayName(order: DeepReadonly<SchemaOrder>): string {
+    const c = order.client;
+    const fantasy = c?.fantasy_name?.trim();
+    if (fantasy) {
+        return fantasy;
+    }
+    const corporate = c?.corporate_name?.trim();
+    if (corporate) {
+        return corporate;
+    }
+    return t('pages.orderList.unknownClient');
+}
+
+function orderStatusPresentation(raw: string): { label: string; badgeClass: string } {
+    const lower = raw.trim().toLowerCase();
+    if (lower === 'open' || lower === 'aberto') {
+        return { label: t('pages.orderList.statusOpen'), badgeClass: 'badge-success' };
+    }
+    if (lower === 'closed' || lower === 'fechado') {
+        return { label: t('pages.orderList.statusClosed'), badgeClass: 'badge-secondary' };
+    }
+    if (lower === 'canceled' || lower === 'cancelled' || lower === 'cancelado') {
+        return { label: t('pages.orderList.statusCanceled'), badgeClass: 'badge-destructive' };
+    }
+    return { label: raw.trim(), badgeClass: 'badge-outline' };
+}
+
+function toListRow(order: DeepReadonly<SchemaOrder>): OrderListRow {
+    const items = order.order_items ?? [];
+    const itemCount = items.length;
+    const totalValue = items.reduce((sum, line) => sum + line.price * line.qty, 0);
+    const pres = orderStatusPresentation(order.status);
+    return {
+        id: order.id as number,
+        clientCompanyName: clientDisplayName(order),
+        statusLabel: pres.label,
+        statusBadgeClass: pres.badgeClass,
+        itemCount,
+        totalValue,
+        synced: order.is_sync,
+    };
+}
+
+const listOrders = computed((): OrderListRow[] => {
+    const orders = currentEvent.value?.orders;
+    if (!orders?.length) {
+        return [];
+    }
+    return orders.map(toListRow);
+});
 
 const filteredOrders = computed(() => {
     const term = searchQuery.value.trim().toLowerCase();
-    if (!term) return orders.value;
-    return orders.value.filter(
-        (o: Order) =>
+    if (!term) {
+        return listOrders.value;
+    }
+    return listOrders.value.filter(
+        (o: OrderListRow) =>
             o.clientCompanyName.toLowerCase().includes(term) ||
-            o.id.toLowerCase().includes(term),
+            String(o.id).includes(term),
     );
 });
 
-function statusLabel(status: OrderStatus): string {
-    switch (status) {
-        case 'Open': return t('pages.orderList.statusOpen');
-        case 'Closed': return t('pages.orderList.statusClosed');
-        case 'Canceled': return t('pages.orderList.statusCanceled');
-        default: return status;
-    }
+function goToEvents(): void {
+    navigateTo(EventsPage, { frame: 'root-frame', clearHistory: true });
 }
 
-function statusBadgeClass(status: OrderStatus): string {
-    switch (status) {
-        case 'Open': return 'badge-success';
-        case 'Closed': return 'badge-secondary';
-        case 'Canceled': return 'badge-destructive';
-        default: return 'badge-outline';
-    }
-}
-
-function onOrderTap(order: Order): void {
+function onOrderTap(order: OrderListRow): void {
     navigateTo(OrderSelectClientPage, {
-        props: { targetPage: 'OrderShowPage' as const, orderId: order.id },
+        props: { targetPage: 'OrderShowPage' as const, orderId: String(order.id) },
         backstackVisible: false,
     });
 }

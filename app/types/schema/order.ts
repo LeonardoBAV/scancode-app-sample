@@ -1,3 +1,4 @@
+import type { Client } from './client';
 import type { OrderItem } from './order-item';
 
 export interface Order {
@@ -13,4 +14,5 @@ export interface Order {
     created_at: string;
     updated_at: string;
     order_items?: OrderItem[];
+    client?: Client | null;
 }

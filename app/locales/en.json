@@ -194,7 +194,8 @@
       "statusClosed": "Closed",
       "statusCanceled": "Canceled",
       "synced": "Synced",
-      "notSynced": "Not synced"
+      "notSynced": "Not synced",
+      "unknownClient": "Unknown client"
     },
     "cart": {
       "title": "Cart",

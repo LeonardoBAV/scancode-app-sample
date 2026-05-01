@@ -61,6 +61,19 @@ export class ClientsRepository extends RepositoryBase {
         return rows.map((row: Client): Client => ClientsRepository.mapSqliteClientRow(row));
     }
 
+    public static async findManyByIds(ids: number[]): Promise<Client[]> {
+        const unique: number[] = [...new Set(ids.filter((id: number) => Number.isFinite(id)))];
+        if (unique.length === 0) {
+            return [];
+        }
+        const placeholders: string = unique.map(() => '?').join(', ');
+        const rows: Client[] = await ClientsRepository.queryAll<Client>(
+            `SELECT * FROM clients WHERE id IN (${placeholders})`,
+            unique,
+        );
+        return rows.map((row: Client): Client => ClientsRepository.mapSqliteClientRow(row));
+    }
+
     private static mapSqliteClientRow(row: Client): Client {
         return {
             ...row,

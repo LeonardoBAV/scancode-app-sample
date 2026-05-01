@@ -2,6 +2,7 @@ import type { Order } from '../../types/schema/order';
 import type { OrderItem } from '../../types/schema/order-item';
 import type { Product } from '../../types/schema/product';
 import type { ProductCategory } from '../../types/schema/product-category';
+import { ClientsRepository } from './clients.repo';
 import { RepositoryBase } from '../repository-base';
 
 interface OrderItemProductJoinRow {
@@ -74,7 +75,8 @@ export class OrdersRepository extends RepositoryBase {
             return null;
         }
         if (base.id == null) {
-            return { ...base, order_items: [] };
+            const [clientEarly] = await ClientsRepository.findManyByIds([base.client_id]);
+            return { ...base, order_items: [], client: clientEarly ?? null };
         }
         const sql: string = `
             SELECT
@@ -140,7 +142,9 @@ export class OrdersRepository extends RepositoryBase {
             };
         });
 
-        return { ...base, order_items: orderItems };
+        const [client] = await ClientsRepository.findManyByIds([base.client_id]);
+
+        return { ...base, order_items: orderItems, client: client ?? null };
     }
 
     public static async upsertMany(orders: Order[]): Promise<void> {

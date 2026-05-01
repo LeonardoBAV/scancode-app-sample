@@ -194,7 +194,8 @@
       "statusClosed": "Fechado",
       "statusCanceled": "Cancelado",
       "synced": "Sincronizado",
-      "notSynced": "Não sincronizado"
+      "notSynced": "Não sincronizado",
+      "unknownClient": "Cliente desconhecido"
     },
     "cart": {
       "title": "Sacola",

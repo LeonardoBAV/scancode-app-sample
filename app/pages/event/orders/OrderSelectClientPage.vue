@@ -52,11 +52,10 @@ function onSelectClient(client: Client): void {
 }
 
 async function onConfirm(): Promise<void> {
-    if (!selectedClient.value) return;
 
     if (props.originPage === 'OrderListPage') {
         const eventId: number | undefined = useCurrentEvent.getEvent().value?.id;
-        const clientId: number | null | undefined = selectedClient.value.id;
+        const clientId: number | null | undefined = selectedClient.value?.id;
 
         const created = await OrdersRepository.createOne({
             event_id: eventId as number,
@@ -68,16 +67,14 @@ async function onConfirm(): Promise<void> {
         });
 
         await useCurrentOrder.setOrder(created.id as number);
-        navigateTo(OrderShowPage);
-        return;
+    } else {
+        const orderId: number = (useCurrentOrder.getOrder()).value?.id as number;
+
+        await OrdersRepository.updateClientId(orderId, selectedClient.value?.id as number);
+        await useCurrentOrder.setOrder(orderId);
     }
 
-    const currentOrder = useCurrentOrder.getOrder().value;
-    const orderId = currentOrder?.id;
-    if (typeof orderId !== 'number') return;
 
-    await OrdersRepository.updateClientId(orderId, selectedClient.value.id as number);
-    await useCurrentOrder.setOrder(orderId);
     navigateTo(OrderShowPage);
 }
 </script>

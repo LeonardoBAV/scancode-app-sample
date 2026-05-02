@@ -2,6 +2,7 @@
 import { ref, readonly, type DeepReadonly, type Ref } from 'vue';
 import { OrdersRepository } from '../../db/repositories/orders.repo';
 import type { Order } from '../../types/schema/order';
+import { useCurrentEvent } from './useCurrentEvent';
 
 
 export class CurrentOrderComposable {
@@ -28,6 +29,7 @@ export class CurrentOrderComposable {
         this.isLoading.value = true;
         try {
             this.order.value = await OrdersRepository.findByIdWithRelations(orderId);
+            await useCurrentEvent.setEvent(this.order.value?.event_id as number);
         } catch (error: unknown) {
             console.error('[CurrentOrderComposable] setOrder failed:', error);
             this.order.value = null;

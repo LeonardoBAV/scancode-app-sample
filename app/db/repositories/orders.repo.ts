@@ -245,6 +245,18 @@ export class OrdersRepository extends RepositoryBase {
         );
     }
 
+    public static async updatePaymentMethodId(orderId: number, paymentMethodId: number | null): Promise<void> {
+        const now: string = new Date().toISOString();
+        await OrdersRepository.execute(
+            `
+                UPDATE orders
+                SET payment_method_id = ?, updated_at = ?, is_sync = 0
+                WHERE id = ?
+            `,
+            [paymentMethodId, now, orderId],
+        );
+    }
+
     public static async truncate(): Promise<void> {
         await OrdersRepository.truncateTable('orders');
     }

@@ -25,6 +25,11 @@ export class CurrentOrderComposable {
         return readonly(this.isLoading);
     }
 
+    public clearOrder(): void {
+        this.order.value = null;
+        this.isLoading.value = false;
+    }
+
     public async setOrder(orderId: number): Promise<void> {
         this.isLoading.value = true;
         try {

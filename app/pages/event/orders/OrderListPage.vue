@@ -1,5 +1,5 @@
 <template>
-    <Page actionBarHidden="true">
+    <Page actionBarHidden="true" @navigatedTo="onNavigatedTo">
         <GridLayout rows="auto, auto, *, auto" class="bg-background">
 
             <HeaderComponent row="0" :title="$t('pages.orderList.title')" />
@@ -154,6 +154,10 @@ const filteredOrders = computed(() => {
             String(o.id).includes(term),
     );
 });
+
+function onNavigatedTo(): void {
+    useCurrentOrder.clearOrder();
+}
 
 function goToEvents(): void {
     navigateTo(EventsPage, { frame: 'root-frame', clearHistory: true });

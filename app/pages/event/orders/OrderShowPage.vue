@@ -65,7 +65,14 @@
                     </GridLayout>
                 </GridLayout>
                 <GridLayout v-if="orderStatus === 'Open'" rows="auto" columns="*, *" columnSpacing="12">
-                    <Button row="0" col="0" :text="$t('pages.orderShow.finish')" class="btn-primary" @tap="onFinish" />
+                    <Button
+                        row="0"
+                        col="0"
+                        :text="$t('pages.orderShow.finish')"
+                        :class="canFinalizeOrder ? 'btn-primary' : 'btn-primary opacity-50'"
+                        :isEnabled="canFinalizeOrder"
+                        @tap="onFinish"
+                    />
                     <Button row="0" col="1" :text="Icons.lucide('printer')" class="lucide btn-secondary" @tap="onPrint" />
                 </GridLayout>
                 <GridLayout v-else rows="auto" columns="*, auto">
@@ -136,6 +143,8 @@ const paymentMethodName: ComputedRef<string> = computed(() => {
     return methods.find((m) => m.id === paymentMethodId)?.name ?? '';
 });
 
+const canFinalizeOrder: ComputedRef<boolean> = computed(() => currentOrderRef.value?.payment_method_id != null);
+
 const clientFantasyName: ComputedRef<string> = computed(() => {
     const c = currentOrderRef.value?.client;
     return c?.fantasy_name?.trim() || c?.corporate_name?.trim() || '';
@@ -172,6 +181,7 @@ async function onFinish(): Promise<void> {
     const order: Order = currentOrderRef.value as Order;
     const id = order.id as number;
     
+
     await OrdersRepository.updateStatus(id, 'Closed');
     await useCurrentEvent.setEvent(order.event_id);
     navigateTo(OrderListPage, { clearHistory: true });

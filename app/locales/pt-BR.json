@@ -234,7 +234,8 @@
       "noClient": "Nenhum cliente selecionado.",
       "changeClient": "Alterar cliente",
       "buyerName": "Nome do comprador",
-      "buyerContact": "Contato do comprador"
+      "buyerContact": "Contato do comprador",
+      "saveBuyerSuccess": "Dados do comprador atualizados."
     },
     "orderShow": {
       "orderValue": "Valor do pedido",

@@ -42,6 +42,14 @@ export class CurrentOrderComposable {
             this.isLoading.value = false;
         }
     }
+
+    public async refresh(): Promise<void> {
+        if (!this.order.value || !this.order.value.id) {
+            throw new Error('Order not found');
+        }
+
+        await this.setOrder(this.order.value.id);
+    }
 }
 
 export const useCurrentOrder: CurrentOrderComposable = CurrentOrderComposable.getInstance();

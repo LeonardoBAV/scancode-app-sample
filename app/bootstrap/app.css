@@ -70,7 +70,7 @@
 }
 
 @utility btn-secondary {
-  @apply bg-secondary text-secondary-foreground text-base font-medium p-3 rounded-lg;
+  @apply bg-secondary text-secondary-foreground text-base font-medium p-3 rounded-lg border border-foreground;
 }
 
 @utility btn-outline {

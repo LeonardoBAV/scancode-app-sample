@@ -93,6 +93,8 @@ Para a lista completa de codepoints, consulte `app/utils/icons.ts`. Para adicion
 
 Todas as variantes usam a classe correspondente. Sobrescreva com utilities individuais se precisar.
 
+`btn-secondary` inclui uma **borda 1px escura** (via `border-foreground`) para diferenciar melhor do fundo.
+
 ```xml
 <!-- Primary -->
 <Button text="Confirmar" class="btn-primary" @tap="onConfirm" />

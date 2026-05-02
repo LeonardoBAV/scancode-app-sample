@@ -24,7 +24,7 @@ NUNCA use `@layer components` — está quebrado no Tailwind v4. Use SEMPRE `@ut
 | Classe              | Uso                                        |
 | ------------------- | ------------------------------------------ |
 | `btn-primary`       | Botão de ação principal (fundo escuro)     |
-| `btn-secondary`     | Botão de ação alternativa (fundo claro)    |
+| `btn-secondary`     | Botão de ação alternativa (fundo claro) — borda 1px escura (`border-foreground`) |
 | `btn-outline`       | Botão com borda, sem fundo                 |
 | `btn-ghost`         | Botão transparente, sem borda              |
 | `btn-destructive`   | Botão de ação perigosa (vermelho)          |

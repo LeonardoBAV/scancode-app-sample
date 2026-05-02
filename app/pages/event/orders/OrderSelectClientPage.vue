@@ -24,6 +24,7 @@ import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import ClientListComponent from '../../../components/ClientListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderShowPage from './OrderShowPage.vue';
+import OrderClientShowPage from './OrderClientShowPage.vue';
 
 
 // --- Component logic ---
@@ -34,7 +35,7 @@ const props = withDefaults(
     { originPage: 'OrderListPage' },
 );
 
-const { navigateTo } = useNavigation();
+const { navigateTo, navigateBack } = useNavigation();
 
 const clientsFromStore = ClientsComposable.getList();
 
@@ -67,14 +68,14 @@ async function onConfirm(): Promise<void> {
         });
 
         await useCurrentOrder.setOrder(created.id as number);
+        navigateTo(OrderShowPage);
     } else {
         const orderId: number = (useCurrentOrder.getOrder()).value?.id as number;
 
         await OrdersRepository.updateClientId(orderId, selectedClient.value?.id as number);
         await useCurrentOrder.setOrder(orderId);
+        navigateBack();
     }
 
-
-    navigateTo(OrderShowPage);
 }
 </script>

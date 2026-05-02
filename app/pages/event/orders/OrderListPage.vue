@@ -165,6 +165,9 @@ async function onOrderTap(order: OrderListRow): Promise<void> {
 }
 
 function onAddNewOrder(): void {
-    navigateTo(OrderSelectClientPage, { props: { originPage: 'OrderListPage' as const } });
+    navigateTo(OrderSelectClientPage, {
+        props: { originPage: 'OrderListPage' as const },
+        backstackVisible: false,
+    });
 }
 </script>

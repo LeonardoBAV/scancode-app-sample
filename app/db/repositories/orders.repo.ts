@@ -166,8 +166,9 @@ export class OrdersRepository extends RepositoryBase {
         const now: string = new Date().toISOString();
         const status: string = input.status ?? 'Open';
         const notes: string | null = input.notes ?? null;
-        const buyerName: string | null = input.buyer_name ?? null;
-        const buyerPhone: string | null = input.buyer_phone ?? null;
+        const [client] = await ClientsRepository.findManyByIds([input.client_id]);
+        const buyerName: string | null = input.buyer_name ?? client?.buyer_name ?? null;
+        const buyerPhone: string | null = input.buyer_phone ?? client?.buyer_contact ?? null;
 
         await OrdersRepository.execute(
             `

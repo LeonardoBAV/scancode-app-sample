@@ -50,6 +50,7 @@ import { computed, type ComputedRef } from 'vue';
 import { Format } from '../utils/format';
 import { EventsComposable } from '../composables/event-composable';
 import { useCurrentEvent } from '../composables/repository/useCurrentEvent';
+import { useCurrentOrder } from '../composables/repository/useCurrentOrder';
 import { useTranslation } from '../composables/useTranslation';
 import { useNavigation } from '../composables/useNavigation';
 import HeaderComponent from '../components/HeaderComponent.vue';
@@ -127,6 +128,7 @@ function deriveEventStatus(start: string, end: string): 'scheduled' | 'in_progre
 
 async function openEvent(event: EventItem): Promise<void> {
     await useCurrentEvent.setEvent(event.id);
+    useCurrentOrder.clearOrder();
     navigateTo(DefaultLayout, { frame: 'root-frame', clearHistory: true });
 }
 </script>

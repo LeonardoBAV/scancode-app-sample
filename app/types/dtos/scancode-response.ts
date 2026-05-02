@@ -36,6 +36,9 @@ export interface OrderDTO {
     event_id: number;
     status: string;
     notes: string | null;
+    /** New (nullable) buyer fields on Order; omitted on older servers. */
+    buyer_name?: string | null;
+    buyer_phone?: string | null;
     client_id: number;
     sales_representative_id: number;
     payment_method_id: number;

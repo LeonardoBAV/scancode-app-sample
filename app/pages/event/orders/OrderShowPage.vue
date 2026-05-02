@@ -139,7 +139,7 @@ const clientFantasyName: ComputedRef<string> = computed(() => {
 });
 
 const buyerName: ComputedRef<string> = computed(() => {
-    const raw = currentOrderRef.value?.client?.buyer_name;
+    const raw = currentOrderRef.value?.buyer_name;
     return typeof raw === 'string' ? raw.trim() : '';
 });
 

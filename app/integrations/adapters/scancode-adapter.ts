@@ -52,6 +52,8 @@ export class ScancodeAdapter {
                     event_id: orderDto.event_id,
                     status: orderDto.status,
                     notes: orderDto.notes,
+                    buyer_name: ScancodeAdapter.nullableBuyerField(orderDto.buyer_name),
+                    buyer_phone: ScancodeAdapter.nullableBuyerField(orderDto.buyer_phone),
                     client_id: orderDto.client_id,
                     sales_representative_id: orderDto.sales_representative_id,
                     payment_method_id: orderDto.payment_method_id,

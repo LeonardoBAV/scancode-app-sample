@@ -8,8 +8,9 @@ import type { SQLiteDatabase, SqliteRow } from '@nativescript-community/sqlite/s
  * v4: orders — ensure is_sync (INTEGER); migrate from legacy synced_at when present.
  * v5: orders — allow NULL payment_method_id.
  * v6: clients — buyer_name, buyer_contact (nullable TEXT).
+ * v7: orders — buyer_name, buyer_phone (nullable TEXT).
  */
-const SCHEMA_VERSION: number = 6;
+const SCHEMA_VERSION: number = 7;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const startVersion: number = db.getVersion();
@@ -40,6 +41,10 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
 
     if (startVersion < 6) {
         await migrateToV6ClientsBuyerFields(db);
+    }
+
+    if (startVersion < 7) {
+        await migrateToV7OrdersBuyerFields(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -162,6 +167,8 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
             event_id                  INTEGER NOT NULL REFERENCES events(id),
             status                    TEXT    NOT NULL DEFAULT 'Pending',
             notes                     TEXT,
+            buyer_name                TEXT,
+            buyer_phone               TEXT,
             client_id                 INTEGER NOT NULL REFERENCES clients(id),
             sales_representative_id   INTEGER NOT NULL,
             payment_method_id         INTEGER REFERENCES payment_methods(id),
@@ -427,5 +434,21 @@ async function migrateToV6ClientsBuyerFields(db: SQLiteDatabase): Promise<void> 
     }
     if (!columnNames.has('buyer_contact')) {
         await db.execute('ALTER TABLE clients ADD COLUMN buyer_contact TEXT');
+    }
+}
+
+/** Adds nullable buyer fields on orders (API-aligned). */
+async function migrateToV7OrdersBuyerFields(db: SQLiteDatabase): Promise<void> {
+    const columns = await db.select('PRAGMA table_info(orders)');
+    if (columns.length === 0) {
+        return;
+    }
+
+    const columnNames = new Set(columns.map((row: SqliteRow) => String(row.name)));
+    if (!columnNames.has('buyer_name')) {
+        await db.execute('ALTER TABLE orders ADD COLUMN buyer_name TEXT');
+    }
+    if (!columnNames.has('buyer_phone')) {
+        await db.execute('ALTER TABLE orders ADD COLUMN buyer_phone TEXT');
     }
 }

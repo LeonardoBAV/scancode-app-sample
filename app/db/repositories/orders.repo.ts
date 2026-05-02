@@ -47,6 +47,8 @@ export class OrdersRepository extends RepositoryBase {
         'event_id',
         'status',
         'notes',
+        'buyer_name',
+        'buyer_phone',
         'client_id',
         'sales_representative_id',
         'payment_method_id',
@@ -158,10 +160,14 @@ export class OrdersRepository extends RepositoryBase {
         payment_method_id: number | null;
         status?: string;
         notes?: string | null;
+        buyer_name?: string | null;
+        buyer_phone?: string | null;
     }): Promise<Order> {
         const now: string = new Date().toISOString();
         const status: string = input.status ?? 'Open';
         const notes: string | null = input.notes ?? null;
+        const buyerName: string | null = input.buyer_name ?? null;
+        const buyerPhone: string | null = input.buyer_phone ?? null;
 
         await OrdersRepository.execute(
             `
@@ -170,19 +176,23 @@ export class OrdersRepository extends RepositoryBase {
                     event_id,
                     status,
                     notes,
+                    buyer_name,
+                    buyer_phone,
                     client_id,
                     sales_representative_id,
                     payment_method_id,
                     is_sync,
                     created_at,
                     updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
                 null,
                 input.event_id,
                 status,
                 notes,
+                buyerName,
+                buyerPhone,
                 input.client_id,
                 input.sales_representative_id,
                 input.payment_method_id,

@@ -65,7 +65,7 @@
                     </GridLayout>
                 </GridLayout>
                 <GridLayout v-if="orderStatus === 'Open'" rows="auto" columns="*, *" columnSpacing="12">
-                    <Button row="0" col="0" :text="$t('pages.orderShow.signature')" class="btn-primary" @tap="onFinish" />
+                    <Button row="0" col="0" :text="$t('pages.orderShow.finish')" class="btn-primary" @tap="onFinish" />
                     <Button row="0" col="1" :text="Icons.lucide('printer')" class="lucide btn-secondary" @tap="onPrint" />
                 </GridLayout>
                 <GridLayout v-else rows="auto" columns="*, auto">
@@ -83,11 +83,14 @@ import { Format } from '../../../utils/format';
 import { Icons } from '../../../utils/icons';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
+import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import { PaymentMethodsComposable } from '../../../composables/payment-methods-composable';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderClientShowPage from './OrderClientShowPage.vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
-import OrderSignPage from './OrderSignPage.vue';
+import type { Order } from '../../../types/schema/order';
+import OrderListPage from './OrderListPage.vue';
 
 
 // --- Component logic ---
@@ -165,7 +168,12 @@ function onPrint(): void {
     console.log('Print tapped');
 }
 
-function onFinish(): void {
-    navigateTo(OrderSignPage);
+async function onFinish(): Promise<void> {
+    const order: Order = currentOrderRef.value as Order;
+    const id = order.id as number;
+    
+    await OrdersRepository.updateStatus(id, 'Closed');
+    await useCurrentEvent.setEvent(order.event_id);
+    navigateTo(OrderListPage, { clearHistory: true });
 }
 </script>

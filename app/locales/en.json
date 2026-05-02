@@ -247,6 +247,7 @@
       "observation": "Observation",
       "observationHint": "Tap to add observation...",
       "finish": "Finish",
+      "reopen": "Reopen",
       "signature": "Signature",
       "print": "Print",
       "statusOpen": "Open",

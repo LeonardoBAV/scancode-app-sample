@@ -247,6 +247,7 @@
       "observation": "Observação",
       "observationHint": "Toque para adicionar observação...",
       "finish": "Finalizar",
+      "reopen": "Reabrir",
       "signature": "Assinatura",
       "statusOpen": "Aberto",
       "statusCompleted": "Finalizado"

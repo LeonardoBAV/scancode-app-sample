@@ -64,19 +64,16 @@
                         <Label col="1" :text="synced ? $t('pages.orderList.synced') : $t('pages.orderList.notSynced')" class="text-sm" :class="synced ? 'text-success' : 'text-warning'" verticalAlignment="center" />
                     </GridLayout>
                 </GridLayout>
-                <GridLayout v-if="orderStatus === 'Open'" rows="auto" columns="*, *" columnSpacing="12">
+                <GridLayout rows="auto" columns="*, *" columnSpacing="12">
                     <Button
                         row="0"
                         col="0"
-                        :text="$t('pages.orderShow.finish')"
-                        :class="canFinalizeOrder ? 'btn-primary' : 'btn-primary opacity-50'"
-                        :isEnabled="canFinalizeOrder"
-                        @tap="onFinish"
+                        :text="orderStatus === 'Open' ? $t('pages.orderShow.finish') : $t('pages.orderShow.reopen')"
+                        :class="primaryFooterButtonClass"
+                        :isEnabled="primaryFooterButtonEnabled"
+                        @tap="onPrimaryFooterTap"
                     />
                     <Button row="0" col="1" :text="Icons.lucide('printer')" class="lucide btn-secondary" @tap="onPrint" />
-                </GridLayout>
-                <GridLayout v-else rows="auto" columns="*, auto">
-                    <Button row="0" col="1" :text="Icons.lucide('printer')" class="lucide btn-icon bg-secondary text-secondary-foreground" @tap="onPrint" />
                 </GridLayout>
             </StackLayout>
         </GridLayout>
@@ -145,6 +142,17 @@ const paymentMethodName: ComputedRef<string> = computed(() => {
 
 const canFinalizeOrder: ComputedRef<boolean> = computed(() => currentOrderRef.value?.payment_method_id != null);
 
+const primaryFooterButtonClass: ComputedRef<string> = computed(() => {
+    if (orderStatus.value === 'Open') {
+        return canFinalizeOrder.value ? 'btn-primary' : 'btn-primary opacity-50';
+    }
+    return 'btn-primary';
+});
+
+const primaryFooterButtonEnabled: ComputedRef<boolean> = computed(() =>
+    orderStatus.value === 'Open' ? canFinalizeOrder.value : true,
+);
+
 const clientFantasyName: ComputedRef<string> = computed(() => {
     const c = currentOrderRef.value?.client;
     return c?.fantasy_name?.trim() || c?.corporate_name?.trim() || '';
@@ -175,6 +183,14 @@ function goToClientShow(): void {
 
 function onPrint(): void {
     console.log('Print tapped');
+}
+
+function onPrimaryFooterTap(): void {
+    if (orderStatus.value === 'Open') {
+        void onFinish();
+        return;
+    }
+    // Reabrir: ação a definir
 }
 
 async function onFinish(): Promise<void> {

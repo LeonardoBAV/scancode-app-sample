@@ -219,13 +219,16 @@ export class OrdersRepository extends RepositoryBase {
 
     public static async updateClientId(orderId: number, clientId: number): Promise<void> {
         const now: string = new Date().toISOString();
+        const [client] = await ClientsRepository.findManyByIds([clientId]);
+        const buyerName: string | null = client?.buyer_name ?? null;
+        const buyerPhone: string | null = client?.buyer_contact ?? null;
         await OrdersRepository.execute(
             `
                 UPDATE orders
-                SET client_id = ?, updated_at = ?, is_sync = 0
+                SET client_id = ?, buyer_name = ?, buyer_phone = ?, updated_at = ?, is_sync = 0
                 WHERE id = ?
             `,
-            [clientId, now, orderId],
+            [clientId, buyerName, buyerPhone, now, orderId],
         );
     }
 

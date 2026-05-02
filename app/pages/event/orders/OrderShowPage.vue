@@ -138,7 +138,10 @@ const clientFantasyName: ComputedRef<string> = computed(() => {
     return c?.fantasy_name?.trim() || c?.corporate_name?.trim() || '';
 });
 
-const buyerName: ComputedRef<string> = computed(() => '');
+const buyerName: ComputedRef<string> = computed(() => {
+    const raw = currentOrderRef.value?.client?.buyer_name;
+    return typeof raw === 'string' ? raw.trim() : '';
+});
 
 watch(
     () => currentOrderRef.value?.notes,

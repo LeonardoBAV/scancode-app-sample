@@ -5,4 +5,7 @@ export interface ClientFormSchema {
     email: string;
     fantasy_name: string;
     phone: string;
+    /** Raw input; validated output is `string | null`. */
+    buyer_name: string;
+    buyer_contact: string;
 }

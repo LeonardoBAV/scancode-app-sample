@@ -63,6 +63,12 @@ class UseClientFormValidation {
         if (key === 'carrier' && issue.code === 'too_big') {
             return String(t('pages.clientForm.errors.carrierMax'));
         }
+        if (key === 'buyer_name' && issue.code === 'too_big') {
+            return String(t('pages.clientForm.errors.buyerNameMax'));
+        }
+        if (key === 'buyer_contact' && issue.code === 'too_big') {
+            return String(t('pages.clientForm.errors.buyerContactMax'));
+        }
 
         return String(t('pages.clientForm.errors.generic'));
     }

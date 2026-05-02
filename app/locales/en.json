@@ -96,9 +96,13 @@
         "fantasyNameMax": "Trade name must be at most 255 characters.",
         "generic": "Check the fields and try again.",
         "invalidEmail": "Enter a valid email address.",
-        "phoneMax": "Phone must be at most 255 characters."
+        "phoneMax": "Phone must be at most 255 characters.",
+        "buyerNameMax": "Buyer name must be at most 255 characters.",
+        "buyerContactMax": "Buyer contact must be at most 255 characters."
       },
       "carrier": "Carrier",
+      "buyerNameHint": "Optional",
+      "buyerContactHint": "Phone or other contact (optional)",
       "fantasyNameHint": "Trade name",
       "corporateNameHint": "Corporate name",
       "cpfCnpjHint": "CPF or CNPJ",

@@ -24,13 +24,23 @@
             </StackLayout>
             <StackLayout class="bg-border mx-4" style="height: 1" />
             <StackLayout class="p-4">
+                <Label :text="$t('pages.orderClientShow.email')" class="text-xs text-muted-foreground mb-1" />
+                <Label :text="displayOrDash(client?.email)" class="text-base font-semibold text-card-foreground" textWrap="true" />
+            </StackLayout>
+            <StackLayout class="bg-border mx-4" style="height: 1" />
+            <StackLayout class="p-4">
+                <Label :text="$t('pages.orderClientShow.phone')" class="text-xs text-muted-foreground mb-1" />
+                <Label :text="displayOrDash(client?.phone)" class="text-base font-semibold text-card-foreground" textWrap="true" />
+            </StackLayout>
+            <StackLayout class="bg-border mx-4" style="height: 1" />
+            <StackLayout class="p-4">
                 <Label :text="$t('pages.orderClientShow.buyerName')" class="text-xs text-muted-foreground mb-1" />
-                <Label :text="client?.corporate_name ?? '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                <Label :text="buyerNameLabel" class="text-base font-semibold text-card-foreground" textWrap="true" />
             </StackLayout>
             <StackLayout class="bg-border mx-4" style="height: 1" />
             <StackLayout class="p-4">
                 <Label :text="$t('pages.orderClientShow.buyerContact')" class="text-xs text-muted-foreground mb-1" />
-                <Label :text="contactLabel" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                <Label :text="buyerContactLabel" class="text-base font-semibold text-card-foreground" textWrap="true" />
             </StackLayout>
         </StackLayout>
     </StackLayout>
@@ -48,18 +58,12 @@ const props = defineProps<{
     client: Client | null;
 }>();
 
-const contactLabel: ComputedRef<string> = computed(() => {
-    const c = props.client;
-    if (!c) {
-        return '—';
-    }
-    const parts: string[] = [];
-    if (c.email) {
-        parts.push(c.email);
-    }
-    if (c.phone) {
-        parts.push(c.phone);
-    }
-    return parts.length > 0 ? parts.join(' · ') : '—';
-});
+function displayOrDash(value: string | null | undefined): string {
+    const t: string = (value ?? '').trim();
+    return t !== '' ? t : '—';
+}
+
+const buyerNameLabel: ComputedRef<string> = computed(() => displayOrDash(props.client?.buyer_name));
+
+const buyerContactLabel: ComputedRef<string> = computed(() => displayOrDash(props.client?.buyer_contact));
 </script>

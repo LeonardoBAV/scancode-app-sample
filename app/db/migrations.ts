@@ -7,8 +7,9 @@ import type { SQLiteDatabase, SqliteRow } from '@nativescript-community/sqlite/s
  * v3: UNIQUE indexes on products.sku and products.barcode.
  * v4: orders — ensure is_sync (INTEGER); migrate from legacy synced_at when present.
  * v5: orders — allow NULL payment_method_id.
+ * v6: clients — buyer_name, buyer_contact (nullable TEXT).
  */
-const SCHEMA_VERSION: number = 5;
+const SCHEMA_VERSION: number = 6;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const startVersion: number = db.getVersion();
@@ -35,6 +36,10 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
 
     if (startVersion < 5) {
         await migrateToV5OrdersNullablePaymentMethod(db);
+    }
+
+    if (startVersion < 6) {
+        await migrateToV6ClientsBuyerFields(db);
     }
 
     await db.setVersion(SCHEMA_VERSION);
@@ -84,6 +89,8 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
             email            TEXT,
             phone            TEXT,
             carrier          TEXT,
+            buyer_name       TEXT,
+            buyer_contact    TEXT,
             created_at       TEXT    NOT NULL DEFAULT '',
             updated_at      TEXT    NOT NULL
         );
@@ -232,11 +239,22 @@ async function migrateToV2AutoincrementPullTables(db: SQLiteDatabase): Promise<v
                 email            TEXT,
                 phone            TEXT,
                 carrier          TEXT,
+                buyer_name       TEXT,
+                buyer_contact    TEXT,
                 created_at       TEXT    NOT NULL DEFAULT '',
                 updated_at       TEXT    NOT NULL
             );
         `);
-        await db.execute('INSERT INTO clients__ac SELECT * FROM clients;');
+        await db.execute(`
+            INSERT INTO clients__ac (
+                id, remote_id, is_sync, cpf_cnpj, corporate_name, fantasy_name, email, phone, carrier,
+                buyer_name, buyer_contact, created_at, updated_at
+            )
+            SELECT
+                id, remote_id, is_sync, cpf_cnpj, corporate_name, fantasy_name, email, phone, carrier,
+                NULL, NULL, created_at, updated_at
+            FROM clients;
+        `);
         await db.execute('DROP TABLE clients;');
         await db.execute('ALTER TABLE clients__ac RENAME TO clients;');
         await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_clients_cpf_cnpj ON clients(cpf_cnpj);');
@@ -394,4 +412,20 @@ async function migrateToV5OrdersNullablePaymentMethod(db: SQLiteDatabase): Promi
     });
 
     await db.execute('PRAGMA foreign_keys = ON;');
+}
+
+/** Adds nullable buyer fields on clients (API-aligned). */
+async function migrateToV6ClientsBuyerFields(db: SQLiteDatabase): Promise<void> {
+    const columns = await db.select('PRAGMA table_info(clients)');
+    if (columns.length === 0) {
+        return;
+    }
+
+    const columnNames = new Set(columns.map((row: SqliteRow) => String(row.name)));
+    if (!columnNames.has('buyer_name')) {
+        await db.execute('ALTER TABLE clients ADD COLUMN buyer_name TEXT');
+    }
+    if (!columnNames.has('buyer_contact')) {
+        await db.execute('ALTER TABLE clients ADD COLUMN buyer_contact TEXT');
+    }
 }

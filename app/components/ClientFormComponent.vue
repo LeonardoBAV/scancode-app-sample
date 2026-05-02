@@ -73,6 +73,29 @@
                         />
                         <Label v-if="fieldErrors.carrier" :text="fieldErrors.carrier" textWrap="true" class="text-xs text-destructive mt-1" />
                     </StackLayout>
+                    <StackLayout class="bg-border mx-4" style="height: 1" />
+                    <StackLayout class="p-4">
+                        <Label :text="$t('pages.orderClientShow.buyerName')" class="text-xs text-muted-foreground mb-1" />
+                        <TextField
+                            v-model="buyerName"
+                            :hint="$t('pages.clientForm.buyerNameHint')"
+                            :class="inputFieldClass('buyer_name')"
+                            placeholderColor="#a1a1aa"
+                        />
+                        <Label v-if="fieldErrors.buyer_name" :text="fieldErrors.buyer_name" textWrap="true" class="text-xs text-destructive mt-1" />
+                    </StackLayout>
+                    <StackLayout class="bg-border mx-4" style="height: 1" />
+                    <StackLayout class="p-4">
+                        <Label :text="$t('pages.orderClientShow.buyerContact')" class="text-xs text-muted-foreground mb-1" />
+                        <TextField
+                            v-model="buyerContact"
+                            :hint="$t('pages.clientForm.buyerContactHint')"
+                            :class="inputFieldClass('buyer_contact')"
+                            keyboardType="phone"
+                            placeholderColor="#a1a1aa"
+                        />
+                        <Label v-if="fieldErrors.buyer_contact" :text="fieldErrors.buyer_contact" textWrap="true" class="text-xs text-destructive mt-1" />
+                    </StackLayout>
                 </StackLayout>
             </StackLayout>
         </ScrollView>
@@ -108,6 +131,8 @@ const cpfCnpj: Ref<string> = ref('');
 const email: Ref<string> = ref('');
 const phone: Ref<string> = ref('');
 const carrier: Ref<string> = ref('');
+const buyerName: Ref<string> = ref('');
+const buyerContact: Ref<string> = ref('');
 
 watch(
     () => props.client,
@@ -131,6 +156,8 @@ async function onSave(): Promise<void> {
         email: validated.email,
         phone: validated.phone,
         carrier: validated.carrier,
+        buyer_name: validated.buyer_name,
+        buyer_contact: validated.buyer_contact,
         is_sync: false,
     };
     emit('save', client);
@@ -143,6 +170,8 @@ function applyClientToFields(client: Client): void {
     email.value = client.email ?? '';
     phone.value = client.phone ?? '';
     carrier.value = client.carrier ?? '';
+    buyerName.value = client.buyer_name ?? '';
+    buyerContact.value = client.buyer_contact ?? '';
 }
 
 async function validateForm(): Promise<ClientFormFields | null> {
@@ -154,6 +183,8 @@ async function validateForm(): Promise<ClientFormFields | null> {
             email: email.value,
             fantasy_name: fantasyName.value,
             phone: phone.value,
+            buyer_name: buyerName.value,
+            buyer_contact: buyerContact.value,
         },
         { ignoreClientId: props.client.id },
     );

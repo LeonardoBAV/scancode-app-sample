@@ -11,6 +11,8 @@ export interface ClientUpdateRequestDTO {
     email: string;
     phone: string;
     carrier: string;
+    buyer_name: string | null;
+    buyer_contact: string | null;
 }
 
 export type ClientCreateRequestDTO = ClientUpdateRequestDTO;

@@ -66,6 +66,9 @@ export interface ClientDTO {
     email: string | null;
     phone: string | null;
     carrier: string | null;
+    /** Present after API supports buyer fields; omitted on older servers. */
+    buyer_name?: string | null;
+    buyer_contact?: string | null;
     created_at: string;
     updated_at: string;
 }

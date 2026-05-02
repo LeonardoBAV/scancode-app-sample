@@ -19,6 +19,8 @@ export class ClientsRepository extends RepositoryBase {
         'email',
         'phone',
         'carrier',
+        'buyer_name',
+        'buyer_contact',
         'created_at',
         'updated_at',
     ];
@@ -78,6 +80,8 @@ export class ClientsRepository extends RepositoryBase {
         return {
             ...row,
             is_sync: ClientsRepository.readSqliteBool(row.is_sync as unknown),
+            buyer_name: row.buyer_name ?? null,
+            buyer_contact: row.buyer_contact ?? null,
         };
     }
 

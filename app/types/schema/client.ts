@@ -8,6 +8,8 @@ export interface Client {
     email: string;
     phone: string;
     carrier: string;
+    buyer_name: string | null;
+    buyer_contact: string | null;
     created_at: string;
     updated_at: string;
 }

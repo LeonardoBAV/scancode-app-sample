@@ -105,7 +105,11 @@ const navigateTo = globals?.$navigateTo as (target: unknown, options?: Record<st
 const orderId: Ref<string> = ref('ORD-NEW');
 const observation: Ref<string> = ref('');
 
-const clientFantasyName: ComputedRef<string> = computed(() => orderCreateClientFantasyName.value);
+const currentOrderRef = useCurrentOrder.getOrder();
+const clientFantasyName: ComputedRef<string> = computed(() => {
+    const c = currentOrderRef.value?.client;
+    return c?.fantasy_name?.trim() || c?.corporate_name?.trim() || '';
+});
 ```
 
 ## Internacionalização (i18n)

@@ -22,7 +22,6 @@
 import { computed, type ComputedRef, ref, type Ref } from 'vue';
 import type { PaymentMethod } from '../../../types/schema/payment-method';
 import { PaymentMethodsComposable } from '../../../composables/payment-methods-composable';
-import { orderCreatePaymentMethodName } from './order-create-state';
 import { useNavigation } from '../../../composables/useNavigation';
 import PaymentMethodListComponent from '../../../components/PaymentMethodListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
@@ -45,7 +44,7 @@ function onSelectPaymentMethod(paymentMethod: PaymentMethod): void {
 
 function onConfirm(): void {
     if (!selectedPayment.value) return;
-    orderCreatePaymentMethodName.value = selectedPayment.value.name;
+    // TODO: persist selectedPayment.value.id on the current order (e.g. OrdersRepository) so OrderShowPage reflects it.
     void navigateBack();
 }
 </script>

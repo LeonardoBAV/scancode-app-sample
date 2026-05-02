@@ -20,6 +20,16 @@ class ClientFormValidation {
         email: this.trimmed.pipe(z.union([z.literal(''), z.email().max(255)])),
         fantasy_name: this.trimmed.pipe(z.string().max(255)),
         phone: this.trimmed.pipe(z.string().max(255)),
+        buyer_name: z
+            .string()
+            .transform((s: string) => s.trim())
+            .pipe(z.string().max(255))
+            .transform((s: string) => (s === '' ? null : s)),
+        buyer_contact: z
+            .string()
+            .transform((s: string) => s.trim())
+            .pipe(z.string().max(255))
+            .transform((s: string) => (s === '' ? null : s)),
     });
 
 }

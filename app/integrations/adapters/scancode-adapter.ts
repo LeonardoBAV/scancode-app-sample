@@ -87,6 +87,8 @@ export class ScancodeAdapter {
                 email: ScancodeAdapter.nullableString(dto.email),
                 phone: ScancodeAdapter.nullableString(dto.phone),
                 carrier: ScancodeAdapter.nullableString(dto.carrier),
+                buyer_name: ScancodeAdapter.nullableBuyerField(dto.buyer_name),
+                buyer_contact: ScancodeAdapter.nullableBuyerField(dto.buyer_contact),
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
             }));
@@ -104,6 +106,8 @@ export class ScancodeAdapter {
                 email: client.email.trim(),
                 fantasy_name: client.fantasy_name.trim(),
                 phone: client.phone.trim(),
+                buyer_name: ScancodeAdapter.toApiNullableString(client.buyer_name),
+                buyer_contact: ScancodeAdapter.toApiNullableString(client.buyer_contact),
             };
             const response = await scancodeApi.postClient(payload);
             const dto = response.data;
@@ -117,6 +121,8 @@ export class ScancodeAdapter {
                 email: ScancodeAdapter.nullableString(dto.email),
                 fantasy_name: ScancodeAdapter.nullableString(dto.fantasy_name),
                 phone: ScancodeAdapter.nullableString(dto.phone),
+                buyer_name: ScancodeAdapter.nullableBuyerField(dto.buyer_name),
+                buyer_contact: ScancodeAdapter.nullableBuyerField(dto.buyer_contact),
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
             };
@@ -134,6 +140,8 @@ export class ScancodeAdapter {
                 email: client.email.trim(),
                 fantasy_name: client.fantasy_name.trim(),
                 phone: client.phone.trim(),
+                buyer_name: ScancodeAdapter.toApiNullableString(client.buyer_name),
+                buyer_contact: ScancodeAdapter.toApiNullableString(client.buyer_contact),
             };
             const response = await scancodeApi.patchClient(client.remote_id as number, payload);
             const dto = response.data;
@@ -147,6 +155,8 @@ export class ScancodeAdapter {
                 email: ScancodeAdapter.nullableString(dto.email),
                 fantasy_name: ScancodeAdapter.nullableString(dto.fantasy_name),
                 phone: ScancodeAdapter.nullableString(dto.phone),
+                buyer_name: ScancodeAdapter.nullableBuyerField(dto.buyer_name),
+                buyer_contact: ScancodeAdapter.nullableBuyerField(dto.buyer_contact),
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
             };
@@ -350,5 +360,22 @@ export class ScancodeAdapter {
 
     private static nullableString(value: string | null | undefined): string {
         return value ?? '';
+    }
+
+    /** API / local `string | null` for buyer fields; empty or whitespace → null. */
+    private static nullableBuyerField(value: string | null | undefined): string | null {
+        if (value == null) {
+            return null;
+        }
+        const trimmed: string = value.trim();
+        return trimmed === '' ? null : trimmed;
+    }
+
+    private static toApiNullableString(value: string | null): string | null {
+        if (value == null) {
+            return null;
+        }
+        const trimmed: string = value.trim();
+        return trimmed === '' ? null : trimmed;
     }
 }

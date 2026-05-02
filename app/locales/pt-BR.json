@@ -96,9 +96,13 @@
         "fantasyNameMax": "Nome fantasia deve ter no máximo 255 caracteres.",
         "generic": "Verifique os campos e tente novamente.",
         "invalidEmail": "Informe um e-mail válido.",
-        "phoneMax": "Telefone deve ter no máximo 255 caracteres."
+        "phoneMax": "Telefone deve ter no máximo 255 caracteres.",
+        "buyerNameMax": "Nome do comprador deve ter no máximo 255 caracteres.",
+        "buyerContactMax": "Contato do comprador deve ter no máximo 255 caracteres."
       },
       "carrier": "Transportadora",
+      "buyerNameHint": "Opcional",
+      "buyerContactHint": "Telefone ou outro contato (opcional)",
       "fantasyNameHint": "Nome fantasia",
       "corporateNameHint": "Razão social",
       "cpfCnpjHint": "CPF ou CNPJ",

@@ -34,6 +34,8 @@ const clientDraft: Ref<Client> = ref<Client>({
     email: '',
     phone: '',
     carrier: '',
+    buyer_name: null,
+    buyer_contact: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
 });

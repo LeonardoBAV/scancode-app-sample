@@ -29,13 +29,12 @@ import OrderShowPage from './OrderShowPage.vue';
 // --- Component logic ---
 const props = withDefaults(
     defineProps<{
-        targetPage: 'back' | 'OrderShowPage';
-        orderId?: string;
+        originPage: 'OrderListPage' | 'OrderClientShowPage';
     }>(),
-    { targetPage: 'OrderShowPage', orderId: undefined },
+    { originPage: 'OrderListPage' },
 );
 
-const { navigateTo, navigateBack } = useNavigation();
+const { navigateTo } = useNavigation();
 
 const clientsFromStore = ClientsComposable.getList();
 
@@ -52,19 +51,10 @@ function onSelectClient(client: Client): void {
     selectedClient.value = selectedClient.value?.id === client.id ? null : client;
 }
 
-function onClientConfirmed(): void {
-    if (props.targetPage === 'back') {
-        void navigateBack();
-    } else {
-        navigateTo(OrderShowPage, props.orderId ? { props: { orderId: props.orderId } } : undefined);
-    }
-}
-
 async function onConfirm(): Promise<void> {
     if (!selectedClient.value) return;
 
-    // When coming from "New order" flow (no orderId), create the order first.
-    if (props.targetPage === 'OrderShowPage' && !props.orderId) {
+    if (props.originPage === 'OrderListPage') {
         const eventId: number | undefined = useCurrentEvent.getEvent().value?.id;
         const clientId: number | null | undefined = selectedClient.value.id;
 
@@ -78,9 +68,16 @@ async function onConfirm(): Promise<void> {
         });
 
         await useCurrentOrder.setOrder(created.id as number);
-        navigateTo(OrderShowPage, { props: { orderId: String(created.id) } });
+        navigateTo(OrderShowPage);
+        return;
     }
 
-    onClientConfirmed();
+    const currentOrder = useCurrentOrder.getOrder().value;
+    const orderId = currentOrder?.id;
+    if (typeof orderId !== 'number') return;
+
+    await OrdersRepository.updateClientId(orderId, selectedClient.value.id as number);
+    await useCurrentOrder.setOrder(orderId);
+    navigateTo(OrderShowPage);
 }
 </script>

@@ -10,27 +10,27 @@
                         <!-- Client details -->
                         <StackLayout class="p-4">
                             <Label :text="$t('pages.orderClientShow.fantasyName')" class="text-xs text-muted-foreground mb-1" />
-                            <Label :text="client.fantasy_name || '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                            <Label :text="client?.fantasy_name || '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
                         </StackLayout>
                         <StackLayout class="bg-border mx-4" style="height: 1" />
                         <StackLayout class="p-4">
                             <Label :text="$t('pages.orderClientShow.corporateName')" class="text-xs text-muted-foreground mb-1" />
-                            <Label :text="client.corporate_name || '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                            <Label :text="client?.corporate_name || '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
                         </StackLayout>
                         <StackLayout class="bg-border mx-4" style="height: 1" />
                         <StackLayout class="p-4">
                             <Label :text="$t('pages.orderClientShow.cpfCnpj')" class="text-xs text-muted-foreground mb-1" />
-                            <Label :text="Format.formatCPFCNPJ(client.cpf_cnpj)" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                            <Label :text="client?.cpf_cnpj ? Format.formatCPFCNPJ(client.cpf_cnpj) : '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
                         </StackLayout>
                         <StackLayout class="bg-border mx-4" style="height: 1" />
                         <StackLayout class="p-4">
                             <Label :text="$t('pages.orderClientShow.email')" class="text-xs text-muted-foreground mb-1" />
-                            <Label :text="client.email || '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                            <Label :text="client?.email || '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
                         </StackLayout>
                         <StackLayout class="bg-border mx-4" style="height: 1" />
                         <StackLayout class="p-4">
                             <Label :text="$t('pages.orderClientShow.phone')" class="text-xs text-muted-foreground mb-1" />
-                            <Label :text="client.phone || '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
+                            <Label :text="client?.phone || '—'" class="text-base font-semibold text-card-foreground" textWrap="true" />
                         </StackLayout>
                         <StackLayout class="bg-border mx-4" style="height: 1" />
                         <!-- Buyer section -->
@@ -54,12 +54,11 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import { orderCreateSelectedClient, orderCreateBuyerName, orderCreateBuyerContact } from './order-create-state';
 import { Format } from '../../../utils/format';
-import { computed } from 'vue';
-import type { Client } from '../../../types/schema/client';
+import { computed, ref, type Ref } from 'vue';
 import type { ComputedRef } from 'vue';
 import { useNavigation } from '../../../composables/useNavigation';
+import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderSelectClientPage from './OrderSelectClientPage.vue';
 
@@ -67,15 +66,16 @@ import OrderSelectClientPage from './OrderSelectClientPage.vue';
 // --- Component logic ---
 const { navigateTo } = useNavigation();
 
-const client: ComputedRef<Client> = computed(() => orderCreateSelectedClient.value);
+const currentOrderRef = useCurrentOrder.getOrder();
+const client = computed(() => currentOrderRef.value?.client ?? null);
 
-const buyerName = orderCreateBuyerName;
-const buyerContact = orderCreateBuyerContact;
+const buyerName: Ref<string> = ref('N/A');
+const buyerContact: Ref<string> = ref('N/A');
 
 
 function goToClientList(): void {
     navigateTo(OrderSelectClientPage, {
-        props: { targetPage: 'back' },
+        props: { originPage: 'OrderClientShowPage' },
         backstackVisible: false,
     });
 }

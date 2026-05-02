@@ -2,7 +2,7 @@
     <Page actionBarHidden="true">
         <GridLayout rows="auto, *, auto" class="bg-background">
 
-            <HeaderComponent row="0" :title="orderId" />
+            <HeaderComponent row="0" :title="headerTitle" />
 
             <!-- Content -->
             <ScrollView row="1">
@@ -78,11 +78,12 @@
 
 <script setup lang="ts">
 // --- Imports ---
-import { orderCreateClientFantasyName, orderCreateBuyerName } from './order-create-state';
-import { ref, computed, type ComputedRef, type Ref } from 'vue';
+import { ref, computed, watch, type ComputedRef, type Ref } from 'vue';
 import { Format } from '../../../utils/format';
 import { Icons } from '../../../utils/icons';
 import { useNavigation } from '../../../composables/useNavigation';
+import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import { PaymentMethodsComposable } from '../../../composables/payment-methods-composable';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderClientShowPage from './OrderClientShowPage.vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
@@ -90,25 +91,63 @@ import OrderSignPage from './OrderSignPage.vue';
 
 
 // --- Component logic ---
-const props = withDefaults(
-    defineProps<{
-        orderId?: string;
-    }>(),
-    { orderId: undefined },
-);
-
-const displayOrderValue: string = Format.formatCurrencyBR(1250);
-const displayTotalItems: string = '5 itens';
 const { navigateTo } = useNavigation();
 
-const orderId: Ref<string> = ref(props.orderId ?? 'ORD-NEW');
 const observation: Ref<string> = ref('');
-const orderStatus: Ref<'Open' | 'Completed'> = ref('Open');
-const synced: Ref<boolean> = ref(false);
-const paymentMethodName: Ref<string> = ref('PIX');
 
-const clientFantasyName: ComputedRef<string> = computed(() => orderCreateClientFantasyName.value);
-const buyerName: ComputedRef<string> = computed(() => orderCreateBuyerName.value);
+const currentOrderRef = useCurrentOrder.getOrder();
+
+const headerTitle: ComputedRef<string> = computed(() => {
+    const id = currentOrderRef.value?.id;
+    if (typeof id === 'number') return '#' + String(id);
+    return '#—';
+});
+
+const orderItemsCount: ComputedRef<number> = computed(() => currentOrderRef.value?.order_items?.length ?? 0);
+
+const orderTotalValue: ComputedRef<number> = computed(() => {
+    const items = currentOrderRef.value?.order_items ?? [];
+    return items.reduce((sum, line) => sum + line.price * line.qty, 0);
+});
+
+const displayOrderValue: ComputedRef<string> = computed(() => Format.formatCurrencyBR(orderTotalValue.value));
+
+const displayTotalItems: ComputedRef<string> = computed(() => {
+    const n = orderItemsCount.value;
+    // Mantém o texto atual simples; se quiser i18n depois, ajustamos.
+    return `${n} itens`;
+});
+
+const orderStatus: ComputedRef<'Open' | 'Completed'> = computed(() => {
+    const raw = currentOrderRef.value?.status?.trim().toLowerCase() ?? '';
+    if (raw === 'open' || raw === 'aberto') return 'Open';
+    return 'Completed';
+});
+
+const synced: ComputedRef<boolean> = computed(() => currentOrderRef.value?.is_sync ?? false);
+
+const paymentMethodName: ComputedRef<string> = computed(() => {
+    const paymentMethodId = currentOrderRef.value?.payment_method_id ?? null;
+    if (!paymentMethodId) return '';
+    const methods = PaymentMethodsComposable.getList().value;
+    return methods.find((m) => m.id === paymentMethodId)?.name ?? '';
+});
+
+const clientFantasyName: ComputedRef<string> = computed(() => {
+    const c = currentOrderRef.value?.client;
+    return c?.fantasy_name?.trim() || c?.corporate_name?.trim() || '';
+});
+
+const buyerName: ComputedRef<string> = computed(() => '');
+
+watch(
+    () => currentOrderRef.value?.notes,
+    (notes) => {
+        // Mantém o TextView controlado localmente, mas inicializa com o valor do pedido.
+        observation.value = notes ?? '';
+    },
+    { immediate: true },
+);
 
 
 function goToPayment(): void {

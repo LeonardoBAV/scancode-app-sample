@@ -207,6 +207,18 @@ export class OrdersRepository extends RepositoryBase {
         return created;
     }
 
+    public static async updateClientId(orderId: number, clientId: number): Promise<void> {
+        const now: string = new Date().toISOString();
+        await OrdersRepository.execute(
+            `
+                UPDATE orders
+                SET client_id = ?, updated_at = ?, is_sync = 0
+                WHERE id = ?
+            `,
+            [clientId, now, orderId],
+        );
+    }
+
     public static async truncate(): Promise<void> {
         await OrdersRepository.truncateTable('orders');
     }

@@ -161,10 +161,10 @@ function goToEvents(): void {
 
 async function onOrderTap(order: OrderListRow): Promise<void> {
     await useCurrentOrder.setOrder(order.id);
-    navigateTo(OrderShowPage, { props: { orderId: String(order.id) } });
+    navigateTo(OrderShowPage);
 }
 
 function onAddNewOrder(): void {
-    navigateTo(OrderSelectClientPage, { props: { targetPage: 'OrderShowPage' as const } });
+    navigateTo(OrderSelectClientPage, { props: { originPage: 'OrderListPage' as const } });
 }
 </script>

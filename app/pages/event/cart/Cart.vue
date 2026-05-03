@@ -72,6 +72,7 @@ import { Format } from '../../../utils/format';
 import type { Product } from '../../../types/schema/product';
 import type { OrderItem } from '../../../types/schema/order-item';
 import { Icons } from '../../../utils/icons';
+import { OrderItemsRepository } from '../../../db/repositories/order-items.repo';
 
 
 // --- Component logic ---
@@ -105,32 +106,84 @@ function closeKeyboard(): void {
 }
 
 function isProductInCart(product: Product): boolean {
-    return cartItems.value.some((c: OrderItem): boolean => c.product_id === product.id);
+    if (product.id == null) {
+        return false;
+    }
+    const productId: number = product.id;
+    return cartItems.value.some((c: OrderItem): boolean => c.product_id === productId);
 }
 
-function removeProductFromCart(product: Product): void {
-    void product;
+async function refreshOrder(): Promise<void> {
+    await useCurrentOrder.refresh();
 }
 
-function addProduct(product: Product): void {
-    void product;
+function getSelectedOrderId(): number {
+    const orderId: number | undefined = orderRef.value?.id ?? undefined;
+    if (orderId == null || !Number.isFinite(orderId) || orderId <= 0) {
+        throw new Error('Order not selected');
+    }
+    return orderId;
+}
+
+async function removeProductFromCart(product: Product): Promise<void> {
+    if (product.id == null) {
+        return;
+    }
+    const productId: number = product.id;
+    const existing: OrderItem | undefined = cartItems.value.find((c: OrderItem): boolean => c.product_id === productId);
+    if (existing == null || existing.id == null) {
+        return;
+    }
+    const orderItemId: number = existing.id;
+    await OrderItemsRepository.deleteById(orderItemId);
+    await refreshOrder();
+}
+
+async function addProduct(product: Product): Promise<void> {
+    const orderId: number = getSelectedOrderId();
+    if (product.id == null) {
+        return;
+    }
+    const productId: number = product.id;
+    const existing: OrderItem | undefined = cartItems.value.find((c: OrderItem): boolean => c.product_id === productId);
+    if (existing?.id != null) {
+        await OrderItemsRepository.setQtyById(existing.id, existing.qty + 1);
+        await refreshOrder();
+        return;
+    }
+    await OrderItemsRepository.createOne({
+        order_id: orderId,
+        product_id: productId,
+        price: product.price,
+        qty: 1,
+        notes: null,
+    });
+    await refreshOrder();
 }
 
 function selecctedProduct(product: Product): void {
-    addProduct(product);
+    void addProduct(product);
 
     closeKeyboard();
     Haptics.vibrateSuccess();
     searchQuery.value = '';
 }
 
-function increaseQty(item: OrderItem): void {
-    item.qty++;
+async function increaseQty(item: OrderItem): Promise<void> {
+    if (item.id == null) {
+        return;
+    }
+    await OrderItemsRepository.setQtyById(item.id, item.qty + 1);
+    await refreshOrder();
 }
 
 async function decreaseQty(item: OrderItem): Promise<void> {
+    if (item.id == null) {
+        return;
+    }
     if (item.qty > 1) {
-        item.qty--;
+        await OrderItemsRepository.setQtyById(item.id, item.qty - 1);
+        await refreshOrder();
         return;
     }
     const confirmed: boolean = await Dialogs.confirm({
@@ -142,13 +195,12 @@ async function decreaseQty(item: OrderItem): Promise<void> {
     if (confirmed) {
         const product: Product | null | undefined = item.product;
         if (product != null) {
-            removeProductFromCart(product);
+            await removeProductFromCart(product);
         }
     }
 }
 
 const orderRef = useCurrentOrder.getOrder();
-console.log(orderRef.value);
 const hasSelectedOrder: ComputedRef<boolean> = computed((): boolean => orderRef.value != null);
 
 const cartItems: ComputedRef<readonly OrderItem[]> = computed((): readonly OrderItem[] => orderRef.value?.order_items ?? []);

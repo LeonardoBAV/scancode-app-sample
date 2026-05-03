@@ -63,7 +63,7 @@ import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
 import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
-import type { Order as SchemaOrder } from '../../../types/schema/order';
+import type { Order as SchemaOrder, OrderStatus } from '../../../types/schema/order';
 import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
@@ -105,18 +105,15 @@ function clientDisplayName(order: DeepReadonly<SchemaOrder>): string {
     return t('pages.orderList.unknownClient');
 }
 
-function orderStatusPresentation(raw: string): { label: string; badgeClass: string } {
-    const lower = raw.trim().toLowerCase();
-    if (lower === 'pending' || lower === 'open' || lower === 'aberto') {
-        return { label: t('pages.orderList.statusOpen'), badgeClass: 'badge-success' };
+function orderStatusPresentation(status: OrderStatus): { label: string; badgeClass: string } {
+    switch (status) {
+        case 'pending':
+            return { label: t('pages.orderList.statusOpen'), badgeClass: 'badge-success' };
+        case 'completed':
+            return { label: t('pages.orderList.statusClosed'), badgeClass: 'badge-secondary' };
+        case 'cancelled':
+            return { label: t('pages.orderList.statusCanceled'), badgeClass: 'badge-destructive' };
     }
-    if (lower === 'completed' || lower === 'closed' || lower === 'fechado') {
-        return { label: t('pages.orderList.statusClosed'), badgeClass: 'badge-secondary' };
-    }
-    if (lower === 'cancelled' || lower === 'canceled' || lower === 'cancelado') {
-        return { label: t('pages.orderList.statusCanceled'), badgeClass: 'badge-destructive' };
-    }
-    return { label: raw.trim(), badgeClass: 'badge-outline' };
 }
 
 function toListRow(order: DeepReadonly<SchemaOrder>): OrderListRow {

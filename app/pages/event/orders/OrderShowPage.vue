@@ -95,6 +95,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { ref, computed, watch, type ComputedRef, type Ref } from 'vue';
+import { useTranslation } from '../../../composables/useTranslation';
 import { Format } from '../../../utils/format';
 import { Icons } from '../../../utils/icons';
 import { useNavigation } from '../../../composables/useNavigation';
@@ -102,6 +103,8 @@ import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import { PaymentMethodsComposable } from '../../../composables/payment-methods-composable';
+import { showToast } from '../../../composables/toast-state';
+import { Haptics } from '../../../utils/haptics';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderClientShowPage from './OrderClientShowPage.vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
@@ -111,6 +114,7 @@ import OrderListPage from './OrderListPage.vue';
 
 // --- Component logic ---
 const { navigateTo } = useNavigation();
+const { t }: { t: (key: string) => string } = useTranslation();
 
 const observation: Ref<string> = ref('');
 
@@ -226,9 +230,16 @@ async function onFinish(): Promise<void> {
 }
 
 async function onReopen(): Promise<void> {
-    const order: Order = currentOrderRef.value as Order;
-    const id = order.id as number;
-    await OrdersRepository.updateStatus(id, 'pending');
-    await useCurrentOrder.refresh();
+    try {
+        const order: Order = currentOrderRef.value as Order;
+        const id = order.id as number;
+        await OrdersRepository.updateStatus(id, 'pending');
+        await useCurrentOrder.refresh();
+        Haptics.vibrateSuccess();
+        showToast({ message: t('pages.orderShow.reopenSuccess'), variant: 'success' });
+    } catch (err: unknown) {
+        console.error(err);
+        showToast({ message: t('pages.orderShow.reopenError'), variant: 'error' });
+    }
 }
 </script>

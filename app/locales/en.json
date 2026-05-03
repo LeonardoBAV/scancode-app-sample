@@ -248,6 +248,8 @@
       "observationHint": "Tap to add observation...",
       "finish": "Finish",
       "reopen": "Reopen",
+      "reopenSuccess": "Order reopened successfully.",
+      "reopenError": "Could not reopen the order. Please try again.",
       "signature": "Signature",
       "print": "Print",
       "statusOpen": "Open",

@@ -248,6 +248,8 @@
       "observationHint": "Toque para adicionar observação...",
       "finish": "Finalizar",
       "reopen": "Reabrir",
+      "reopenSuccess": "Pedido reaberto com sucesso.",
+      "reopenError": "Não foi possível reabrir o pedido. Tente novamente.",
       "signature": "Assinatura",
       "statusOpen": "Aberto",
       "statusCompleted": "Finalizado"

@@ -4,7 +4,14 @@
         <StackLayout row="0" class="px-4 pt-2 pb-2">
             <GridLayout columns="auto, *" class="input-search">
                 <Label col="0" :text="Icons.lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
-                <TextField col="1" v-model="searchQuery" :hint="$t('pages.paymentMethodList.searchHint')" class="text-base text-foreground p-0" placeholderColor="#a1a1aa" />
+                <TextField
+                    col="1"
+                    v-model="searchQuery"
+                    :hint="$t('pages.paymentMethodList.searchHint')"
+                    class="text-base text-foreground p-0"
+                    placeholderColor="#a1a1aa"
+                    :editable="allowSelect"
+                />
             </GridLayout>
         </StackLayout>
 
@@ -14,7 +21,7 @@
                 <GridLayout
                     columns="auto, *"
                     :class="['p-4 mx-4 mb-2 border rounded-lg', selectedPaymentMethodId === item.id ? 'bg-primary border-primary' : 'bg-card border-border']"
-                    @tap="$emit('select', item)"
+                    @tap="onRowTap(item)"
                 >
                     <Label col="0" :text="Icons.lucide('credit-card')" :class="['lucide mr-4', selectedPaymentMethodId === item.id ? 'text-primary-foreground' : 'text-muted-foreground']" verticalAlignment="center" />
                     <GridLayout col="1" columns="*, auto">
@@ -53,14 +60,26 @@ import { Icons } from '../utils/icons';
 
 
 // --- Component logic ---
-const props = defineProps<{
-    paymentMethods: PaymentMethod[];
-    selectedPaymentMethodId: number | null;
-}>();
+const props = withDefaults(
+    defineProps<{
+        paymentMethods: PaymentMethod[];
+        selectedPaymentMethodId: number | null;
+        /** When false, search and row taps are disabled (e.g. order no longer pending). */
+        allowSelect?: boolean;
+    }>(),
+    { allowSelect: true },
+);
 
-defineEmits<{
+const emit = defineEmits<{
     (e: 'select', paymentMethod: PaymentMethod): void;
 }>();
+
+function onRowTap(item: PaymentMethod): void {
+    if (!props.allowSelect) {
+        return;
+    }
+    emit('select', item);
+}
 
 const searchQuery = ref('');
 

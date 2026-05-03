@@ -36,9 +36,21 @@
                         <!-- Buyer section -->
                         <StackLayout class="p-4">
                             <Label :text="$t('pages.orderClientShow.buyerName')" class="text-xs text-muted-foreground mb-1" />
-                            <TextField v-model="buyerName" :hint="$t('pages.orderClientShow.buyerName')" class="input-field mb-3" placeholderColor="#71717a" />
+                            <TextField
+                                v-model="buyerName"
+                                :hint="$t('pages.orderClientShow.buyerName')"
+                                class="input-field mb-3"
+                                placeholderColor="#71717a"
+                                :editable="isOrderEditable"
+                            />
                             <Label :text="$t('pages.orderClientShow.buyerContact')" class="text-xs text-muted-foreground mb-1" />
-                            <TextField v-model="buyerPhone" :hint="$t('pages.orderClientShow.buyerContact')" class="input-field mb-3" placeholderColor="#71717a" />
+                            <TextField
+                                v-model="buyerPhone"
+                                :hint="$t('pages.orderClientShow.buyerContact')"
+                                class="input-field mb-3"
+                                placeholderColor="#71717a"
+                                :editable="isOrderEditable"
+                            />
                         </StackLayout>
                     </StackLayout>
                 </StackLayout>
@@ -51,11 +63,18 @@
                         row="0"
                         col="0"
                         :text="$t('common.save')"
-                        :class="isDirty ? 'btn-secondary' : 'btn-secondary opacity-50'"
-                        :isEnabled="isDirty"
+                        :class="isDirty && isOrderEditable ? 'btn-secondary' : 'btn-secondary opacity-50'"
+                        :isEnabled="isDirty && isOrderEditable"
                         @tap="onSaveBuyerFields"
                     />
-                    <Button row="0" col="1" :text="$t('pages.orderClientShow.changeClient')" class="btn-primary" @tap="goToClientList" />
+                    <Button
+                        row="0"
+                        col="1"
+                        :text="$t('pages.orderClientShow.changeClient')"
+                        class="btn-primary"
+                        :isEnabled="isOrderEditable"
+                        @tap="goToClientList"
+                    />
                 </GridLayout>
             </StackLayout>
         </GridLayout>
@@ -70,6 +89,7 @@ import { showToast } from '../../../composables/toast-state';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import type { OrderStatus } from '../../../types/schema/order';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderSelectClientPage from './OrderSelectClientPage.vue';
@@ -82,6 +102,16 @@ const { t } = useTranslation();
 
 const currentOrderRef = useCurrentOrder.getOrder();
 const client = computed(() => currentOrderRef.value?.client ?? null);
+
+const orderStatus = computed((): OrderStatus => {
+    const raw = currentOrderRef.value?.status;
+    if (raw === 'pending' || raw === 'completed' || raw === 'cancelled') {
+        return raw;
+    }
+    return 'pending';
+});
+
+const isOrderEditable = computed(() => orderStatus.value === 'pending');
 
 const buyerName: Ref<string> = ref('');
 const buyerPhone: Ref<string> = ref('');
@@ -108,6 +138,9 @@ watch(
 );
 
 async function onSaveBuyerFields(): Promise<void> {
+    if (!isOrderEditable.value) {
+        return;
+    }
     const nextBuyerName: string = buyerName.value.trim();
     const nextBuyerPhone: string = buyerPhone.value.trim();
 
@@ -124,6 +157,9 @@ async function onSaveBuyerFields(): Promise<void> {
 
 
 function goToClientList(): void {
+    if (!isOrderEditable.value) {
+        return;
+    }
     navigateTo(OrderSelectClientPage, {
         props: { originPage: 'OrderClientShowPage' },
         backstackVisible: false,

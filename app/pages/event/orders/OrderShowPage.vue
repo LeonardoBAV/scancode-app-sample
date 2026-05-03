@@ -49,7 +49,13 @@
                                 <Label col="0" :text="Icons.lucide('clipboard-list')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
                                 <Label col="1" :text="$t('pages.orderShow.observation')" class="text-sm font-medium text-muted-foreground" verticalAlignment="center" />
                             </GridLayout>
-                            <TextView v-model="observation" :hint="$t('pages.orderShow.observationHint')" class="input-field" height="100" />
+                            <TextView
+                                v-model="observation"
+                                :hint="$t('pages.orderShow.observationHint')"
+                                class="input-field"
+                                height="100"
+                                :editable="observationEditable"
+                            />
                         </StackLayout>
                     </StackLayout>
                 </StackLayout>
@@ -138,6 +144,8 @@ const orderStatus: ComputedRef<OrderStatus> = computed(() => {
     }
     return 'pending';
 });
+
+const observationEditable: ComputedRef<boolean> = computed(() => orderStatus.value === 'pending');
 
 const synced: ComputedRef<boolean> = computed(() => currentOrderRef.value?.is_sync ?? false);
 

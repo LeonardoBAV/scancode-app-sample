@@ -3,13 +3,19 @@
         <GridLayout rows="auto, *, auto" class="bg-background">
             <HeaderComponent row="0" :title="$t('pages.orderPayment.title')" :showAvatar="false" />
 
-            <PaymentMethodListComponent row="1" :payment-methods="paymentMethods" :selected-payment-method-id="selectedPayment?.id ?? null" @select="onSelectPaymentMethod" />
+            <PaymentMethodListComponent
+                row="1"
+                :payment-methods="paymentMethods"
+                :selected-payment-method-id="selectedPayment?.id ?? null"
+                :allow-select="isOrderEditable"
+                @select="onSelectPaymentMethod"
+            />
 
             <StackLayout row="2" class="footer-bar">
                 <Button
                     :text="$t('pages.orderPayment.confirm')"
-                    :class="selectedPayment && !isSaving ? 'btn-primary' : 'btn-primary opacity-50'"
-                    :isEnabled="!!selectedPayment && !isSaving"
+                    :class="selectedPayment && !isSaving && isOrderEditable ? 'btn-primary' : 'btn-primary opacity-50'"
+                    :isEnabled="!!selectedPayment && !isSaving && isOrderEditable"
                     @tap="onConfirm"
                 />
             </StackLayout>
@@ -26,6 +32,7 @@ import { useNavigation } from '../../../composables/useNavigation';
 import PaymentMethodListComponent from '../../../components/PaymentMethodListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import type { OrderStatus } from '../../../types/schema/order';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 
 
@@ -34,6 +41,16 @@ const { navigateBack } = useNavigation();
 
 const paymentMethodsFromStore = PaymentMethodsComposable.getList();
 const currentOrder = useCurrentOrder.getOrder();
+
+const orderStatus = computed((): OrderStatus => {
+    const raw = currentOrder.value?.status;
+    if (raw === 'pending' || raw === 'completed' || raw === 'cancelled') {
+        return raw;
+    }
+    return 'pending';
+});
+
+const isOrderEditable = computed(() => orderStatus.value === 'pending');
 
 const selectedPayment: Ref<PaymentMethod | null> = ref<PaymentMethod | null>(null);
 const isSaving: Ref<boolean> = ref<boolean>(false);
@@ -57,6 +74,9 @@ watch(
 );
 
 async function onSelectPaymentMethod(paymentMethod: PaymentMethod): Promise<void> {
+    if (!isOrderEditable.value) {
+        return;
+    }
     if (isSaving.value) return;
     const orderId: number | undefined = currentOrder.value?.id ?? undefined;
     if (!orderId) return;
@@ -75,6 +95,9 @@ async function onSelectPaymentMethod(paymentMethod: PaymentMethod): Promise<void
 }
 
 function onConfirm(): void {
+    if (!isOrderEditable.value) {
+        return;
+    }
     if (!selectedPayment.value) return;
     void navigateBack();
 }

@@ -63,7 +63,7 @@ async function onConfirm(): Promise<void> {
             client_id: clientId as number,
             sales_representative_id: 0,
             payment_method_id: null,
-            status: 'Open',
+            status: 'pending',
             notes: null,
         });
 

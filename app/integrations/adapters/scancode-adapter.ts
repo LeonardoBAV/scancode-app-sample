@@ -11,7 +11,7 @@ import { ApiException } from '../../types/exceptions/api-exception';
 import type { Auth } from '../../types/sessions/auth';
 import type { Client } from '../../types/schema/client';
 import type { Event } from '../../types/schema/event';
-import type { Order } from '../../types/schema/order';
+import type { Order, OrderStatus } from '../../types/schema/order';
 import type { OrderItem } from '../../types/schema/order-item';
 import type { PaymentMethod } from '../../types/schema/payment-method';
 import type { ProductCategory } from '../../types/schema/product-category';
@@ -50,7 +50,7 @@ export class ScancodeAdapter {
                     id: orderDto.id,
                     remote_id: orderDto.id,
                     event_id: orderDto.event_id,
-                    status: orderDto.status,
+                    status: orderDto.status as OrderStatus,
                     notes: orderDto.notes,
                     buyer_name: ScancodeAdapter.nullableBuyerField(orderDto.buyer_name),
                     buyer_phone: ScancodeAdapter.nullableBuyerField(orderDto.buyer_phone),

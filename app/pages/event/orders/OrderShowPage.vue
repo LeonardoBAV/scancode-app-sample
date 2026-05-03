@@ -58,7 +58,13 @@
             <!-- Footer -->
             <StackLayout row="2" class="footer-bar">
                 <GridLayout rows="auto" columns="*, *" class="mb-3" verticalAlignment="center">
-                    <Label col="0" :text="orderStatus === 'Open' ? $t('pages.orderShow.statusOpen') : $t('pages.orderShow.statusCompleted')" :class="(orderStatus === 'Open' ? 'badge-success' : 'badge-secondary') + ' mr-2'" verticalAlignment="center" horizontalAlignment="center" />
+                    <Label
+                        col="0"
+                        :text="orderStatus === 'pending' ? $t('pages.orderShow.statusOpen') : orderStatus === 'completed' ? $t('pages.orderShow.statusCompleted') : $t('pages.orderList.statusCanceled')"
+                        :class="(orderStatus === 'pending' ? 'badge-success' : orderStatus === 'completed' ? 'badge-secondary' : 'badge-destructive') + ' mr-2'"
+                        verticalAlignment="center"
+                        horizontalAlignment="center"
+                    />
                     <GridLayout col="1" columns="auto, *" class="ml-2" verticalAlignment="center" horizontalAlignment="center">
                         <Label col="0" :text="synced ? Icons.lucide('circle-check') : Icons.lucide('clock')" :class="(synced ? 'lucide text-success' : 'lucide text-warning') + ' mr-2'" verticalAlignment="center" />
                         <Label col="1" :text="synced ? $t('pages.orderList.synced') : $t('pages.orderList.notSynced')" class="text-sm" :class="synced ? 'text-success' : 'text-warning'" verticalAlignment="center" />
@@ -68,7 +74,7 @@
                     <Button
                         row="0"
                         col="0"
-                        :text="orderStatus === 'Open' ? $t('pages.orderShow.finish') : $t('pages.orderShow.reopen')"
+                        :text="orderStatus === 'pending' ? $t('pages.orderShow.finish') : $t('pages.orderShow.reopen')"
                         :class="primaryFooterButtonClass"
                         :isEnabled="primaryFooterButtonEnabled"
                         @tap="onPrimaryFooterTap"
@@ -93,7 +99,7 @@ import { PaymentMethodsComposable } from '../../../composables/payment-methods-c
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderClientShowPage from './OrderClientShowPage.vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
-import type { Order } from '../../../types/schema/order';
+import type { Order, OrderStatus } from '../../../types/schema/order';
 import OrderListPage from './OrderListPage.vue';
 
 
@@ -125,10 +131,12 @@ const displayTotalItems: ComputedRef<string> = computed(() => {
     return `${n} itens`;
 });
 
-const orderStatus: ComputedRef<'Open' | 'Completed'> = computed(() => {
-    const raw = currentOrderRef.value?.status?.trim().toLowerCase() ?? '';
-    if (raw === 'open' || raw === 'aberto') return 'Open';
-    return 'Completed';
+const orderStatus: ComputedRef<OrderStatus> = computed(() => {
+    const raw = currentOrderRef.value?.status;
+    if (raw === 'pending' || raw === 'completed' || raw === 'cancelled') {
+        return raw;
+    }
+    return 'pending';
 });
 
 const synced: ComputedRef<boolean> = computed(() => currentOrderRef.value?.is_sync ?? false);
@@ -143,14 +151,14 @@ const paymentMethodName: ComputedRef<string> = computed(() => {
 const canFinalizeOrder: ComputedRef<boolean> = computed(() => currentOrderRef.value?.payment_method_id != null);
 
 const primaryFooterButtonClass: ComputedRef<string> = computed(() => {
-    if (orderStatus.value === 'Open') {
+    if (orderStatus.value === 'pending') {
         return canFinalizeOrder.value ? 'btn-primary' : 'btn-primary opacity-50';
     }
     return 'btn-primary';
 });
 
 const primaryFooterButtonEnabled: ComputedRef<boolean> = computed(() =>
-    orderStatus.value === 'Open' ? canFinalizeOrder.value : true,
+    orderStatus.value === 'pending' ? canFinalizeOrder.value : true,
 );
 
 const clientFantasyName: ComputedRef<string> = computed(() => {
@@ -186,20 +194,26 @@ function onPrint(): void {
 }
 
 function onPrimaryFooterTap(): void {
-    if (orderStatus.value === 'Open') {
+    if (orderStatus.value === 'pending') {
         void onFinish();
         return;
     }
-    // Reabrir: ação a definir
+    void onReopen();
 }
 
 async function onFinish(): Promise<void> {
     const order: Order = currentOrderRef.value as Order;
     const id = order.id as number;
-    
 
-    await OrdersRepository.updateStatus(id, 'Closed');
+    await OrdersRepository.updateStatus(id, 'completed');
     await useCurrentEvent.setEvent(order.event_id);
     navigateTo(OrderListPage, { clearHistory: true });
+}
+
+async function onReopen(): Promise<void> {
+    const order: Order = currentOrderRef.value as Order;
+    const id = order.id as number;
+    await OrdersRepository.updateStatus(id, 'pending');
+    await useCurrentOrder.refresh();
 }
 </script>

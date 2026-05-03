@@ -20,7 +20,7 @@
 Definir em `app/types/` junto com os demais tipos de domínio.
 
 ```typescript
-// app/types/order.ts — modelo persistido (pull + pós-push)
+// app/types/schema/order.ts — modelo persistido (pull + pós-push); exporta também `OrderStatus`
 export interface Order {
     id: number;
     remote_id: number | null;
@@ -47,7 +47,7 @@ export interface NewOrder {
     updatedAt: string;
 }
 
-// app/types/order-item.ts
+// app/types/schema/order-item.ts
 export interface OrderItem {
     id: number;
     orderId: number;

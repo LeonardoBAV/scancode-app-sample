@@ -107,13 +107,13 @@ function clientDisplayName(order: DeepReadonly<SchemaOrder>): string {
 
 function orderStatusPresentation(raw: string): { label: string; badgeClass: string } {
     const lower = raw.trim().toLowerCase();
-    if (lower === 'open' || lower === 'aberto') {
+    if (lower === 'pending' || lower === 'open' || lower === 'aberto') {
         return { label: t('pages.orderList.statusOpen'), badgeClass: 'badge-success' };
     }
-    if (lower === 'closed' || lower === 'fechado') {
+    if (lower === 'completed' || lower === 'closed' || lower === 'fechado') {
         return { label: t('pages.orderList.statusClosed'), badgeClass: 'badge-secondary' };
     }
-    if (lower === 'canceled' || lower === 'cancelled' || lower === 'cancelado') {
+    if (lower === 'cancelled' || lower === 'canceled' || lower === 'cancelado') {
         return { label: t('pages.orderList.statusCanceled'), badgeClass: 'badge-destructive' };
     }
     return { label: raw.trim(), badgeClass: 'badge-outline' };

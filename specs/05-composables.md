@@ -252,10 +252,22 @@ Este composable é diferente dos demais: **recebe `eventId` como parâmetro** po
 ```typescript
 import { ref, computed, readonly, type Ref, type ComputedRef } from 'vue';
 import { getAuth } from '../persistence/auth-session';
-import type { Order, NewOrder, OrderStatus } from '../types/order';
-import type { NewOrderItem } from '../types/order-item';
+import type { Order, OrderStatus } from '../types/schema/order';
+import type { NewOrderItem } from '../types/schema/order-item';
 import { createOrderWithItems } from '../db/transactions';
 import * as ordersRepo     from '../db/repositories/orders.repo';
+
+/** Input de criação (ver também `specs/02-repositories.md`). */
+interface NewOrder {
+    eventId: number;
+    status: OrderStatus;
+    notes: string | null;
+    clientId: number;
+    salesRepresentativeId: number;
+    paymentMethodId: number;
+    createdAt: string;
+    updatedAt: string;
+}
 
 // Não é singleton puro — o estado é por evento selecionado
 const orders: Ref<Order[]>    = ref([]);
@@ -301,7 +313,7 @@ async function createOrder(
 }
 
 async function cancelOrder(orderId: number, eventId: number): Promise<void> {
-    await ordersRepo.updateStatus(orderId, 'Canceled');
+    await ordersRepo.updateStatus(orderId, 'cancelled');
     orders.value = await ordersRepo.findByEvent(eventId);
 }
 

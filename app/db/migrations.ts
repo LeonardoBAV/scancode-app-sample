@@ -9,8 +9,9 @@ import type { SQLiteDatabase, SqliteRow } from '@nativescript-community/sqlite/s
  * v5: orders — allow NULL payment_method_id.
  * v6: clients — buyer_name, buyer_contact (nullable TEXT).
  * v7: orders — buyer_name, buyer_phone (nullable TEXT).
+ * v8: orders.status — CHECK aligned with API enum (pending | completed | cancelled); default pending.
  */
-const SCHEMA_VERSION: number = 7;
+const SCHEMA_VERSION: number = 8;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const startVersion: number = db.getVersion();
@@ -47,10 +48,14 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
         await migrateToV7OrdersBuyerFields(db);
     }
 
+    if (startVersion < 8) {
+        await migrateToV8OrdersStatusCheck(db);
+    }
+
     await db.setVersion(SCHEMA_VERSION);
 }
 
-/** Creates the full database schema (squashed from former v1–v7). */
+/** Creates the full database schema (squashed from former v1–v8). */
 async function migrateToV1(db: SQLiteDatabase): Promise<void> {
     await db.execute('DROP TABLE IF EXISTS sync_log;');
 
@@ -165,7 +170,7 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
             id                        INTEGER PRIMARY KEY AUTOINCREMENT,
             remote_id                 INTEGER UNIQUE,
             event_id                  INTEGER NOT NULL REFERENCES events(id),
-            status                    TEXT    NOT NULL DEFAULT 'Pending',
+            status                    TEXT    NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'cancelled')),
             notes                     TEXT,
             buyer_name                TEXT,
             buyer_phone               TEXT,
@@ -451,4 +456,76 @@ async function migrateToV7OrdersBuyerFields(db: SQLiteDatabase): Promise<void> {
     if (!columnNames.has('buyer_phone')) {
         await db.execute('ALTER TABLE orders ADD COLUMN buyer_phone TEXT');
     }
+}
+
+/**
+ * Restricts `orders.status` to API enum values via CHECK; default `pending`.
+ * Coerces legacy status strings in the INSERT so typical dev DBs (e.g. Open / Pending) still upgrade.
+ */
+async function migrateToV8OrdersStatusCheck(db: SQLiteDatabase): Promise<void> {
+    const columns = await db.select('PRAGMA table_info(orders)');
+    if (columns.length === 0) {
+        return;
+    }
+
+    await db.execute('PRAGMA foreign_keys = OFF;');
+
+    await db.transaction(async () => {
+        await db.execute(`
+            CREATE TABLE orders__v8 (
+                id                        INTEGER PRIMARY KEY AUTOINCREMENT,
+                remote_id                 INTEGER UNIQUE,
+                event_id                  INTEGER NOT NULL REFERENCES events(id),
+                status                    TEXT    NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'cancelled')),
+                notes                     TEXT,
+                buyer_name                TEXT,
+                buyer_phone               TEXT,
+                client_id                 INTEGER NOT NULL REFERENCES clients(id),
+                sales_representative_id   INTEGER NOT NULL,
+                payment_method_id         INTEGER REFERENCES payment_methods(id),
+                is_sync                   INTEGER NOT NULL DEFAULT 0,
+                created_at                TEXT    NOT NULL,
+                updated_at                TEXT    NOT NULL
+            );
+        `);
+
+        await db.execute(`
+            INSERT INTO orders__v8 (
+                id, remote_id, event_id, status, notes, buyer_name, buyer_phone,
+                client_id, sales_representative_id, payment_method_id, is_sync, created_at, updated_at
+            )
+            SELECT
+                id,
+                remote_id,
+                event_id,
+                CASE lower(trim(ifnull(status, '')))
+                    WHEN 'open' THEN 'pending'
+                    WHEN 'aberto' THEN 'pending'
+                    WHEN 'pending' THEN 'pending'
+                    WHEN 'closed' THEN 'completed'
+                    WHEN 'fechado' THEN 'completed'
+                    WHEN 'completed' THEN 'completed'
+                    WHEN 'canceled' THEN 'cancelled'
+                    WHEN 'cancelled' THEN 'cancelled'
+                    WHEN 'cancelado' THEN 'cancelled'
+                    ELSE 'pending'
+                END,
+                notes,
+                buyer_name,
+                buyer_phone,
+                client_id,
+                sales_representative_id,
+                payment_method_id,
+                is_sync,
+                created_at,
+                updated_at
+            FROM orders;
+        `);
+
+        await db.execute('DROP TABLE orders;');
+        await db.execute('ALTER TABLE orders__v8 RENAME TO orders;');
+        await db.execute('CREATE INDEX IF NOT EXISTS idx_orders_event_id ON orders(event_id);');
+    });
+
+    await db.execute('PRAGMA foreign_keys = ON;');
 }

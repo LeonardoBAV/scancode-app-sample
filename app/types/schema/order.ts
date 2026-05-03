@@ -1,11 +1,14 @@
 import type { Client } from './client';
 import type { OrderItem } from './order-item';
 
+/** API / SQLite `orders.status` (CHECK). */
+export type OrderStatus = 'pending' | 'completed' | 'cancelled';
+
 export interface Order {
     id: number | null;
     remote_id: number | null;
     event_id: number;
-    status: string;
+    status: OrderStatus;
     notes: string | null;
     buyer_name: string | null;
     buyer_phone: string | null;

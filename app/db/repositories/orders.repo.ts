@@ -1,4 +1,4 @@
-import type { Order } from '../../types/schema/order';
+import type { Order, OrderStatus } from '../../types/schema/order';
 import type { OrderItem } from '../../types/schema/order-item';
 import type { Product } from '../../types/schema/product';
 import type { ProductCategory } from '../../types/schema/product-category';
@@ -158,13 +158,13 @@ export class OrdersRepository extends RepositoryBase {
         client_id: number;
         sales_representative_id: number;
         payment_method_id: number | null;
-        status?: string;
+        status?: OrderStatus;
         notes?: string | null;
         buyer_name?: string | null;
         buyer_phone?: string | null;
     }): Promise<Order> {
         const now: string = new Date().toISOString();
-        const status: string = input.status ?? 'Open';
+        const status: OrderStatus = input.status ?? 'pending';
         const notes: string | null = input.notes ?? null;
         const [client] = await ClientsRepository.findManyByIds([input.client_id]);
         const buyerName: string | null = input.buyer_name ?? client?.buyer_name ?? null;
@@ -257,7 +257,7 @@ export class OrdersRepository extends RepositoryBase {
         );
     }
 
-    public static async updateStatus(orderId: number, status: string): Promise<void> {
+    public static async updateStatus(orderId: number, status: OrderStatus): Promise<void> {
         const now: string = new Date().toISOString();
         await OrdersRepository.execute(
             `

@@ -257,6 +257,18 @@ export class OrdersRepository extends RepositoryBase {
         );
     }
 
+    public static async updateNotes(orderId: number, notes: string | null): Promise<void> {
+        const now: string = new Date().toISOString();
+        await OrdersRepository.execute(
+            `
+                UPDATE orders
+                SET notes = ?, updated_at = ?, is_sync = 0
+                WHERE id = ?
+            `,
+            [notes, now, orderId],
+        );
+    }
+
     public static async updateStatus(orderId: number, status: OrderStatus): Promise<void> {
         const now: string = new Date().toISOString();
         await OrdersRepository.execute(

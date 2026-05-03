@@ -205,8 +205,15 @@ async function onFinish(): Promise<void> {
     const order: Order = currentOrderRef.value as Order;
     const id = order.id as number;
 
+    const storedNotes: string = (order.notes ?? '').trim();
+    const draftNotes: string = observation.value.trim();
+    
+    if (storedNotes !== draftNotes) {
+        await OrdersRepository.updateNotes(id, draftNotes === '' ? null : draftNotes);
+    }
+
     await OrdersRepository.updateStatus(id, 'completed');
-    await useCurrentEvent.setEvent(order.event_id);
+    await useCurrentOrder.refresh();
     navigateTo(OrderListPage, { clearHistory: true });
 }
 

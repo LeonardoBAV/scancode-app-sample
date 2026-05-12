@@ -3,9 +3,9 @@
 **Derivado das migrations da API em:** 28/03/2026  
 **Atualização `events` + `orders.event_id`:** 29/03/2026 — alinhado a `2026_03_29_044250_create_events_table.php` e `2026_03_29_044252_add_event_id_to_orders_table.php`
 
-**Versão do schema local:** 3 (`events` definitiva + `orders`/`order_items` inteiros + tabelas de backup)
+**Versão do schema local (`PRAGMA user_version`):** **1** — DDL único em `migrateToV1` (squash pré-produção).
 
-**Migrations do app (`app/db/migrations.ts`):** `SCHEMA_VERSION` **2** — em instalações que já tinham o arquivo SQLite na revisão 1, `migrateToV2AutoincrementPullTables` recria `product_categories`, `products`, `clients`, `payment_methods` e `events` com `INTEGER PRIMARY KEY AUTOINCREMENT`, copiando linhas e preservando `id` (FKs de `orders` / `order_items` intactas). Instalações novas recebem esse DDL já na `migrateToV1` e não executam a v2.
+**Migrations do app (`app/db/migrations.ts`):** `SCHEMA_VERSION` **1**; `runMigrations` só executa `migrateToV1` quando `user_version < 1`. Bancos de builds antigos com cadeia incremental (versões 2–9 removidas): limpar dados do app ou o arquivo SQLite antes de depender de um esquema garantido.
 
 ---
 
@@ -354,12 +354,12 @@ A ordem respeita as dependências de chaves estrangeiras:
 O arquivo `db/migrations.ts` deve implementar controle de versão via `PRAGMA user_version`:
 
 ```typescript
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 1;
 
 // Ao abrir o banco:
 // - Ler PRAGMA user_version
-// - Se < SCHEMA_VERSION: rodar migrations pendentes
+// - Se < SCHEMA_VERSION: rodar migrateToV1 (DDL completo)
 // - Atualizar PRAGMA user_version ao final
 ```
 
-**Migrações entre versões:** seguir deltas em `migrations.ts` (placeholder antigo de `events`, troca de PK TEXT→INTEGER em `orders`, criação de tabelas de backup, etc.).
+**Migrações entre versões:** pré-produção o DDL está achatado numa única função; evoluções futuras voltam a usar deltas versionados em `migrations.ts`.

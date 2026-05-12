@@ -5,7 +5,7 @@
             <HeaderComponent row="0" :title="$t('pages.cart.title')" />
 
             <!-- Search -->
-            <StackLayout v-if="hasSelectedOrder" row="1" class="px-4 pt-4 pb-2">
+            <StackLayout v-if="hasSelectedOrder && canEditOrder" row="1" class="px-4 pt-4 pb-2">
                 <GridLayout columns="auto, *" class="input-search">
                     <Label col="0" :text="Icons.lucide('search')" class="lucide text-muted-foreground mr-3" verticalAlignment="center" />
                     <TextField ref="searchFieldRef" col="1" v-model="searchQuery" :hint="$t('pages.cart.searchHint')" class="text-base text-foreground p-0" placeholderColor="#71717a" />
@@ -41,9 +41,9 @@
                             <Label row="1" col="0" :text="(item.product?.sku ?? '') + ' · ' + (item.product?.product_category?.name ?? '')" class="text-xs text-muted-foreground mt-1" />
                             <Label row="1" col="1" :text="Format.formatCurrencyBR(item.price) + ' ' + perUnitLabel" class="text-xs text-muted-foreground" verticalAlignment="center" />
                             <GridLayout row="2" col="0" colSpan="2" rows="auto" columns="auto, auto, auto" class="mt-3">
-                                <Button col="0" text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" @tap="decreaseQty(item)" />
+                                <Button col="0" text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" :isEnabled="canEditOrder" @tap="decreaseQty(item)" />
                                 <Label col="1" :text="String(item.qty)" class="text-base font-semibold text-foreground text-center min-w-8 mx-2" verticalAlignment="center" />
-                                <Button col="2" text="+" class="btn-icon-sm bg-primary text-primary-foreground" @tap="increaseQty(item)" />
+                                <Button col="2" text="+" class="btn-icon-sm bg-primary text-primary-foreground" :isEnabled="canEditOrder" @tap="increaseQty(item)" />
                             </GridLayout>
                         </GridLayout>
                     </template>
@@ -126,6 +126,9 @@ function getSelectedOrderId(): number {
 }
 
 async function removeProductFromCart(product: Product): Promise<void> {
+    if (!canEditOrder.value) {
+        return;
+    }
     if (product.id == null) {
         return;
     }
@@ -140,6 +143,9 @@ async function removeProductFromCart(product: Product): Promise<void> {
 }
 
 async function addProduct(product: Product): Promise<void> {
+    if (!canEditOrder.value) {
+        return;
+    }
     const orderId: number = getSelectedOrderId();
     if (product.id == null) {
         return;
@@ -170,6 +176,9 @@ function selecctedProduct(product: Product): void {
 }
 
 async function increaseQty(item: OrderItem): Promise<void> {
+    if (!canEditOrder.value) {
+        return;
+    }
     if (item.id == null) {
         return;
     }
@@ -178,6 +187,9 @@ async function increaseQty(item: OrderItem): Promise<void> {
 }
 
 async function decreaseQty(item: OrderItem): Promise<void> {
+    if (!canEditOrder.value) {
+        return;
+    }
     if (item.id == null) {
         return;
     }
@@ -202,6 +214,7 @@ async function decreaseQty(item: OrderItem): Promise<void> {
 
 const orderRef = useCurrentOrder.getOrder();
 const hasSelectedOrder: ComputedRef<boolean> = computed((): boolean => orderRef.value != null);
+const canEditOrder: ComputedRef<boolean> = computed((): boolean => orderRef.value?.status === 'pending');
 
 const cartItems: ComputedRef<readonly OrderItem[]> = computed((): readonly OrderItem[] => orderRef.value?.order_items ?? []);
 </script>

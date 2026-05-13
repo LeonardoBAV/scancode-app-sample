@@ -20,6 +20,19 @@ export abstract class RepositoryBase {
         return name;
     }
 
+    /**
+     * Next integer strictly below zero for offline-first PKs (`id` null at insert).
+     * `MIN(id) - 1` among negatives, or `-1` when none exist — avoids collision with API ids.
+     */
+    protected static async allocateNextLocalNegativeId(table: string): Promise<number> {
+        const safe: string = RepositoryBase.assertSafeSqlIdentifier(table);
+        const row: { next_id: number } | null = await RepositoryBase.queryOne<{ next_id: number }>(
+            `SELECT COALESCE((SELECT MIN(id) FROM ${safe} WHERE id < 0) - 1, -1) AS next_id`,
+        );
+        const n: number = row == null ? NaN : Number(row.next_id);
+        return Number.isFinite(n) ? n : -1;
+    }
+
     /** SQLite stores booleans as INTEGER 0/1. */
     protected static readSqliteBool(value: unknown): boolean {
         return Number(value) === 1;

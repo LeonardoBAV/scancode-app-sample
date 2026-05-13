@@ -31,12 +31,11 @@ export class ClientsRepository extends RepositoryBase {
     }
 
     public static async upsertOne(client: Client): Promise<Client> {
+        if (client.id == null) {
+            client.id = await ClientsRepository.allocateNextLocalNegativeId('clients');
+        }
         await ClientsRepository.insertOrReplaceOne('clients', ClientsRepository.CLIENT_COLUMNS, client);
         await ClientsComposable.refresh();
-
-        if (client.id == null) {
-            client = ClientsComposable.getList().value[ClientsComposable.getList().value.length - 1];
-        }
         return client;
     }
 

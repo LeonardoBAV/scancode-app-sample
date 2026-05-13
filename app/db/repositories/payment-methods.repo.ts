@@ -28,6 +28,9 @@ export class PaymentMethodsRepository extends RepositoryBase {
     }
 
     public static async upsertOne(method: PaymentMethod): Promise<void> {
+        if (method.id == null) {
+            method.id = await PaymentMethodsRepository.allocateNextLocalNegativeId('payment_methods');
+        }
         await PaymentMethodsRepository.insertOrReplaceOne(
             'payment_methods',
             PaymentMethodsRepository.PAYMENT_METHOD_COLUMNS,

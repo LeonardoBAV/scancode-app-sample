@@ -73,6 +73,9 @@ export class ProductsRepository extends RepositoryBase {
     }
 
     public static async upsertOne(product: Product): Promise<void> {
+        if (product.id == null) {
+            product.id = await ProductsRepository.allocateNextLocalNegativeId('products');
+        }
         await ProductsRepository.insertOrReplaceOne('products', ProductsRepository.PRODUCT_COLUMNS, product);
         await ProductsComposable.refresh();
     }

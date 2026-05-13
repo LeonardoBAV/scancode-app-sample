@@ -30,6 +30,7 @@ export class SyncPushService {
 
             if (clientPending.remote_id == null) {
                 client = await ScancodeAdapter.createClient(clientPending);
+                await ClientsRepository.updateClientId(clientPending.id, client.id);
             } else {
                 client = await ScancodeAdapter.updateClient(clientPending);
             }
@@ -45,11 +46,11 @@ export class SyncPushService {
         const productsPending: Product[] = await ProductsRepository.findAllUnsynced();
 
         for (const productPending of productsPending) {
-            console.log('productPending', productPending);
             let product: Product;
 
             if (productPending.remote_id == null) {
                 product = await ScancodeAdapter.createProduct(productPending);
+                await ProductsRepository.updateProductId(productPending.id, product.id);
             } else {
                 product = await ScancodeAdapter.updateProduct(productPending);
             }
@@ -69,6 +70,7 @@ export class SyncPushService {
 
             if (paymentMethodPending.remote_id == null) {
                 paymentMethod = await ScancodeAdapter.createPaymentMethod(paymentMethodPending);
+                await PaymentMethodsRepository.updatePaymentMethodId(paymentMethodPending.id, paymentMethod.id);
             } else {
                 paymentMethod = await ScancodeAdapter.updatePaymentMethod(paymentMethodPending);
             }

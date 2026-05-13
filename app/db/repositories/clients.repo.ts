@@ -39,6 +39,17 @@ export class ClientsRepository extends RepositoryBase {
         return client;
     }
 
+    /** `UPDATE` só da coluna `id` (ex.: PK local → id da API); FKs com ON UPDATE CASCADE acompanham. */
+    public static async updateClientId(fromId: number | null, toId: number | null): Promise<void> {
+        if (fromId == null || toId == null || fromId === toId || !Number.isFinite(fromId) || !Number.isFinite(toId)) {
+            return;
+        }
+        await ClientsRepository.execute(
+            'UPDATE clients SET id = ? WHERE id = ? AND remote_id IS NULL',
+            [toId, fromId],
+        );
+    }
+
     public static async findAll(): Promise<Client[]> {
         const rows: Client[] = await ClientsRepository.queryAll<Client>('SELECT * FROM clients ORDER BY corporate_name ASC');
         return rows.map((row: Client): Client => ClientsRepository.mapSqliteClientRow(row));

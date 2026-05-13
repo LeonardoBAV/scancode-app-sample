@@ -39,6 +39,17 @@ export class PaymentMethodsRepository extends RepositoryBase {
         await PaymentMethodsComposable.refresh();
     }
 
+    /** `UPDATE` só da coluna `id` (PK local → id da API); FKs com ON UPDATE CASCADE acompanham. */
+    public static async updatePaymentMethodId(fromId: number | null, toId: number | null): Promise<void> {
+        if (fromId == null || toId == null || fromId === toId || !Number.isFinite(fromId) || !Number.isFinite(toId)) {
+            return;
+        }
+        await PaymentMethodsRepository.execute(
+            'UPDATE payment_methods SET id = ? WHERE id = ? AND remote_id IS NULL',
+            [toId, fromId],
+        );
+    }
+
     public static async findAll(): Promise<PaymentMethod[]> {
         const rows: PaymentMethod[] = await PaymentMethodsRepository.queryAll<PaymentMethod>(
             'SELECT * FROM payment_methods ORDER BY name COLLATE NOCASE ASC',

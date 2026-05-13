@@ -80,6 +80,17 @@ export class ProductsRepository extends RepositoryBase {
         await ProductsComposable.refresh();
     }
 
+    /** `UPDATE` só da coluna `id` (PK local → id da API); FKs com ON UPDATE CASCADE acompanham. */
+    public static async updateProductId(fromId: number | null, toId: number | null): Promise<void> {
+        if (fromId == null || toId == null || fromId === toId || !Number.isFinite(fromId) || !Number.isFinite(toId)) {
+            return;
+        }
+        await ProductsRepository.execute(
+            'UPDATE products SET id = ? WHERE id = ? AND remote_id IS NULL',
+            [toId, fromId],
+        );
+    }
+
     public static async findAll(): Promise<Product[]> {
         const sql: string = `
             SELECT

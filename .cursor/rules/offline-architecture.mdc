@@ -1,5 +1,5 @@
 ---
-description: offline-first, SQLite, sync, repositories, composables, pull, push, database, db, migrations, order, orders, pedido, pedidos, evento, eventos, clientes, produtos, sincronizacao
+description: offline-first, SQLite, sync, repositories, composables, pull, push, database, db, migrations, order, orders, pedido, pedidos, evento, eventos, clientes, produtos, sincronizacao, PK temporaria, id negativo, remote_id, updateClientId, cascade
 ---
 
 # Arquitetura Offline-First
@@ -32,6 +32,37 @@ Antes de implementar qualquer camada offline, leia a spec correspondente em `spe
 9. **Profile “Sincronizar” — código atual:** `syncService.updateEntities()` → push de **clientes** pendentes (`syncPushService`) **depois** pull parcial de catálogo (`product_categories`/`products`, `clients`, `payment_methods`) sem `events`. Ver `specs/06-sync-services.md`.
 10. **Pedidos:** `id` INTEGER — autoincrement offline; no pull, `id` = id da API; após push, **realinhar** `id` = `remote_id` = id da API. Conflito de id na **restauração** de backup: novo autoincrement + atualizar `order_items.order_id` (backlog).
 11. **Backup:** V1 só armazenar; **sem push** antes do backup. Backlog: botão Restaurar pedidos assíncronos **por seller** (`sales_representative_id`).
+
+## PK local temporária (criação offline) → id canónico da API
+
+**Onde está:** `ClientsRepository` / `ProductsRepository` / `PaymentMethodsRepository` (`upsertOne` + `allocateNextLocalNegativeId` em `RepositoryBase`); push em `app/sync/sync-push-service.ts`.
+
+### O que é “temporário”
+
+- Registros criados **só no dispositivo** chegam ao primeiro `INSERT` com `id: null` no objeto TypeScript.
+- O repositório atribui um **`id` inteiro negativo** (`…, -2, -1`) único na tabela, via `SELECT COALESCE(MIN(id) WHERE id < 0) - 1, -1)`. Esse valor é a **PK local provisória** até o servidor existir.
+- Enquanto a API ainda não conhece a entidade, **`remote_id` fica `NULL`** e **`is_sync = 0`** (pendente de push).
+
+### Por que negativo
+
+- Ids **positivos** vindos do pull / API não colidem com a faixa negativa.
+- Pedidos e itens referenciam `clients`, `products`, `payment_methods` por FK; no DDL, **`ON UPDATE CASCADE`** propaga quando a PK do catálogo muda.
+
+### Como deixa de ser temporário (push após `POST` na API)
+
+Fluxo em `SyncPushService` para **`remote_id == null`** (primeiro envio):
+
+1. Adapter **`create*`** → resposta com **`id` positivo** canónico da API (e demais campos).
+2. **`updateClientId` / `updateProductId` / `updatePaymentMethodId` (`fromId`, `toId`)** — um `UPDATE` **só da coluna `id`**: `SET id = toId WHERE id = fromId AND remote_id IS NULL`. Isto move a linha existente para a PK da API; as FKs (`orders.client_id`, `orders.payment_method_id`, `order_items.product_id`, …) **acompanham** o cascade.
+3. **`upsertOne`** com o objeto retornado/atualizado — grava **`remote_id`**, **`is_sync`**, timestamps e restantes colunas (o `id` em memória já é o da API).
+
+No ramo **`remote_id` já preenchido** (PATCH), não se chama `update*Id`; só `upsertOne`.
+
+### Invariantes úteis para o agente
+
+- Não introduzir `INSERT OR REPLACE` “cego” para substituir PK local por id da API sem este `UPDATE` prévio — risco de **duas linhas** (PK antiga + PK nova).
+- Novas entidades offline com FK para catálogo devem seguir o mesmo padrão se tiverem ciclo create-remoto + realinhamento de PK.
+- Detalhe de schema: `specs/01-db-schema.md`. Fluxo UI sync: `specs/06-sync-services.md`, `specs/04-sync-push.md`.
 
 ## Pacotes necessários (instalar antes da Fase 1)
 

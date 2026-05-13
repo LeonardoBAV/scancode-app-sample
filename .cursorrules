@@ -68,7 +68,7 @@ Colocar em `app/fonts/` ou `app/assets/` **não funciona** — o webpack ignora 
 3. **`nativescript-components.mdc`** — Catálogo: exemplos de todos os componentes usando `@utility`
 4. **`nativescript-implementer.mdc`** — Implementação: arquitetura, navegação, code style
 5. **`NATIVESCRIPT.md`** — Referência completa da plataforma NativeScript
-6. **`offline-architecture.mdc`** — Offline-first, SQLite, sync (`specs/` como fonte detalhada)
+6. **`offline-architecture.mdc`** — Offline-first, SQLite, sync (`specs/` como fonte detalhada); inclui **PK local temporária (negativa)** e realinhamento no push (`update*Id` + `upsertOne`)
 7. **`specs/05-composables.md`** — Padrão de formulários offline (Zod, `useClientFormValidation` / `useProductFormValidation`, duplicatas no SQLite, chaves `pages.*Form.errors`)
 
 ## Sistema de cores (referência rápida)

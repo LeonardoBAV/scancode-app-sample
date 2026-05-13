@@ -10,11 +10,19 @@ Este documento cobre: **(A)** o que está implementado em `app/sync/sync-push-se
 
 ## A) Implementado — `sync-push-service.ts` (`SyncPushService` / `syncPushService`)
 
-**Responsabilidade:** enviar **clientes** marcados como não sincronizados no SQLite e gravar a versão devolvida/atualizada pela API.
+**Responsabilidade:** enviar **clientes**, **produtos** e **meios de pagamento** com `is_sync = 0` para a API e gravar a resposta no SQLite.
 
-- `ClientsRepository.findAllUnsynced()` → para cada registro, `ScancodeAdapter.updateClient(client)` → `ClientsRepository.upsertOne(updated)`.
+- `*Repository.findAllUnsynced()` → por registro: `create*` ou `update*` no `ScancodeAdapter` → (só em **create**) `updateClientId` / `updateProductId` / `updatePaymentMethodId` com `(id local, id da API)` → `upsertOne` com payload completo.
 - **Não tem estado reativo.** Não conhece Vue.
 - Orquestrado por **`syncService.updateEntities()`** (Profile), **antes** do pull parcial de catálogo.
+
+### PK local temporária e realinhamento (detalhe para agentes)
+
+- Criação offline: repositórios atribuem **`id` negativo** quando o insert vem com `id` null (`RepositoryBase.allocateNextLocalNegativeId`).
+- Até existir na API: **`remote_id` NULL**, **`is_sync = 0`**.
+- Após **`POST`** bem-sucedido: o serviço chama **`update*Id(fromLocal, apiId)`** — `UPDATE … SET id = apiId WHERE id = fromLocal AND remote_id IS NULL` — para que FKs com **`ON UPDATE CASCADE`** (`orders`, `order_items`) sigam o novo id; em seguida **`upsertOne`** define `remote_id`, `is_sync` e o resto dos campos.
+
+Documentação de regras para o agente: **`.cursor/rules/offline-architecture.mdc`** (secção *PK local temporária*).
 
 ---
 
@@ -37,7 +45,9 @@ O `push.ts` leria os registros de pedidos criados offline (com `synced_at IS NUL
 
 | Entidade | Estado |
 |---|---|
-| **Clientes** | **Implementado** em `sync-push-service.ts` (pendentes locais → API → upsert). |
+| **Clientes** | **Implementado** em `sync-push-service.ts` (pendentes → API → `updateClientId` se create → `upsertOne`). |
+| **Produtos** | **Implementado** — mesmo padrão (`updateProductId` no create). |
+| **Meios de pagamento** | **Implementado** — mesmo padrão (`updatePaymentMethodId` no create). |
 | **`orders`** | **Alvo** em `push.ts` (secção B abaixo). |
 
 `order_items` não têm push independente no desenho de pedidos — seriam enviados **embutidos no payload do pedido**. O backend criaria os itens junto com o pedido numa única requisição.

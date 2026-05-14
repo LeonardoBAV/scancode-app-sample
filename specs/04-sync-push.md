@@ -63,8 +63,8 @@ flowchart TD
     C -->|Não| Z["fim — nada a fazer"]
     C -->|Sim| D["Para cada order pendente"]
     D --> E["orderItemsRepo.findByOrder(order.id)"]
-    E --> F["Montar payload\n+ items + sales_representative_id de getAuth()"]
-    F --> G["scancodeAdapter.createOrder(payload)"]
+    E --> F["Montar payload\n+ order_items (sem sales_representative_id — API via auth)"]
+    F --> G["ScancodeAdapter.createOrder(payload)"]
     G --> H{sucesso?}
     H -->|Sim| I["ordersRepo.markAsSynced(localId, apiId)\nrealinha id = remote_id = apiId"]
     I --> D
@@ -76,26 +76,29 @@ flowchart TD
 
 ## Payload de um Pedido
 
+Tipos em `app/types/dtos/scancode-request.ts`: `OrderCreateRequestDTO` e `OrderCreateItemRequestDTO`.
+
 ```typescript
-interface CreateOrderPayload {
-    event_id: number;                     // orders.event_id
-    client_id: number;                    // orders.client_id
-    payment_method_id: number;            // orders.payment_method_id
-    sales_representative_id: number;      // de getAuth().sales_representative.id
-    status: string;                       // orders.status
-    notes: string | null;                 // orders.notes
-    items: CreateOrderItemPayload[];
+interface OrderCreateRequestDTO {
+    event_id: number;
+    client_id: number;
+    payment_method_id: number;
+    notes: string | null;
+    buyer_name: string | null;
+    buyer_phone: string | null;
+    status: OrderStatus;                  // 'pending' | 'completed' | 'cancelled'
+    order_items: OrderCreateItemRequestDTO[];
 }
 
-interface CreateOrderItemPayload {
-    product_id: number;                   // order_items.product_id
-    price: number;                        // order_items.price (snapshot — não re-consultado)
-    qty: number;                          // order_items.qty
-    notes: string | null;                 // order_items.notes
+interface OrderCreateItemRequestDTO {
+    product_id: number;
+    price: number;                        // snapshot — não re-consultado
+    qty: number;
+    notes: string | null;
 }
 ```
 
-> **`sales_representative_id`** é injetado de `getAuth().sales_representative.id` no momento do push, não do banco local. Isso garante que sempre usa o ID correto do seller logado, mesmo que o campo `sales_representative_id` no SQLite seja redundante neste caso.
+> **`sales_representative_id`** não vai no body do `POST /orders`. A API define o representante a partir do token (Bearer). O SQLite continua a guardar `sales_representative_id` no pedido local (preenchido na criação offline, p.ex. a partir de `getAuth()`), para relatórios e integridade local; na resposta do POST o campo vem preenchido e pode ser usado no `markAsSynced` / `upsert`.
 
 ---
 
@@ -133,47 +136,48 @@ Erro 5xx da API:
 ## Estrutura alvo do `push.ts` (pedidos)
 
 ```typescript
-// app/sync/push.ts — a criar
+// app/sync/push.ts — a criar (exemplo alinhado ao contrato da API; métodos `findUnsynced` / `findByOrder` / `markAsSynced` ainda não existem nos repositórios)
 
 import { getAuth } from '../persistence/auth-session';
-import * as scancodeAdapter from '../integrations/adapters/scancode-adapter';
-import * as ordersRepo      from '../db/repositories/orders.repo';
-import * as orderItemsRepo  from '../db/repositories/order-items.repo';
-import type { CreateOrderPayload } from '../types/dtos/scancode-request';
+import { OrderItemsRepository } from '../db/repositories/order-items.repo';
+import { OrdersRepository } from '../db/repositories/orders.repo';
+import { ScancodeAdapter } from '../integrations/adapters/scancode-adapter';
+import type { OrderCreateRequestDTO } from '../types/dtos/scancode-request';
 
 export async function pushOrders(): Promise<void> {
-    const pending = await ordersRepo.findUnsynced();
+    if (getAuth() == null) {
+        return;
+    }
+
+    const pending = await OrdersRepository.findUnsynced();
 
     if (pending.length === 0) {
         return;
     }
 
-    const auth = getAuth();
-    if (!auth) {
-        return; // não deve acontecer se o chamador verificou auth antes
-    }
-
     for (const order of pending) {
         try {
-            const items = await orderItemsRepo.findByOrder(order.id);
+            const items = await OrderItemsRepository.findByOrder(order.id);
 
-            const payload: CreateOrderPayload = {
-                event_id:                  order.event_id,
-                client_id:                 order.client_id,
-                payment_method_id:         order.payment_method_id,
-                sales_representative_id:   auth.sales_representative.id,
-                status:                    order.status,
-                notes:                     order.notes,
-                items: items.map((item) => ({
+            const payload: OrderCreateRequestDTO = {
+                event_id: order.event_id,
+                client_id: order.client_id,
+                payment_method_id: order.payment_method_id as number,
+                status: order.status,
+                notes: order.notes,
+                buyer_name: order.buyer_name,
+                buyer_phone: order.buyer_phone,
+                order_items: items.map((item) => ({
                     product_id: item.product_id,
-                    price:      item.price,
-                    qty:        item.qty,
-                    notes:      item.notes,
+                    price: item.price,
+                    qty: item.qty,
+                    notes: item.notes,
                 })),
             };
 
-            const apiId: number = (await scancodeAdapter.createOrder(payload)).id;
-            await ordersRepo.markAsSynced(order.id, apiId);
+            const created = await ScancodeAdapter.createOrder(payload);
+            const apiId: number = created.id as number;
+            await OrdersRepository.markAsSynced(order.id, apiId);
 
         } catch (err: unknown) {
             // Logar e continuar — não bloqueia os demais pedidos
@@ -185,39 +189,12 @@ export async function pushOrders(): Promise<void> {
 
 ---
 
-## O que precisa ser adicionado na camada de integração (pedidos)
+## Camada de integração (pedidos) — implementado
 
-### `scancode-api.ts`
-
-```typescript
-export async function createOrder(payload: CreateOrderPayload): Promise<CreateOrderResponseDTO> {
-    const { data } = await http.post<CreateOrderResponseDTO>('/orders', payload);
-    return data;
-}
-```
-
-### `scancode-adapter.ts`
-
-```typescript
-export async function createOrder(payload: CreateOrderPayload): Promise<CreateOrderResponseDTO> {
-    try {
-        return await scancodeApi.createOrder(payload);
-    } catch (err: unknown) {
-        handleApiError(err);
-    }
-}
-```
-
-### DTO de resposta esperado
-
-```typescript
-// app/types/dtos/scancode-response.ts — adicionar:
-export interface CreateOrderResponseDTO {
-    id: number;         // remote_id a ser gravado no SQLite
-    status: string;
-    // ... demais campos retornados pela API
-}
-```
+- **`scancode-request.ts`:** `OrderCreateRequestDTO`, `OrderCreateItemRequestDTO` (body com `order_items`).
+- **`scancode-response.ts`:** `OrderResponseDTO` = `{ data: OrderDTO }` (o pedido completo inclui `order_items` com `price` em string).
+- **`scancode-api.ts`:** `postOrder(body)` → `POST /orders`.
+- **`scancode-adapter.ts`:** `ScancodeAdapter.createOrder(payload)` → domínio `Order` (mapeamento partilhado com o pull de eventos).
 
 ---
 

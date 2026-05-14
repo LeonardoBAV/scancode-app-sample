@@ -47,6 +47,11 @@ export interface OrderDTO {
     order_items: OrderItemDTO[];
 }
 
+/** POST /orders — envelope matches other resource responses. */
+export interface OrderResponseDTO {
+    data: OrderDTO;
+}
+
 export interface EventDTO {
     id: number;
     name: string;

@@ -1,12 +1,13 @@
 import type {
     ClientCreateRequestDTO,
     ClientUpdateRequestDTO,
+    OrderCreateRequestDTO,
     PaymentMethodCreateRequestDTO,
     PaymentMethodUpdateRequestDTO,
     ProductCreateRequestDTO,
     ProductUpdateRequestDTO,
 } from '../../types/dtos/scancode-request';
-import type { ValidationErrorResponseDTO } from '../../types/dtos/scancode-response';
+import type { OrderDTO, ValidationErrorResponseDTO } from '../../types/dtos/scancode-response';
 import { ApiException } from '../../types/exceptions/api-exception';
 import type { Auth } from '../../types/sessions/auth';
 import type { Client } from '../../types/schema/client';
@@ -46,29 +47,7 @@ export class ScancodeAdapter {
                 end: dto.end,
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
-                orders: (dto.orders ?? []).map((orderDto): Order => ({
-                    id: orderDto.id,
-                    remote_id: orderDto.id,
-                    event_id: orderDto.event_id,
-                    status: orderDto.status as OrderStatus,
-                    notes: orderDto.notes,
-                    buyer_name: ScancodeAdapter.nullableBuyerField(orderDto.buyer_name),
-                    buyer_phone: ScancodeAdapter.nullableBuyerField(orderDto.buyer_phone),
-                    client_id: orderDto.client_id,
-                    sales_representative_id: orderDto.sales_representative_id,
-                    payment_method_id: orderDto.payment_method_id,
-                    is_sync: true,
-                    created_at: orderDto.created_at,
-                    updated_at: orderDto.updated_at,
-                    order_items: orderDto.order_items.map((itemDto): OrderItem => ({
-                        id: itemDto.id,
-                        order_id: itemDto.order_id,
-                        product_id: itemDto.product_id,
-                        price: Number.parseFloat(itemDto.price),
-                        qty: itemDto.qty,
-                        notes: itemDto.notes,
-                    })),
-                })),
+                orders: (dto.orders ?? []).map((orderDto): Order => ScancodeAdapter.mapOrderDtoToDomain(orderDto)),
             }));
         } catch (err: unknown) {
             ScancodeAdapter.handleApiError(err);
@@ -334,6 +313,41 @@ export class ScancodeAdapter {
         } catch (err: unknown) {
             ScancodeAdapter.handleApiError(err);
         }
+    }
+
+    public static async createOrder(payload: OrderCreateRequestDTO): Promise<Order> {
+        try {
+            const response = await scancodeApi.postOrder(payload);
+            return ScancodeAdapter.mapOrderDtoToDomain(response.data);
+        } catch (err: unknown) {
+            ScancodeAdapter.handleApiError(err);
+        }
+    }
+
+    private static mapOrderDtoToDomain(orderDto: OrderDTO): Order {
+        return {
+            id: orderDto.id,
+            remote_id: orderDto.id,
+            event_id: orderDto.event_id,
+            status: orderDto.status as OrderStatus,
+            notes: orderDto.notes,
+            buyer_name: ScancodeAdapter.nullableBuyerField(orderDto.buyer_name),
+            buyer_phone: ScancodeAdapter.nullableBuyerField(orderDto.buyer_phone),
+            client_id: orderDto.client_id,
+            sales_representative_id: orderDto.sales_representative_id,
+            payment_method_id: orderDto.payment_method_id,
+            is_sync: true,
+            created_at: orderDto.created_at,
+            updated_at: orderDto.updated_at,
+            order_items: orderDto.order_items.map((itemDto): OrderItem => ({
+                id: itemDto.id,
+                order_id: itemDto.order_id,
+                product_id: itemDto.product_id,
+                price: Number.parseFloat(itemDto.price),
+                qty: itemDto.qty,
+                notes: itemDto.notes,
+            })),
+        };
     }
 
     private static handleApiError(err: unknown): never {

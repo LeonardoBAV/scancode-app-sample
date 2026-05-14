@@ -1,3 +1,5 @@
+import type { OrderStatus } from '../schema/order';
+
 export interface LoginRequestDTO {
     cpf: string;
     password: string;
@@ -35,3 +37,25 @@ export interface PaymentMethodUpdateRequestDTO {
 
 /** POST /payment-methods — same body shape as PATCH */
 export type PaymentMethodCreateRequestDTO = PaymentMethodUpdateRequestDTO;
+
+/** POST /orders — one line item (body `order_items[]`). */
+export interface OrderCreateItemRequestDTO {
+    product_id: number;
+    price: number;
+    qty: number;
+    notes: string | null;
+}
+
+/**
+ * POST /orders — `sales_representative_id` is set by the API from the auth token, not sent in the body.
+ */
+export interface OrderCreateRequestDTO {
+    event_id: number;
+    client_id: number;
+    payment_method_id: number;
+    notes: string | null;
+    buyer_name: string | null;
+    buyer_phone: string | null;
+    status: OrderStatus;
+    order_items: OrderCreateItemRequestDTO[];
+}

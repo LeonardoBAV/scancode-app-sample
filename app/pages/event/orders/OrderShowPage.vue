@@ -76,7 +76,7 @@
                         <Label col="1" :text="synced ? $t('pages.orderList.synced') : $t('pages.orderList.notSynced')" class="text-sm" :class="synced ? 'text-success' : 'text-warning'" verticalAlignment="center" />
                     </GridLayout>
                 </GridLayout>
-                <GridLayout rows="auto" columns="*, *" columnSpacing="12">
+                <GridLayout rows="auto" columns="*, auto, auto" columnSpacing="12">
                     <Button
                         row="0"
                         col="0"
@@ -85,7 +85,15 @@
                         :isEnabled="primaryFooterButtonEnabled"
                         @tap="onPrimaryFooterTap"
                     />
-                    <Button row="0" col="1" :text="Icons.lucide('printer')" class="lucide btn-secondary" @tap="onPrint" />
+                    <Button
+                        row="0"
+                        col="1"
+                        :text="Icons.lucide('refresh-cw')"
+                        class="lucide btn-secondary"
+                        :isEnabled="!synced"
+                        @tap="onSyncOrder"
+                    />
+                    <Button row="0" col="2" :text="Icons.lucide('file-text')" class="lucide btn-secondary" @tap="onPrint" />
                 </GridLayout>
             </StackLayout>
         </GridLayout>
@@ -203,6 +211,10 @@ function goToClientShow(): void {
 
 function onPrint(): void {
     console.log('Print tapped');
+}
+
+function onSyncOrder(): void {
+    // Sincronização do pedido — ação a definir.
 }
 
 function onPrimaryFooterTap(): void {

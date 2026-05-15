@@ -121,10 +121,9 @@ flowchart TD
 | **API** | `integrations/apis/scancode-api.ts` | Define endpoints, monta payloads, retorna DTOs | Trata erros de negócio |
 | **Adapter** | `integrations/adapters/scancode-adapter.ts` | Regras de erro, limpa auth no 401, converte DTOs | Conhece Vue ou SQLite |
 | **Repository** | `db/repositories/*.repo.ts` | CRUD no SQLite — único lugar com SQL | Conhece API ou Vue |
-| **SyncService** | `sync/sync-service.ts` | Orquestrador: `refresh()` (login) delega no pull; `updateEntities()` (Profile) push de clientes + pull parcial. | SQL direto; API direta |
+| **SyncService** | `sync/sync-service.ts` | Orquestrador: `refresh()` (login) delega no pull; `updateEntities()` (Profile) delega em `syncPushService.updateEntities()` + `syncPullService.updateEntities()`. | SQL direto; API direta |
 | **SyncPullService** | `sync/sync-pull-service.ts` | Pull: adapter → repositórios; truncate em `refresh()`; `*Composable.refresh()` onde implementado (events, products, payment methods). **`sync_log` ainda não escrito aqui.** | Estado reativo (exceto refresh explícito); SQL direto |
-| **SyncPushService** | `sync/sync-push-service.ts` | Push de **clientes** não sincronizados via adapter → `upsert` local. | Estado reativo |
-| **push.ts (pedidos)** | `sync/push.ts` (não existe — alvo em `04`) | Lê pedidos `synced_at IS NULL` → API → realinhamento de PK | — |
+| **SyncPushService** | `sync/sync-push-service.ts` | Push de clientes, produtos, meios de pagamento e pedidos (`updateOrders`) via adapter → realinhamento de PK onde aplicável → `upsert` local; `refreshOrderItems` após create de pedido. | Estado reativo |
 | **Composable** | `composables/use*.ts` | Expõe `ref`s reativos para a UI, lê/escreve via repo | Chama API diretamente; contém SQL |
 | **Page/Component** | `pages/**/*.vue` | Consome composables, renderiza UI | Contém lógica de negócio ou SQL |
 
@@ -136,7 +135,7 @@ flowchart TD
 2. **Repositório nunca conhece Vue** — sem `ref`, sem `reactive`, sem imports do Vue.
 3. **SQL só existe em repositórios** — nenhuma outra camada escreve SQL.
 4. **Push nunca re-consulta preços** — o `price` do `order_item` é o snapshot do momento da criação local.
-5. **`synced_at IS NULL` = verdade do estado offline** — é a única fonte de "o que ainda não foi para a API".
+5. **Pendentes de push:** `is_sync = 0` (e `remote_id IS NULL` onde aplicável ao fluxo de create) — ver `specs/04-sync-push.md`; não usar `synced_at` em `orders` como neste schema.
 6. **Pull não bloqueia uso** — falha de pull não impede o app de funcionar com dados locais existentes.
 7. **Adapter permanece agnóstico ao SQLite** — o adapter existente não é modificado para conhecer o banco local.
 
@@ -178,8 +177,7 @@ app/
 ├── sync/
 │   ├── sync-service.ts          # SyncService — orquestrador (login refresh, Profile updateEntities)
 │   ├── sync-pull-service.ts     # SyncPullService — pull API → SQLite (+ truncate em refresh)
-│   ├── sync-push-service.ts     # SyncPushService — push clientes → API (hoje)
-│   └── push.ts                  # pedidos SQLite → API (alvo — quando existir)
+│   ├── sync-push-service.ts     # SyncPushService — push clientes, produtos, meios, pedidos → API
 │
 └── composables/
     ├── event-composable.ts     # EventsComposable
@@ -202,7 +200,7 @@ specs/                           # este diretório — documentação técnica
 | **3** | Novos endpoints na API + funções no adapter para pull | Fase 2 |
 | **4** | `sync/sync-pull-service.ts`, `sync/sync-push-service.ts`, `sync/sync-service.ts` — ver `06-sync-services.md` | Fase 3 |
 | **5** | Composables (leitura do SQLite para UI) | Fase 2 |
-| **6** | `sync/push.ts` para **pedidos** (ação explícita; alvo em `04`; clientes já em `sync-push-service.ts`) | Fase 3 |
+| **6** | Push de pedidos já em `sync-push-service.ts` (`updateOrders`); ver `04-sync-push.md` | Fase 3 |
 
 > As fases 4, 5 e 6 podem ser desenvolvidas em paralelo após a Fase 3.
 

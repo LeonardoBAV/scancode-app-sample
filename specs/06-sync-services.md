@@ -83,14 +83,14 @@ Após gravação no SQLite, o código chama **`EventsComposable.refresh()`**, **
 | Ecrã / ação | Chamada | Efeito resumido |
 | --- | --- | --- |
 | **Login** (após `setAuth`) | `syncService.refresh()` | Wipe operacional + pull de eventos, produtos (e categorias), clientes, métodos de pagamento. |
-| **Profile — “Sincronizar”** | `syncService.updateEntities()` | Push de clientes pendentes + pull parcial de catálogo (produtos/categorias, clientes, métodos de pagamento). |
+| **Profile — “Sincronizar”** | `syncService.updateEntities()` | Push de clientes, produtos, meios de pagamento e pedidos pendentes + pull parcial de catálogo. |
 
 ---
 
 ## Integração com o adapter e repositórios
 
 - **Pull:** `SyncPullService` usa apenas **`ScancodeAdapter`** (e repositórios). Não contém SQL; não mantém estado Vue, exceto as chamadas controladas a `*Composable.refresh()` descritas acima.
-- **Push:** `SyncPushService` usa **`ScancodeAdapter.updateClient`** e **`ClientsRepository`**.
+- **Push:** `SyncPushService` usa **`ScancodeAdapter`** e repositórios (clientes, produtos, meios de pagamento, **pedidos**, `order_items` via `OrderItemsRepository` no refresh de itens).
 - **`sync_log`:** a escrita em `sync_log` após cada entidade, descrita como alvo em `specs/03-sync-pull.md`, **não está ligada** nestes serviços no código atual (ver quadro abaixo).
 
 ---
@@ -104,7 +104,7 @@ Use esta tabela para interpretar `00-architecture.md`, `03-sync-pull.md` e `04-s
 | Backup de `orders` com `synced_at IS NULL` antes do wipe no login | Sim (`00-architecture`) | **Não implementado** — tabelas de backup existem nas migrations, mas o fluxo de login não as popula. |
 | Pull de `orders` / `order_items` após login | Sim (ordem 6–7 em `03`) | **Não implementado** — `refresh()` faz truncate dessas tabelas mas **não** as repovoa pela API. |
 | `sync_log` / `pulled_at` após cada pull | Descrito em `03` | **Não implementado** no `app/sync/*`. |
-| Push de **pedidos** (`push.ts`, `pushOrders`) | `04-sync-push.md` | **Não implementado** — ficheiro `app/sync/push.ts` não existe. |
+| Push de **pedidos** (`updateOrders` / `pushOrders` em `sync-push-service.ts`) | `04-sync-push.md` | **Parcialmente implementado** — mesmo ficheiro que outras entidades; ramo `update` ainda não activo no código (`04` descreve o actual, incl. `|| true`). |
 | Push de **clientes** offline | Não era o foco original de `04` | **Implementado** em `sync-push-service.ts`. |
 | Profile só pull de catálogo | `00-architecture` (regra antiga) | **Atual:** Profile faz **push de clientes** + **pull parcial** via `syncService.updateEntities()`. |
 
@@ -118,9 +118,9 @@ Quando as linhas acima forem implementadas, actualizar esta tabela e reduzir not
 | --- | --- |
 | `specs/00-architecture.md` | Visão offline-first, login/logout, diagrama de camadas. |
 | `specs/03-sync-pull.md` | Ordem de pull, upsert, entidades, **comportamento alvo** (incl. `sync_log`, orders). |
-| `specs/04-sync-push.md` | Contrato alvo para **pedidos**; secção sobre clientes / `sync-push-service` alinhada ao código. |
+| `specs/04-sync-push.md` | Push SQLite → API: clientes, produtos, meios, **pedidos** (`sync-push-service.ts`), `refreshOrderItems`, PK negativa; desenho antigo `push.ts` arquivado na nota final do `04`. |
 | `specs/05-composables.md` | Onde `*Composable.refresh()` é chamado. |
 
 ---
 
-**Última revisão (alinhamento ao código):** 2026-04-09
+**Última revisão (alinhamento ao código):** 2026-05-14

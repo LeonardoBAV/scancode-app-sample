@@ -1,6 +1,7 @@
 import type {
     ClientCreateRequestDTO,
     ClientUpdateRequestDTO,
+    OrderCreateItemRequestDTO,
     OrderCreateRequestDTO,
     PaymentMethodCreateRequestDTO,
     PaymentMethodUpdateRequestDTO,
@@ -315,13 +316,32 @@ export class ScancodeAdapter {
         }
     }
 
-    public static async createOrder(payload: OrderCreateRequestDTO): Promise<Order> {
+    public static async createOrder(order: Order): Promise<Order> {
         try {
+            const payload: OrderCreateRequestDTO = ScancodeAdapter.toOrderCreateRequestDTO(order);
             const response = await scancodeApi.postOrder(payload);
             return ScancodeAdapter.mapOrderDtoToDomain(response.data);
         } catch (err: unknown) {
             ScancodeAdapter.handleApiError(err);
         }
+    }
+
+    private static toOrderCreateRequestDTO(order: Order): OrderCreateRequestDTO {
+        return {
+            event_id: order.event_id,
+            client_id: order.client_id,
+            payment_method_id: order.payment_method_id,
+            notes: order.notes,
+            buyer_name: order.buyer_name,
+            buyer_phone: order.buyer_phone,
+            status: order.status,
+            order_items: (order.order_items ?? []).map((item): OrderCreateItemRequestDTO => ({
+                product_id: item.product_id,
+                price: item.price,
+                qty: item.qty,
+                notes: item.notes,
+            })),
+        };
     }
 
     private static mapOrderDtoToDomain(orderDto: OrderDTO): Order {

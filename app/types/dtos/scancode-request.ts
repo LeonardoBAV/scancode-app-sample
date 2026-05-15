@@ -52,7 +52,7 @@ export interface OrderCreateItemRequestDTO {
 export interface OrderCreateRequestDTO {
     event_id: number;
     client_id: number;
-    payment_method_id: number;
+    payment_method_id: number | null;
     notes: string | null;
     buyer_name: string | null;
     buyer_phone: string | null;

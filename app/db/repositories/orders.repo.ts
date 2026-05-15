@@ -170,9 +170,12 @@ export class OrdersRepository extends RepositoryBase {
         const buyerName: string | null = input.buyer_name ?? client?.buyer_name ?? null;
         const buyerPhone: string | null = input.buyer_phone ?? client?.buyer_contact ?? null;
 
+        const localId: number = await OrdersRepository.allocateNextLocalNegativeId('orders');
+
         await OrdersRepository.execute(
             `
                 INSERT INTO orders (
+                    id,
                     remote_id,
                     event_id,
                     status,
@@ -185,9 +188,10 @@ export class OrdersRepository extends RepositoryBase {
                     is_sync,
                     created_at,
                     updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `,
             [
+                localId,
                 null,
                 input.event_id,
                 status,
@@ -203,19 +207,36 @@ export class OrdersRepository extends RepositoryBase {
             ],
         );
 
-        const row: { id: number } | null = await OrdersRepository.queryOne<{ id: number }>(
-            'SELECT last_insert_rowid() as id',
-        );
-        const id: number = row?.id ?? 0;
-        if (!Number.isFinite(id) || id <= 0) {
-            throw new Error('Failed to create order (missing last_insert_rowid)');
-        }
-
-        const created: Order | null = await OrdersRepository.findByIdWithRelations(id);
+        const created: Order | null = await OrdersRepository.findByIdWithRelations(localId);
         if (!created) {
             throw new Error('Failed to load newly created order');
         }
         return created;
+    }
+
+    public static async upsertOne(order: Order): Promise<void> {
+        await OrdersRepository.insertOrReplaceOne('orders', OrdersRepository.ORDER_COLUMNS, order);
+    }
+
+    /** `UPDATE` só da coluna `id` (PK local negativo → id da API); FKs com ON UPDATE CASCADE acompanham. */
+    public static async updateOrderId(fromId: number | null, toId: number | null): Promise<void> {
+        if (fromId == null || toId == null || fromId === toId || !Number.isFinite(fromId) || !Number.isFinite(toId)) {
+            return;
+        }
+        await OrdersRepository.execute(
+            'UPDATE orders SET id = ? WHERE id = ? AND remote_id IS NULL',
+            [toId, fromId],
+        );
+    }
+
+    public static async findAllUnsynced(): Promise<Order[]> {
+        const rows: Order[] = await OrdersRepository.queryAll<Order>(
+            'SELECT * FROM orders WHERE is_sync = 0 ORDER BY id ASC',
+        );
+        return rows.map((row: Order): Order => ({
+            ...row,
+            is_sync: OrdersRepository.readSqliteBool(row.is_sync as unknown),
+        }));
     }
 
     public static async updateClientId(orderId: number, clientId: number): Promise<void> {

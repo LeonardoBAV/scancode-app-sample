@@ -11,14 +11,15 @@ export class SyncService {
         return SyncService._instance;
     }
 
+    public async refresh(): Promise<void> {
+        await syncPullService.refresh();
+    }
+
     public async updateEntities(): Promise<void> {
         await syncPushService.updateEntities();
         await syncPullService.updateEntities();
     }
 
-    public async refresh(): Promise<void> {
-        await syncPullService.refresh();
-    }
 }
 
 export const syncService: SyncService = SyncService.getInstance();

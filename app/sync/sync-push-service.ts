@@ -1,8 +1,11 @@
 import type { Client } from '../types/schema/client';
+import type { Order } from '../types/schema/order';
 import type { PaymentMethod } from '../types/schema/payment-method';
 import type { Product } from '../types/schema/product';
 import { ScancodeAdapter } from '../integrations/adapters/scancode-adapter';
 import { ClientsRepository } from '../db/repositories/clients.repo';
+import { OrderItemsRepository } from '../db/repositories/order-items.repo';
+import { OrdersRepository } from '../db/repositories/orders.repo';
 import { PaymentMethodsRepository } from '../db/repositories/payment-methods.repo';
 import { ProductsRepository } from '../db/repositories/products.repo';
 
@@ -20,6 +23,42 @@ export class SyncPushService {
         await this.pushClients();
         await this.pushProducts();
         await this.pushPaymentMethods();
+        await this.updateOrders(null);
+    }
+
+    public async updateOrders(orders: Order[] | null): Promise<void> {
+        const pending: Order[] = orders ?? await OrdersRepository.findAllUnsynced();
+        await this.pushOrders(pending);
+    }
+
+    private async pushOrders(orders: Order[]): Promise<void> {
+        for (const orderPending of orders) {
+
+            const orderWithItems: Order = await OrdersRepository.findByIdWithRelations(orderPending.id as number) as Order;
+
+            let order: Order;
+
+            if (orderWithItems.remote_id == null || true) {
+                order = await ScancodeAdapter.createOrder(orderWithItems);
+                await OrdersRepository.updateOrderId(orderPending.id, order.id);
+            } else {
+                //order = await ScancodeAdapter.updateOrder(orderWithItems);
+            }
+
+            await this.refreshOrderItems(order.id as number, order.order_items ?? []);
+            order.is_sync = true;
+            order.remote_id = order.id;
+            await OrdersRepository.upsertOne(order);
+        }
+    }
+
+    //talvez alocar esta logica depois em outro lugar
+    private async refreshOrderItems(orderId: number, items: Order['order_items']): Promise<void> {
+        await OrderItemsRepository.deleteByOrderId(orderId);
+        const list = items ?? [];
+        if (list.length > 0) {
+            await OrderItemsRepository.upsertMany(list);
+        }
     }
 
     private async pushClients(): Promise<void> {

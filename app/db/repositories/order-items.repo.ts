@@ -39,14 +39,19 @@ export class OrderItemsRepository extends RepositoryBase {
         if (qty <= 0) {
             return;
         }
+        const localId: number = await OrderItemsRepository.allocateNextLocalNegativeId('order_items');
         await OrderItemsRepository.execute(
             `
-                INSERT INTO order_items (order_id, product_id, price, qty, notes)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO order_items (id, order_id, product_id, price, qty, notes)
+                VALUES (?, ?, ?, ?, ?, ?)
             `,
-            [input.order_id, input.product_id, input.price, qty, input.notes ?? null],
+            [localId, input.order_id, input.product_id, input.price, qty, input.notes ?? null],
         );
         await OrderItemsRepository.touchOrder(input.order_id);
+    }
+
+    public static async deleteByOrderId(orderId: number): Promise<void> {
+        await OrderItemsRepository.execute('DELETE FROM order_items WHERE order_id = ?', [orderId]);
     }
 
     public static async setQtyById(orderItemId: number, qty: number): Promise<void> {

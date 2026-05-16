@@ -48,9 +48,32 @@
                 <Label :text="$t('pages.orderList.emptyHint')" class="text-sm text-muted-foreground text-center" textWrap="true" />
             </StackLayout>
 
-            <!-- Footer: add order -->
-            <GridLayout v-if="currentEvent && !loading" row="3" rows="auto" class="footer-bar">
-                <Button :text="$t('pages.orderList.addOrder')" class="btn-primary" @tap="onAddNewOrder" />
+            <!-- Footer: sync | novo pedido -->
+            <GridLayout
+                v-if="currentEvent && !loading"
+                row="3"
+                rows="auto"
+                columns="*, *"
+                columnSpacing="12"
+                class="footer-bar"
+            >
+            <Button
+                    row="0"
+                    col="0"
+                    horizontalAlignment="stretch"
+                    :text="Icons.lucide('plus')"
+                    class="lucide btn-primary"
+                    @tap="onAddNewOrder"
+                />
+                <Button
+                    row="0"
+                    col="1"
+                    horizontalAlignment="stretch"
+                    :text="Icons.lucide('refresh-cw')"
+                    class="lucide btn-secondary"
+                    :isEnabled="!syncingOrders"
+                    @tap="onSyncOrders"
+                />
             </GridLayout>
 
         </GridLayout>
@@ -63,6 +86,7 @@ import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
 import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import { syncService } from '../../../sync/sync-service';
 import type { Order as SchemaOrder, OrderStatus } from '../../../types/schema/order';
 import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
@@ -91,6 +115,7 @@ const currentEvent = computed(() => currentEventRef.value);
 const loading = computed(() => loadingRef.value);
 
 const searchQuery = ref('');
+const syncingOrders = ref(false);
 
 function clientDisplayName(order: DeepReadonly<SchemaOrder>): string {
     const c = order.client;
@@ -170,5 +195,21 @@ function onAddNewOrder(): void {
         props: { originPage: 'OrderListPage' as const },
         backstackVisible: false,
     });
+}
+
+async function onSyncOrders(): Promise<void> {
+    const eventId = currentEvent.value?.id;
+    if (typeof eventId !== 'number') {
+        return;
+    }
+    syncingOrders.value = true;
+    try {
+        await syncService.updateOrders();
+        await useCurrentEvent.setEvent(eventId);
+    } catch (err: unknown) {
+        console.error('[OrderListPage] onSyncOrders failed:', err);
+    } finally {
+        syncingOrders.value = false;
+    }
 }
 </script>

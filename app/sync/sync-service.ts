@@ -20,6 +20,11 @@ export class SyncService {
         await syncPullService.updateEntities();
     }
 
+    public async updateOrders(): Promise<void> {
+        await syncPushService.updateEntities();
+        await syncPushService.updateOrders();
+    }
+
 }
 
 export const syncService: SyncService = SyncService.getInstance();

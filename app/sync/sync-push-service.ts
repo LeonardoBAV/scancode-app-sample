@@ -23,11 +23,10 @@ export class SyncPushService {
         await this.pushClients();
         await this.pushProducts();
         await this.pushPaymentMethods();
-        await this.updateOrders(null);
     }
 
-    public async updateOrders(orders: Order[] | null): Promise<void> {
-        const pending: Order[] = orders ?? await OrdersRepository.findAllUnsynced();
+    public async updateOrders(): Promise<void> {
+        const pending: Order[] = await OrdersRepository.findAllUnsynced();
         await this.pushOrders(pending);
     }
 

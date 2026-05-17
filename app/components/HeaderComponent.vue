@@ -36,6 +36,7 @@ import { nextTick, onMounted, ref, type Ref } from 'vue';
 import { Frame } from '@nativescript/core';
 import { useNavigation } from '../composables/useNavigation';
 import { getAuth } from '../persistence/auth-session';
+import { getHostFrame } from '../utils/navigation-frame';
 import { Icons, type LucideIcon } from '../utils/icons';
 import Profile from '../pages/Profile/Profile.vue';
 
@@ -75,11 +76,7 @@ const avatarInitials: string = ((): string => {
 })();
 
 function getNavFrame(): Frame | null {
-    const topmost: Frame | null = Frame.topmost();
-    if (topmost?.canGoBack()) {
-        return topmost;
-    }
-    return Frame.getFrameById('root-frame') ?? topmost;
+    return getHostFrame();
 }
 
 onMounted(() => {
@@ -107,7 +104,6 @@ function onRightAction(): void {
 
 function openProfile(): void {
     navigateTo(Profile, {
-        frame: 'root-frame',
         transition: { name: 'slideLeft', duration: 300 },
     });
 }

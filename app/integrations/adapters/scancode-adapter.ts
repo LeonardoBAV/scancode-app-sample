@@ -3,6 +3,7 @@ import type {
     ClientUpdateRequestDTO,
     OrderCreateItemRequestDTO,
     OrderCreateRequestDTO,
+    OrderUpdateRequestDTO,
     PaymentMethodCreateRequestDTO,
     PaymentMethodUpdateRequestDTO,
     ProductCreateRequestDTO,
@@ -326,6 +327,16 @@ export class ScancodeAdapter {
         }
     }
 
+    public static async updateOrder(order: Order): Promise<Order> {
+        try {
+            const payload: OrderUpdateRequestDTO = ScancodeAdapter.toOrderUpdateRequestDTO(order);
+            const response = await scancodeApi.patchOrder(order.remote_id as number, payload);
+            return ScancodeAdapter.mapOrderDtoToDomain(response.data);
+        } catch (err: unknown) {
+            ScancodeAdapter.handleApiError(err);
+        }
+    }
+
     private static toOrderCreateRequestDTO(order: Order): OrderCreateRequestDTO {
         return {
             event_id: order.event_id,
@@ -335,13 +346,31 @@ export class ScancodeAdapter {
             buyer_name: order.buyer_name,
             buyer_phone: order.buyer_phone,
             status: order.status,
-            order_items: (order.order_items ?? []).map((item): OrderCreateItemRequestDTO => ({
-                product_id: item.product_id,
-                price: item.price,
-                qty: item.qty,
-                notes: item.notes,
-            })),
+            order_items: ScancodeAdapter.toOrderItemRequestDTOs(order.order_items),
         };
+    }
+
+    private static toOrderUpdateRequestDTO(order: Order): OrderUpdateRequestDTO {
+        return {
+            client_id: order.client_id,
+            payment_method_id: order.payment_method_id,
+            notes: order.notes,
+            buyer_name: order.buyer_name,
+            buyer_phone: order.buyer_phone,
+            status: order.status,
+            order_items: ScancodeAdapter.toOrderItemRequestDTOs(order.order_items),
+        };
+    }
+
+    private static toOrderItemRequestDTOs(
+        items: OrderItem[] | undefined,
+    ): OrderCreateItemRequestDTO[] {
+        return (items ?? []).map((item): OrderCreateItemRequestDTO => ({
+            product_id: item.product_id,
+            price: item.price,
+            qty: item.qty,
+            notes: item.notes,
+        }));
     }
 
     private static mapOrderDtoToDomain(orderDto: OrderDTO): Order {

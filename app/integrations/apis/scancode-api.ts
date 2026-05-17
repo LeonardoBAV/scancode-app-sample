@@ -6,6 +6,7 @@ import type {
     ClientUpdateRequestDTO,
     LoginRequestDTO,
     OrderCreateRequestDTO,
+    OrderUpdateRequestDTO,
     PaymentMethodCreateRequestDTO,
     PaymentMethodUpdateRequestDTO,
     ProductCreateRequestDTO,
@@ -108,6 +109,11 @@ export class ScancodeApi extends HttpClient {
 
     public async postOrder(body: OrderCreateRequestDTO): Promise<OrderResponseDTO> {
         const { data } = await this.post<OrderResponseDTO>('/orders', body);
+        return data;
+    }
+
+    public async patchOrder(remoteId: number, body: OrderUpdateRequestDTO): Promise<OrderResponseDTO> {
+        const { data } = await this.patch<OrderResponseDTO>(`/orders/${remoteId}`, body);
         return data;
     }
 }

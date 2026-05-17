@@ -37,11 +37,11 @@ export class SyncPushService {
 
             let order: Order;
 
-            if (orderWithItems.remote_id == null || true) {
+            if (orderWithItems.remote_id == null) {
                 order = await ScancodeAdapter.createOrder(orderWithItems);
                 await OrdersRepository.updateOrderId(orderPending.id, order.id);
             } else {
-                //order = await ScancodeAdapter.updateOrder(orderWithItems);
+                order = await ScancodeAdapter.updateOrder(orderWithItems);
             }
 
             await this.refreshOrderItems(order.id as number, order.order_items ?? []);

@@ -59,3 +59,19 @@ export interface OrderCreateRequestDTO {
     status: OrderStatus;
     order_items: OrderCreateItemRequestDTO[];
 }
+
+/** PATCH /orders/:id — one line item (body `order_items[]`). */
+export type OrderUpdateItemRequestDTO = OrderCreateItemRequestDTO;
+
+/**
+ * PATCH /orders/:id — `event_id` and `sales_representative_id` are not sent; server keeps them.
+ */
+export interface OrderUpdateRequestDTO {
+    client_id: number;
+    payment_method_id: number | null;
+    notes: string | null;
+    buyer_name: string | null;
+    buyer_phone: string | null;
+    status: OrderStatus;
+    order_items: OrderUpdateItemRequestDTO[];
+}

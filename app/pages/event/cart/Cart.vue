@@ -118,10 +118,7 @@ async function refreshOrder(): Promise<void> {
 }
 
 function getSelectedOrderId(): number {
-    const orderId: number | undefined = orderRef.value?.id ?? undefined;
-    if (orderId == null || !Number.isFinite(orderId) || orderId <= 0) {
-        throw new Error('Order not selected');
-    }
+    const orderId: number = (orderRef.value?.id) as number;
     return orderId;
 }
 

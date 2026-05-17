@@ -38,11 +38,24 @@ export abstract class RepositoryBase {
         return Number(value) === 1;
     }
 
-    protected static buildInsertOrReplaceSql(table: string, columns: readonly string[]): string {
+    /**
+     * Upsert without deleting the row (avoids ON DELETE CASCADE on parent tables e.g. `orders` → `order_items`).
+     * Uses SQLite `ON CONFLICT DO UPDATE` instead of `INSERT OR REPLACE` (which is DELETE + INSERT).
+     */
+    protected static buildUpsertSql(
+        table: string,
+        columns: readonly string[],
+        primaryKey: string = 'id',
+    ): string {
         RepositoryBase.assertSafeSqlIdentifier(table);
+        const safePk: string = RepositoryBase.assertSafeSqlIdentifier(primaryKey);
         const safeColumns: string[] = columns.map((c: string) => RepositoryBase.assertSafeSqlIdentifier(c));
         const placeholders: string = safeColumns.map(() => '?').join(', ');
-        return `INSERT OR REPLACE INTO ${table} (${safeColumns.join(', ')}) VALUES (${placeholders})`;
+        const updateAssignments: string = safeColumns
+            .filter((c: string): boolean => c !== safePk)
+            .map((c: string): string => `${c} = excluded.${c}`)
+            .join(', ');
+        return `INSERT INTO ${table} (${safeColumns.join(', ')}) VALUES (${placeholders}) ON CONFLICT(${safePk}) DO UPDATE SET ${updateAssignments}`;
     }
 
     protected static rowParamsForColumns<T extends object>(
@@ -89,7 +102,7 @@ export abstract class RepositoryBase {
             return;
         }
         const db: SQLiteDatabase = await RepositoryBase.connection();
-        const sql: string = RepositoryBase.buildInsertOrReplaceSql(table, columns as unknown as string[]);
+        const sql: string = RepositoryBase.buildUpsertSql(table, columns as unknown as string[]);
         await db.transaction(async () => {
             for (const row of rows) {
                 await db.execute(sql, RepositoryBase.rowParamsForColumns(row, columns));

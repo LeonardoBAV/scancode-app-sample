@@ -44,11 +44,10 @@ export class SyncPushService {
                 order = await ScancodeAdapter.updateOrder(orderWithItems);
             }
 
-            console.log('order.order_items', order.order_items);
-            await this.refreshOrderItems(order.id as number, order.order_items ?? []);
             order.is_sync = true;
             order.remote_id = order.id;
             await OrdersRepository.upsertOne(order);
+            await this.refreshOrderItems(order.id as number, order.order_items ?? []);
         }
     }
 
@@ -56,7 +55,6 @@ export class SyncPushService {
     private async refreshOrderItems(orderId: number, items: Order['order_items']): Promise<void> {
         await OrderItemsRepository.deleteByOrderId(orderId);
         const list = items ?? [];
-        console.log('list', list);
         if (list.length > 0) {
             await OrderItemsRepository.upsertMany(list);
         }

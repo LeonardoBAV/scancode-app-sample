@@ -74,6 +74,7 @@
 // --- Imports ---
 import { ref, computed, type Ref, type ComputedRef } from 'vue';
 import { Dialogs, type TextField } from '@nativescript/core';
+import { BarcodeScanner } from 'nativescript-barcodescanner';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
 import { ProductsComposable } from '../../../composables/products-composable';
@@ -84,6 +85,7 @@ import type { Product } from '../../../types/schema/product';
 import type { OrderItem } from '../../../types/schema/order-item';
 import { Icons } from '../../../utils/icons';
 import { OrderItemsRepository } from '../../../db/repositories/order-items.repo';
+import { showToast } from '../../../composables/toast-state';
 
 
 // --- Component logic ---
@@ -117,8 +119,43 @@ const totalQuantityLabel: ComputedRef<string> = computed((): string => {
 
 const footerStatsLabel: ComputedRef<string> = computed((): string => `${productCountLabel.value} · ${totalQuantityLabel.value}`);
 
-function onCameraTap(): void {
-    // TODO: ação da câmera
+async function onCameraTap(): Promise<void> {
+    if (!canEditOrder.value) {
+        return;
+    }
+    const scanner = new BarcodeScanner();
+    try {
+        const result = await scanner.scan({
+            formats: 'EAN_13, EAN_8, UPC_A, UPC_E, CODE_128, CODE_39, ITF',
+            cancelLabel: t('pages.cart.scanCancel'),
+            message: t('pages.cart.scanMessage'),
+            preferFrontCamera: false,
+            showFlipCameraButton: false,
+            showTorchButton: true,
+            torchOn: false,
+            resultDisplayDuration: 0,
+            openSettingsIfPermissionWasPreviouslyDenied: true,
+        });
+
+        const scannedCode: string = result.text.trim();
+        if (!scannedCode) {
+            return;
+        }
+
+        const found: Product | undefined = ProductsComposable.getList().value.find(
+            (p: Product): boolean => !!p.barcode && p.barcode.trim() === scannedCode
+        );
+
+        if (found == null) {
+            showToast({ message: t('pages.cart.scanNotFound'), variant: 'error' });
+            return;
+        }
+
+        await addProduct(found);
+        Haptics.vibrateSuccess();
+    } catch {
+        // scanner cancelado pelo usuário — sem ação
+    }
 }
 
 function closeKeyboard(): void {

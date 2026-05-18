@@ -8,6 +8,7 @@
     "search": "Search",
     "loading": "Loading...",
     "networkError": "Connection error. Check your internet.",
+    "unexpectedError": "An unexpected error occurred. Please try again.",
     "error": "Error",
     "free": "Free",
     "orders": "orders",

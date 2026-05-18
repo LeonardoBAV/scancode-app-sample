@@ -8,6 +8,7 @@
     "search": "Buscar",
     "loading": "Carregando...",
     "networkError": "Erro de conexão. Verifique sua internet.",
+    "unexpectedError": "Ocorreu um erro inesperado. Tente novamente.",
     "error": "Erro",
     "free": "Grátis",
     "orders": "pedidos",

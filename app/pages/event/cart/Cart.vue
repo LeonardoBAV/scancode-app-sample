@@ -51,10 +51,21 @@
             </GridLayout>
 
             <!-- Footer -->
-            <GridLayout v-if="hasSelectedOrder" row="3" rows="auto" columns="*, *" class="footer-bar">
-                <Label col="0" :text="totalItemsLabel" class="text-base font-semibold text-foreground" verticalAlignment="center" />
-                <Label col="1" :text="Format.formatCurrencyBR(cartTotal)" class="text-xl font-bold text-success text-right" verticalAlignment="center" />
-            </GridLayout>
+            <StackLayout v-if="hasSelectedOrder" row="3" class="footer-bar">
+                <GridLayout rows="auto, auto, auto" columns="*, auto">
+                    <Button
+                        row="0"
+                        col="1"
+                        rowSpan="3"
+                        :text="Icons.lucide('camera')"
+                        class="lucide btn-icon bg-secondary text-secondary-foreground w-12 h-12"
+                        verticalAlignment="center"
+                        @tap="onCameraTap"
+                    />
+                    <Label row="1" col="0" :text="Format.formatCurrencyBR(cartTotal)" class="text-2xl font-bold text-success" />
+                    <Label row="2" col="0" :text="footerStatsLabel" class="text-sm text-muted-foreground mt-1" />
+                </GridLayout>
+            </StackLayout>
         </GridLayout>
     </Page>
 </template>
@@ -94,10 +105,21 @@ const cartTotal: ComputedRef<number> = computed((): number =>
     cartItems.value.reduce((sum: number, item: OrderItem): number => sum + item.price * item.qty, 0)
 );
 
-const totalItemsLabel: ComputedRef<string> = computed((): string => {
+const productCountLabel: ComputedRef<string> = computed((): string => {
+    const count: number = cartItems.value.length;
+    return count === 1 ? `1 ${t('pages.cart.product')}` : `${count} ${t('pages.cart.products')}`;
+});
+
+const totalQuantityLabel: ComputedRef<string> = computed((): string => {
     const count: number = cartItems.value.reduce((sum: number, item: OrderItem): number => sum + item.qty, 0);
     return count === 1 ? `1 ${t('pages.cart.item')}` : `${count} ${t('pages.cart.items')}`;
 });
+
+const footerStatsLabel: ComputedRef<string> = computed((): string => `${productCountLabel.value} · ${totalQuantityLabel.value}`);
+
+function onCameraTap(): void {
+    // TODO: ação da câmera
+}
 
 function closeKeyboard(): void {
     setTimeout((): void => {

@@ -60,6 +60,7 @@
                         :text="Icons.lucide('camera')"
                         class="lucide btn-icon bg-secondary text-secondary-foreground w-12 h-12"
                         verticalAlignment="center"
+                        :isEnabled="canEditOrder"
                         @tap="onCameraTap"
                     />
                     <Label row="1" col="0" :text="Format.formatCurrencyBR(cartTotal)" class="text-2xl font-bold text-success" />
@@ -119,11 +120,45 @@ const totalQuantityLabel: ComputedRef<string> = computed((): string => {
 
 const footerStatsLabel: ComputedRef<string> = computed((): string => `${productCountLabel.value} · ${totalQuantityLabel.value}`);
 
+function isScanCancelled(error: unknown): boolean {
+    const message: string = error instanceof Error ? error.message : String(error);
+    return message.includes('Scan aborted') || message.includes('abort');
+}
+
+async function ensureCameraPermission(scanner: BarcodeScanner): Promise<boolean> {
+    const hasPermission: boolean = await scanner.hasCameraPermission();
+    if (hasPermission) {
+        return true;
+    }
+    try {
+        await scanner.requestCameraPermission();
+    } catch {
+        showToast({ message: t('pages.cart.scanPermissionDenied'), variant: 'error' });
+        return false;
+    }
+    const granted: boolean = await scanner.hasCameraPermission();
+    if (!granted) {
+        showToast({ message: t('pages.cart.scanPermissionDenied'), variant: 'error' });
+    }
+    return granted;
+}
+
 async function onCameraTap(): Promise<void> {
+    console.log('onCameraTap');
     if (!canEditOrder.value) {
         return;
     }
-    const scanner = new BarcodeScanner();
+    const scanner: BarcodeScanner = new BarcodeScanner();
+    const cameraAvailable: boolean = await scanner.available();
+    console.log('cameraAvailable', cameraAvailable);
+    if (!cameraAvailable) {
+        showToast({ message: t('pages.cart.scanCameraUnavailable'), variant: 'error' });
+        return;
+    }
+    const hasPermission: boolean = await ensureCameraPermission(scanner);
+    if (!hasPermission) {
+        return;
+    }
     try {
         const result = await scanner.scan({
             formats: 'EAN_13, EAN_8, UPC_A, UPC_E, CODE_128, CODE_39, ITF',
@@ -136,6 +171,7 @@ async function onCameraTap(): Promise<void> {
             resultDisplayDuration: 0,
             openSettingsIfPermissionWasPreviouslyDenied: true,
         });
+        console.log('result', result);
 
         const scannedCode: string = result.text.trim();
         if (!scannedCode) {
@@ -153,8 +189,16 @@ async function onCameraTap(): Promise<void> {
 
         await addProduct(found);
         Haptics.vibrateSuccess();
-    } catch {
-        // scanner cancelado pelo usuário — sem ação
+    } catch (error: unknown) {
+        if (isScanCancelled(error)) {
+            return;
+        }
+        const message: string = error instanceof Error ? error.message : String(error);
+        if (message.toLowerCase().includes('camera') || message.toLowerCase().includes('permission')) {
+            showToast({ message: t('pages.cart.scanPermissionDenied'), variant: 'error' });
+            return;
+        }
+        showToast({ message: t('pages.cart.scanError'), variant: 'error' });
     }
 }
 

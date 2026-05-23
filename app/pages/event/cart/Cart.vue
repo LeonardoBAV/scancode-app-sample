@@ -40,11 +40,12 @@
                             <Label row="0" col="1" :text="Format.formatCurrencyBR(item.price * item.qty)" class="text-base font-bold text-success" verticalAlignment="top" />
                             <Label row="1" col="0" :text="(item.product?.sku ?? '') + ' · ' + (item.product?.product_category?.name ?? '')" class="text-xs text-muted-foreground mt-1" />
                             <Label row="1" col="1" :text="Format.formatCurrencyBR(item.price) + ' ' + perUnitLabel" class="text-xs text-muted-foreground" verticalAlignment="center" />
-                            <GridLayout row="2" col="0" colSpan="2" rows="auto" columns="auto, auto, auto" class="mt-3">
-                                <Button col="0" text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" :isEnabled="canEditOrder" @tap="decreaseQty(item)" />
+                            <GridLayout v-if="canEditOrder" row="2" col="0" colSpan="2" rows="auto" columns="auto, auto, auto" class="mt-3">
+                                <Button col="0" text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" @tap="decreaseQty(item)" />
                                 <Label col="1" :text="String(item.qty)" class="text-base font-semibold text-foreground text-center min-w-8 mx-2" verticalAlignment="center" />
-                                <Button col="2" text="+" class="btn-icon-sm bg-primary text-primary-foreground" :isEnabled="canEditOrder" @tap="increaseQty(item)" />
+                                <Button col="2" text="+" class="btn-icon-sm bg-primary text-primary-foreground" @tap="increaseQty(item)" />
                             </GridLayout>
+                            <Label v-else row="2" col="0" colSpan="2" :text="String(item.qty)" class="text-base font-semibold text-foreground mt-3" />
                         </GridLayout>
                     </template>
                 </ListView>
@@ -54,13 +55,13 @@
             <StackLayout v-if="hasSelectedOrder" row="3" class="footer-bar">
                 <GridLayout rows="auto, auto, auto" columns="*, auto">
                     <Button
+                        v-if="canEditOrder"
                         row="0"
                         col="1"
                         rowSpan="3"
                         :text="Icons.lucide('camera')"
                         class="lucide btn-icon bg-secondary text-secondary-foreground w-12 h-12"
                         verticalAlignment="center"
-                        :isEnabled="canEditOrder"
                         @tap="onCameraTap"
                     />
                     <Label row="1" col="0" :text="Format.formatCurrencyBR(cartTotal)" class="text-2xl font-bold text-success" />

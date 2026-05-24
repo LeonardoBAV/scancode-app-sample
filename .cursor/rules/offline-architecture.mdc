@@ -18,6 +18,7 @@ Antes de implementar qualquer camada offline, leia a spec correspondente em `spe
 | Push SQLite → API (pedidos alvo; clientes implementados) | `specs/04-sync-push.md` |
 | `app/composables/use*.ts` (dados — events, products, clients, orders) | `specs/05-composables.md` |
 | Formulário de cliente (Zod, duplicata CPF/CNPJ, `ClientFormComponent`, push `PATCH`) | `specs/05-composables.md` — secção **Formulário de cliente** |
+| Geração de PDF do pedido (`@ordy/order-pdf`, mapper, CLI Node, Laravel) | `specs/07-order-pdf-engine.md` |
 
 ## Resumo das Regras de Ouro
 

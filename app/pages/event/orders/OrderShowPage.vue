@@ -118,7 +118,7 @@ import OrderClientShowPage from './OrderClientShowPage.vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
 import type { Order, OrderStatus } from '../../../types/schema/order';
 import OrderListPage from './OrderListPage.vue';
-import { pdfService } from '../../../services/pdf-service';
+import { pdfService } from '../../../services/pdf/pdf-service';
 
 
 // --- Component logic ---

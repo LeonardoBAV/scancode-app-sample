@@ -1,7 +1,93 @@
 # pdfmake — integração NativeScript e rollback
 
-**Versão:** 25/05/2026 (rev. 8 — mínimo absoluto confirmado)  
-**Objetivo:** documentar o **mínimo real** para pdfmake no device e como fazer rollback.
+**Versão:** 24/05/2026 (rev. 9 — arquitetura em camadas)  
+**Objetivo:** documentar o **mínimo real** para pdfmake no device, a **arquitetura de serviços** e como fazer rollback.
+
+---
+
+## Arquitetura de serviços
+
+A geração de PDF está dividida em **três camadas** dentro de `app/services/`, para separar a engine pdfmake do armazenamento NativeScript e permitir reutilizar o core noutro projecto (ex.: servidor Node) no futuro.
+
+```
+app/services/
+├── pdf-core/                          # engine — depende só de pdfmake
+│   ├── pdf-core-service.ts            # orquestra template → make → buffer
+│   ├── pdf-core-template-service.ts   # monta TDocumentDefinitions
+│   └── pdf-core-make-service.ts       # wrapper pdfmake (VFS + getBuffer)
+├── storage/
+│   └── storage-service.ts             # grava Uint8Array em disco (NativeScript)
+└── pdf/
+    └── pdf-service.ts                 # camada do app — une core + storage
+```
+
+### Fluxo
+
+```
+Página (OrderShowPage)
+    │
+    ▼
+PdfService                    app/services/pdf/
+    │  generateHelloWorld() / generateSampleOrder()
+    │  → Promise<string>  (path do ficheiro)
+    │
+    ├─► PdfCoreService      app/services/pdf-core/
+    │       │
+    │       ├─► PdfCoreTemplateService.build*()
+    │       │       → TDocumentDefinitions
+    │       │
+    │       └─► PdfCoreMakeService.generateBuffer(doc)
+    │               → Promise<Uint8Array>
+    │
+    └─► StorageService.save(buffer, fileName)
+            → string (path absoluto)
+```
+
+### Responsabilidades
+
+| Serviço | Ficheiro | Responsabilidade | Retorno |
+| --- | --- | --- | --- |
+| **PdfService** | `pdf/pdf-service.ts` | API pública do app; combina core + storage | `Promise<string>` (path) |
+| **PdfCoreService** | `pdf-core/pdf-core-service.ts` | Orquestra geração: escolhe template, chama make | `Promise<Uint8Array>` |
+| **PdfCoreTemplateService** | `pdf-core/pdf-core-template-service.ts` | Monta o conteúdo (`TDocumentDefinitions`) | `TDocumentDefinitions` |
+| **PdfCoreMakeService** | `pdf-core/pdf-core-make-service.ts` | Wrapper da lib pdfmake (VFS, `createPdf`, `getBuffer`) | `Promise<Uint8Array>` |
+| **StorageService** | `storage/storage-service.ts` | Persiste bytes no disco | `string` (path) |
+
+### Dependências por camada
+
+| Camada | Depende de | Não depende de |
+| --- | --- | --- |
+| `pdf-core/*` | `pdfmake`, `@types/pdfmake` | NativeScript, SQLite, Vue |
+| `storage/*` | `@nativescript/core` | pdfmake |
+| `pdf/*` | `pdf-core`, `storage` | pdfmake directamente |
+
+**Regra:** só `pdf-core-make-service.ts` importa `pdfmake/build/pdfmake` e `pdfmake/build/vfs_fonts`. Templates usam apenas `pdfmake/interfaces` (tipos).
+
+### API pública (app)
+
+As páginas importam **sempre** `pdf/pdf-service.ts`:
+
+```typescript
+import { pdfService } from '../../../services/pdf/pdf-service';
+
+const filePath = await pdfService.generateSampleOrder();
+// → /data/.../documents/sample-order.pdf
+```
+
+Métodos disponíveis:
+
+| Método | Ficheiro gerado | Uso |
+| --- | --- | --- |
+| `generateHelloWorld()` | `hello-world.pdf` | Smoke test mínimo |
+| `generateSampleOrder()` | `sample-order.pdf` | Demo com tabela de pedido (dados hardcoded) |
+
+### Reutilização noutro projecto
+
+Para extrair a engine para um servidor Node (ou pacote npm interno):
+
+1. Copiar a pasta `app/services/pdf-core/` — **zero alterações** de dependência (só pdfmake).
+2. Substituir `StorageService` por gravação com `fs` (ou devolver o buffer directamente na API HTTP).
+3. Manter `PdfCoreTemplateService` como ponto único de definição de layouts; novos documentos = novos métodos `build*()` aqui.
 
 ---
 
@@ -15,8 +101,8 @@ Testado com `ns run android` — PDF hello world OK (`byteLength: 6386`), **sem*
 | --- | --- |
 | `pdfmake` | `dependencies` |
 | `@types/pdfmake@0.2.11` | `devDependencies` |
-| `import pdfMake from 'pdfmake/build/pdfmake'` | serviço |
-| `import pdfFontsModule from 'pdfmake/build/vfs_fonts'` + `pdfMake.vfs = …` | serviço — **causa raiz** |
+| `import pdfMake from 'pdfmake/build/pdfmake'` | `pdf-core-make-service.ts` |
+| `import pdfFontsModule from 'pdfmake/build/vfs_fonts'` + `pdfMake.vfs = …` | `pdf-core-make-service.ts` — **causa raiz** |
 | `PdfService` + botão print | app |
 
 ### Instalação
@@ -30,7 +116,7 @@ npm install --save-dev @types/pdfmake@0.2.11
 
 **Nenhuma alteração necessária** para hello world. O bloco polyfills foi **testado como desnecessário** (rev. 7).
 
-### Código (serviço)
+### Código (VFS — só em pdf-core-make-service)
 
 ```typescript
 import pdfMake from 'pdfmake/build/pdfmake';
@@ -62,11 +148,15 @@ Usar sempre `pdfmake/build/pdfmake` + `pdfmake/build/vfs_fonts` — **não** o e
 
 | Ficheiro | Papel |
 | --- | --- |
-| `app/services/pdf-service.ts` | Geração + gravação em `knownFolders.documents()` |
-| `app/pages/event/orders/OrderShowPage.vue` | `onPrint()` |
+| `app/services/pdf-core/pdf-core-service.ts` | Orquestração da geração (template + make) |
+| `app/services/pdf-core/pdf-core-template-service.ts` | Definição de layouts (`TDocumentDefinitions`) |
+| `app/services/pdf-core/pdf-core-make-service.ts` | Wrapper pdfmake (VFS, `createPdf`, `getBuffer`) |
+| `app/services/storage/storage-service.ts` | Gravação em `knownFolders.documents()` |
+| `app/services/pdf/pdf-service.ts` | Facade do app — core + storage |
+| `app/pages/event/orders/OrderShowPage.vue` | `onPrint()` — chama `pdfService` |
 | `webpack.config.js` | Sem bloco pdfmake |
 
-Logs `[PdfService]` / `[OrderShowPage]`: debug — remover em produção.
+Logs `[PdfService]`, `[PdfCoreService]`, `[PdfCoreMakeService]`, `[StorageService]`, `[OrderShowPage]`: debug — remover em produção.
 
 ---
 
@@ -76,9 +166,11 @@ Logs `[PdfService]` / `[OrderShowPage]`: debug — remover em produção.
 npm uninstall pdfmake @types/pdfmake
 ```
 
-1. Apagar `app/services/pdf-service.ts`
-2. Reverter `OrderShowPage.vue` (import + `onPrint`)
-3. `ns clean && ns run android`
+1. Apagar `app/services/pdf-core/` (3 ficheiros)
+2. Apagar `app/services/storage/storage-service.ts`
+3. Apagar `app/services/pdf/pdf-service.ts`
+4. Reverter `OrderShowPage.vue` (import + `onPrint`)
+5. `ns clean && ns run android`
 
 Não há bloco webpack pdfmake para reverter.
 
@@ -114,7 +206,7 @@ config.plugin("provide-pdf-polyfills").use(webpack.ProvidePlugin, [
 
 | Sintoma | Ação |
 | --- | --- |
-| `Roboto-Regular.ttf not found` | Restaurar assign de `vfs_fonts` |
+| `Roboto-Regular.ttf not found` | Restaurar assign de `vfs_fonts` em `pdf-core-make-service.ts` |
 | `Helvetica.afm not found` | Usar `vfs_fonts` (Roboto), não Helvetica sem VFS |
 | `getBuffer` hang 5s | Quase sempre VFS; raramente polyfill |
 | TS7016 | `@types/pdfmake@0.2.11` |
@@ -130,10 +222,13 @@ config.plugin("provide-pdf-polyfills").use(webpack.ProvidePlugin, [
 | 6 | Mínimo intermédio (vfs + polyfills) — **polyfills eram excesso** |
 | 7 | Teste sem polyfills |
 | 8 | **Mínimo absoluto confirmado:** só pdfmake + vfs_fonts + serviço |
+| 9 | **Arquitetura em camadas:** `pdf-core` / `storage` / `pdf`; templates separados; core reutilizável |
 
 ---
 
 ## Referências
 
-- `app/services/pdf-service.ts`
+- `app/services/pdf/pdf-service.ts`
+- `app/services/pdf-core/`
+- `app/services/storage/storage-service.ts`
 - [pdfmake — client-side](https://pdfmake.github.io/docs/0.1/getting-started/client-side/)

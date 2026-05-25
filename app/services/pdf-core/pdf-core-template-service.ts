@@ -1,37 +1,26 @@
-import { File, isAndroid, knownFolders } from '@nativescript/core';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFontsModule from 'pdfmake/build/vfs_fonts';
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
-
-const pdfVfs: Record<string, string> = pdfFontsModule as unknown as Record<string, string>;
-(pdfMake as { vfs: Record<string, string> }).vfs = pdfVfs;
 
 const TABLE_HEADER_FILL = '#1e293b';
 const TABLE_HEADER_TEXT = '#f8fafc';
 const TABLE_ROW_ALT_FILL = '#f1f5f9';
 const TABLE_BORDER = '#cbd5e1';
 
-export class PdfService {
-    private static readonly _instance: PdfService = new PdfService();
+export class PdfCoreTemplateService {
+    private static readonly _instance: PdfCoreTemplateService = new PdfCoreTemplateService();
 
     private constructor() { }
 
-    public static getInstance(): PdfService {
-        return PdfService._instance;
+    public static getInstance(): PdfCoreTemplateService {
+        return PdfCoreTemplateService._instance;
     }
 
-    public generateHelloWorld(): Promise<string> {
-        return this.createPdfFile(
-            { content: [{ text: 'Hello world' }] },
-            'hello-world2.pdf',
-        );
+    public buildHelloWorld(): TDocumentDefinitions {
+        return {
+            content: [{ text: 'Hello world' }],
+        };
     }
 
-    public generateSampleOrder(): Promise<string> {
-        return this.createPdfFile(this.buildSampleOrderDocDefinition(), 'sample-order.pdf');
-    }
-
-    private buildSampleOrderDocDefinition(): TDocumentDefinitions {
+    public buildSampleOrder(): TDocumentDefinitions {
         const orderNumber = '2026-0042';
         const orderDate = '24/05/2026';
         const clientName = 'Restaurante Sabor & Arte';
@@ -189,89 +178,6 @@ export class PdfService {
             },
         };
     }
-
-    private createPdfFile(docDefinition: TDocumentDefinitions, fileName: string): Promise<string> {
-        const g = global as typeof global & { Buffer?: unknown; process?: unknown };
-        console.log('[PdfService] createPdfFile start:', fileName);
-        console.log('[PdfService] global.Buffer:', typeof g.Buffer);
-        console.log('[PdfService] global.process:', typeof g.process);
-
-        return new Promise((resolve, reject) => {
-            const timeoutId = setTimeout(() => {
-                console.log('[PdfService] still waiting after 5s (getBuffer callback not fired)');
-            }, 5000);
-
-            let pdf;
-            try {
-                pdf = pdfMake.createPdf(docDefinition);
-                console.log('[PdfService] createPdf ok');
-            } catch (err: unknown) {
-                clearTimeout(timeoutId);
-                console.log('[PdfService] createPdf threw:', err);
-                reject(err);
-                return;
-            }
-
-            try {
-                const stream = pdf.getStream();
-                stream.on('data', (chunk: { length?: number }) => {
-                    console.log('[PdfService] stream data bytes:', chunk?.length);
-                });
-                stream.on('end', () => console.log('[PdfService] stream end'));
-                stream.on('error', (err: unknown) => {
-                    console.log('[PdfService] stream error:', err);
-                    clearTimeout(timeoutId);
-                    reject(err);
-                });
-            } catch (err: unknown) {
-                clearTimeout(timeoutId);
-                console.log('[PdfService] getStream threw:', err);
-                reject(err);
-                return;
-            }
-
-            console.log('[PdfService] calling getBuffer...');
-            try {
-                pdf.getBuffer((buffer: Uint8Array) => {
-                    clearTimeout(timeoutId);
-                    console.log('[PdfService] getBuffer callback fired, byteLength:', buffer?.byteLength);
-
-                    try {
-                        const path = this.saveFile(buffer, fileName);
-                        console.log('[PdfService] saveFile ok:', path);
-                        resolve(path);
-                    } catch (err: unknown) {
-                        console.log('[PdfService] saveFile threw:', err);
-                        reject(err);
-                    }
-                });
-                console.log('[PdfService] getBuffer call returned (waiting callback)');
-            } catch (err: unknown) {
-                clearTimeout(timeoutId);
-                console.log('[PdfService] getBuffer threw:', err);
-                reject(err);
-            }
-        });
-    }
-
-    private saveFile(bytes: Uint8Array, fileName: string): string {
-        console.log('[PdfService] saveFile start:', fileName, 'byteLength:', bytes?.byteLength);
-        const file: File = knownFolders.documents().getFile(fileName);
-        console.log('[PdfService] target path:', file.path);
-
-        if (isAndroid) {
-            const nativeBytes = Array.create('byte', bytes.byteLength) as number[];
-            for (let i = 0; i < bytes.byteLength; i++) {
-                nativeBytes[i] = bytes[i];
-            }
-            file.writeSync(nativeBytes);
-        } else {
-            file.writeSync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
-        }
-
-        console.log('[PdfService] writeSync done');
-        return file.path;
-    }
 }
 
-export const pdfService: PdfService = PdfService.getInstance();
+export const pdfCoreTemplateService: PdfCoreTemplateService = PdfCoreTemplateService.getInstance();

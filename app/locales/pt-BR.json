@@ -260,6 +260,9 @@
       "reopen": "Reabrir",
       "reopenSuccess": "Pedido reaberto com sucesso.",
       "reopenError": "Não foi possível reabrir o pedido. Tente novamente.",
+      "printError": "Não foi possível gerar o PDF. Tente novamente.",
+      "printOpenError": "PDF gerado, mas não foi possível abrir o ficheiro.",
+      "openPdfTitle": "Abrir PDF",
       "signature": "Assinatura",
       "statusOpen": "Aberto",
       "statusCompleted": "Finalizado"

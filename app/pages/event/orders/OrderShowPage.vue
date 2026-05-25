@@ -118,6 +118,7 @@ import OrderClientShowPage from './OrderClientShowPage.vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
 import type { Order, OrderStatus } from '../../../types/schema/order';
 import OrderListPage from './OrderListPage.vue';
+import { isAndroid, Utils } from '@nativescript/core';
 import { pdfService } from '../../../services/pdf/pdf-service';
 
 
@@ -211,16 +212,18 @@ function goToClientShow(): void {
 }
 
 async function onPrint(): Promise<void> {
-    console.log('[OrderShowPage] Print tapped');
     try {
-        console.log('[OrderShowPage] calling pdfService.generateHelloWorld...');
         const filePath = await pdfService.generateSampleOrder();
-        console.log('[OrderShowPage] PDF saved:', filePath);
+        const opened = isAndroid
+            ? Utils.openFile(filePath, t('pages.orderShow.openPdfTitle'))
+            : Utils.openFile(filePath);
+
+        if (!opened) {
+            showToast({ message: t('pages.orderShow.printOpenError'), variant: 'error' });
+        }
     } catch (err: unknown) {
-        console.log('[OrderShowPage] PDF error:', err);
         console.error(err);
-    } finally {
-        console.log('[OrderShowPage] onPrint finished');
+        showToast({ message: t('pages.orderShow.printError'), variant: 'error' });
     }
 }
 

@@ -212,8 +212,14 @@ function goToClientShow(): void {
 }
 
 async function onPrint(): Promise<void> {
+    const orderId: number | null | undefined = currentOrderRef.value?.id;
+    if (typeof orderId !== 'number') {
+        showToast({ message: t('pages.orderShow.printError'), variant: 'error' });
+        return;
+    }
+
     try {
-        const filePath = await pdfService.generateSampleOrder();
+        const filePath = await pdfService.generateOrder(orderId);
         const opened = isAndroid
             ? Utils.openFile(filePath, t('pages.orderShow.openPdfTitle'))
             : Utils.openFile(filePath);

@@ -1,5 +1,7 @@
+import type { Order } from '../../types/schema/order';
 import { pdfCoreMakeService } from './pdf-core-make-service';
 import { pdfCoreTemplateService } from './pdf-core-template-service';
+
 
 export class PdfCoreService {
     private static readonly _instance: PdfCoreService = new PdfCoreService();
@@ -10,15 +12,9 @@ export class PdfCoreService {
         return PdfCoreService._instance;
     }
 
-    public generateHelloWorld(): Promise<Uint8Array> {
-        console.log('[PdfCoreService] generateHelloWorld');
-        const docDefinition = pdfCoreTemplateService.buildHelloWorld();
-        return pdfCoreMakeService.generateBuffer(docDefinition);
-    }
-
-    public generateSampleOrder(): Promise<Uint8Array> {
-        console.log('[PdfCoreService] generateSampleOrder');
-        const docDefinition = pdfCoreTemplateService.buildSampleOrder();
+    public generateOrder(order: Order, paymentMethodName: string): Promise<Uint8Array> {
+        console.log('[PdfCoreService] generateOrder', order.id);
+        const docDefinition = pdfCoreTemplateService.buildOrder(order, paymentMethodName);
         return pdfCoreMakeService.generateBuffer(docDefinition);
     }
 }

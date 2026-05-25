@@ -1,9 +1,19 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
+import type { Order, OrderStatus } from '../../types/schema/order';
+import type { OrderItem } from '../../types/schema/order-item';
+import { Format } from '../../utils/format';
+
 
 const TABLE_HEADER_FILL = '#1e293b';
 const TABLE_HEADER_TEXT = '#f8fafc';
 const TABLE_ROW_ALT_FILL = '#f1f5f9';
 const TABLE_BORDER = '#cbd5e1';
+
+const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+    pending: 'Aberto',
+    completed: 'Finalizado',
+    cancelled: 'Cancelado',
+};
 
 export class PdfCoreTemplateService {
     private static readonly _instance: PdfCoreTemplateService = new PdfCoreTemplateService();
@@ -14,36 +24,29 @@ export class PdfCoreTemplateService {
         return PdfCoreTemplateService._instance;
     }
 
-    public buildHelloWorld(): TDocumentDefinitions {
-        return {
-            content: [{ text: 'Hello world' }],
-        };
-    }
+    public buildOrder(order: Order, paymentMethodName: string): TDocumentDefinitions {
+        const orderNumber: string = order.id != null ? String(order.id) : '—';
+        const orderDate: string = Format.formatIsoDateToBR(order.created_at.slice(0, 10));
+        const clientName: string = PdfCoreTemplateService.resolveClientName(order);
+        const clientDocument: string = Format.formatCPFCNPJ(order.client?.cpf_cnpj);
+        const buyerName: string = order.buyer_name?.trim() || '—';
+        const observation: string = order.notes?.trim() || '—';
+        const statusLabel: string = ORDER_STATUS_LABELS[order.status] ?? order.status;
 
-    public buildSampleOrder(): TDocumentDefinitions {
-        const orderNumber = '2026-0042';
-        const orderDate = '24/05/2026';
-        const clientName = 'Restaurante Sabor & Arte';
-        const clientDocument = '12.345.678/0001-90';
-        const buyerName = 'Maria Silva';
-        const paymentMethod = 'PIX — à vista';
-        const observation = 'Entregar no depósito. Horário preferencial: 08h–12h.';
+        const items: OrderItem[] = order.order_items ?? [];
+        const subtotal: number = items.reduce((sum: number, item: OrderItem) => sum + item.price * item.qty, 0);
 
-        const lineItems = [
-            { product: 'Cerveja Artesanal IPA 500ml', qty: 24, unit: 'cx', unitPrice: 'R$ 89,90', total: 'R$ 2.157,60' },
-            { product: 'Refrigerante Cola 2L', qty: 12, unit: 'un', unitPrice: 'R$ 6,50', total: 'R$ 78,00' },
-            { product: 'Água Mineral 500ml (pack 12)', qty: 8, unit: 'pack', unitPrice: 'R$ 14,90', total: 'R$ 119,20' },
-            { product: 'Suco Natural Laranja 1L', qty: 6, unit: 'un', unitPrice: 'R$ 12,00', total: 'R$ 72,00' },
-            { product: 'Energético Zero 250ml', qty: 36, unit: 'un', unitPrice: 'R$ 8,90', total: 'R$ 320,40' },
-        ];
-
-        const itemRows = lineItems.map((item, index) => [
-            { text: item.product, style: index % 2 === 1 ? 'tableCellAlt' : 'tableCell' },
-            { text: String(item.qty), style: 'tableCellCenter', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
-            { text: item.unit, style: 'tableCellCenter', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
-            { text: item.unitPrice, style: 'tableCellRight', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
-            { text: item.total, style: 'tableCellRightBold', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
-        ]);
+        const itemRows = items.map((item: OrderItem, index: number) => {
+            const lineTotal: number = item.price * item.qty;
+            const productName: string = item.product?.name?.trim() || `Produto #${item.product_id}`;
+            return [
+                { text: productName, style: index % 2 === 1 ? 'tableCellAlt' : 'tableCell' },
+                { text: String(item.qty), style: 'tableCellCenter', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
+                { text: 'un', style: 'tableCellCenter', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
+                { text: Format.formatCurrencyBR(item.price), style: 'tableCellRight', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
+                { text: Format.formatCurrencyBR(lineTotal), style: 'tableCellRightBold', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
+            ];
+        });
 
         return {
             pageSize: 'A4',
@@ -79,7 +82,7 @@ export class PdfCoreTemplateService {
                             stack: [
                                 { text: 'CLIENTE', style: 'sectionLabel' },
                                 { text: clientName, style: 'sectionValue' },
-                                { text: `CNPJ: ${clientDocument}`, style: 'sectionDetail' },
+                                { text: `CPF/CNPJ: ${clientDocument}`, style: 'sectionDetail' },
                                 { text: `Comprador: ${buyerName}`, style: 'sectionDetail', margin: [0, 4, 0, 0] },
                             ],
                         },
@@ -87,8 +90,8 @@ export class PdfCoreTemplateService {
                             width: '*',
                             stack: [
                                 { text: 'PAGAMENTO', style: 'sectionLabel' },
-                                { text: paymentMethod, style: 'sectionValue' },
-                                { text: 'Status: Confirmado', style: 'sectionDetail' },
+                                { text: paymentMethodName, style: 'sectionValue' },
+                                { text: `Status: ${statusLabel}`, style: 'sectionDetail' },
                             ],
                         },
                     ],
@@ -129,9 +132,8 @@ export class PdfCoreTemplateService {
                             table: {
                                 widths: ['*', 'auto'],
                                 body: [
-                                    [{ text: 'Subtotal', style: 'totalLabel' }, { text: 'R$ 2.747,20', style: 'totalValue' }],
-                                    [{ text: 'Desconto (5%)', style: 'totalLabel' }, { text: '- R$ 137,36', style: 'totalValueMuted' }],
-                                    [{ text: 'Total', style: 'totalLabelBold' }, { text: 'R$ 2.609,84', style: 'totalValueBold' }],
+                                    [{ text: 'Subtotal', style: 'totalLabel' }, { text: Format.formatCurrencyBR(subtotal), style: 'totalValue' }],
+                                    [{ text: 'Total', style: 'totalLabelBold' }, { text: Format.formatCurrencyBR(subtotal), style: 'totalValueBold' }],
                                 ],
                             },
                             layout: 'noBorders',
@@ -144,11 +146,6 @@ export class PdfCoreTemplateService {
                         { text: 'OBSERVAÇÕES', style: 'sectionLabel', margin: [0, 20, 0, 4] },
                         { text: observation, style: 'observation' },
                     ],
-                },
-                {
-                    text: 'Documento gerado como exemplo — dados fictícios para demonstração do pdfmake.',
-                    style: 'footer',
-                    margin: [0, 32, 0, 0],
                 },
             ],
             styles: {
@@ -171,12 +168,18 @@ export class PdfCoreTemplateService {
                 totalLabel: { fontSize: 9, color: '#64748b' },
                 totalLabelBold: { fontSize: 10, bold: true, color: '#0f172a', margin: [0, 4, 0, 0] },
                 totalValue: { fontSize: 9, alignment: 'right' },
-                totalValueMuted: { fontSize: 9, alignment: 'right', color: '#16a34a' },
                 totalValueBold: { fontSize: 11, bold: true, alignment: 'right', color: '#0f172a', margin: [0, 4, 0, 0] },
                 observation: { fontSize: 9, color: '#475569', italics: true },
-                footer: { fontSize: 8, color: '#94a3b8', alignment: 'center', italics: true },
             },
         };
+    }
+
+    private static resolveClientName(order: Order): string {
+        const client = order.client;
+        if (client == null) {
+            return '—';
+        }
+        return client.fantasy_name?.trim() || client.corporate_name?.trim() || '—';
     }
 }
 

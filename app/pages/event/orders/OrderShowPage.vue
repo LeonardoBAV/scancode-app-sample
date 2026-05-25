@@ -118,6 +118,7 @@ import OrderClientShowPage from './OrderClientShowPage.vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
 import type { Order, OrderStatus } from '../../../types/schema/order';
 import OrderListPage from './OrderListPage.vue';
+import { pdfService } from '../../../services/pdf-service';
 
 
 // --- Component logic ---
@@ -209,8 +210,18 @@ function goToClientShow(): void {
     navigateTo(OrderClientShowPage);
 }
 
-function onPrint(): void {
-    console.log('Print tapped');
+async function onPrint(): Promise<void> {
+    console.log('[OrderShowPage] Print tapped');
+    try {
+        console.log('[OrderShowPage] calling pdfService.generateHelloWorld...');
+        const filePath = await pdfService.generateSampleOrder();
+        console.log('[OrderShowPage] PDF saved:', filePath);
+    } catch (err: unknown) {
+        console.log('[OrderShowPage] PDF error:', err);
+        console.error(err);
+    } finally {
+        console.log('[OrderShowPage] onPrint finished');
+    }
 }
 
 function onPrimaryFooterTap(): void {

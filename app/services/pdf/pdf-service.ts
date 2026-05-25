@@ -8,6 +8,7 @@ import { storageService } from '../storage/storage-service';
 
 export class PdfService {
     private static readonly _instance: PdfService = new PdfService();
+    private static readonly DISTRIBUTOR_NAME: string = 'Distribuidora';
 
     private constructor() { }
 
@@ -22,7 +23,8 @@ export class PdfService {
             throw new Error(`Order not found: ${orderId}`);
         }
         const paymentMethodName: string = await PdfService.resolvePaymentMethodName(order.payment_method_id);
-        const buffer: Uint8Array = await pdfCoreService.generateOrder(order, paymentMethodName);
+        const distributorName: string = PdfService.DISTRIBUTOR_NAME;
+        const buffer: Uint8Array = await pdfCoreService.generateOrder(order, paymentMethodName, distributorName);
         return storageService.save(buffer, `order-${orderId}.pdf`);
     }
 

@@ -1,6 +1,7 @@
 import type { TDocumentDefinitions } from 'pdfmake/interfaces';
 import type { Order, OrderStatus } from '../../types/schema/order';
 import type { OrderItem } from '../../types/schema/order-item';
+import type { Client } from '../../types/schema/client';
 import { Format } from '../../utils/format';
 
 
@@ -24,14 +25,18 @@ export class PdfCoreTemplateService {
         return PdfCoreTemplateService._instance;
     }
 
-    public buildOrder(order: Order, paymentMethodName: string): TDocumentDefinitions {
+    public buildOrder(order: Order, paymentMethodName: string, distributorName: string): TDocumentDefinitions {
         const orderNumber: string = order.id != null ? String(order.id) : '—';
-        const orderDate: string = Format.formatIsoDateToBR(order.created_at.slice(0, 10));
-        const clientName: string = PdfCoreTemplateService.resolveClientName(order);
-        const clientDocument: string = Format.formatCPFCNPJ(order.client?.cpf_cnpj);
-        const buyerName: string = order.buyer_name?.trim() || '—';
-        const observation: string = order.notes?.trim() || '—';
+        const createdAt: string = Format.formatIsoDateToBR(order.created_at.slice(0, 10));
+        const updatedAt: string = Format.formatIsoDateToBR(order.updated_at.slice(0, 10));
         const statusLabel: string = ORDER_STATUS_LABELS[order.status] ?? order.status;
+        const client: Client | null | undefined = order.client;
+        const corporateName: string = client?.corporate_name?.trim() || '—';
+        const cnpj: string = Format.formatCNPJ(client?.cpf_cnpj);
+        const buyerName: string = order.buyer_name?.trim() || client?.buyer_name?.trim() || '—';
+        const buyerEmail: string = client?.email?.trim() || '—';
+        const carrier: string = client?.carrier?.trim() || '—';
+        const observation: string = order.notes?.trim() || '—';
 
         const items: OrderItem[] = order.order_items ?? [];
         const subtotal: number = items.reduce((sum: number, item: OrderItem) => sum + item.price * item.qty, 0);
@@ -39,76 +44,58 @@ export class PdfCoreTemplateService {
         const itemRows = items.map((item: OrderItem, index: number) => {
             const lineTotal: number = item.price * item.qty;
             const productName: string = item.product?.name?.trim() || `Produto #${item.product_id}`;
+            const rowFill: string | undefined = index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined;
             return [
                 { text: productName, style: index % 2 === 1 ? 'tableCellAlt' : 'tableCell' },
-                { text: String(item.qty), style: 'tableCellCenter', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
-                { text: 'un', style: 'tableCellCenter', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
-                { text: Format.formatCurrencyBR(item.price), style: 'tableCellRight', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
-                { text: Format.formatCurrencyBR(lineTotal), style: 'tableCellRightBold', fillColor: index % 2 === 1 ? TABLE_ROW_ALT_FILL : undefined },
+                { text: String(item.qty), style: 'tableCell', fillColor: rowFill },
+                { text: 'un', style: 'tableCell', fillColor: rowFill },
+                { text: Format.formatCurrencyBR(item.price), style: 'tableCell', fillColor: rowFill },
+                { text: Format.formatCurrencyBR(lineTotal), style: 'tableCellBold', fillColor: rowFill },
             ];
         });
+
+        const orderInfoRows: { label: string; value: string }[] = [
+            { label: 'Data de Criação', value: createdAt },
+            { label: 'Data de Alteração', value: updatedAt },
+            { label: 'Status', value: statusLabel },
+            { label: 'Nome do Cliente (Razão Social)', value: corporateName },
+            { label: 'CNPJ', value: cnpj },
+            { label: 'Nome Comprador', value: buyerName },
+            { label: 'Email Comprador', value: buyerEmail },
+            { label: 'Tipo de Pagamento', value: paymentMethodName },
+            { label: 'Transportadora', value: carrier },
+        ];
 
         return {
             pageSize: 'A4',
             pageMargins: [40, 48, 40, 48],
             defaultStyle: { font: 'Roboto', fontSize: 10, color: '#334155' },
             content: [
+                { text: distributorName, style: 'distributorTitle' },
+                { text: `Pedido #${orderNumber}`, style: 'orderTitle', margin: [0, 0, 0, 20] },
+                { text: 'INFORMAÇÕES DO PEDIDO', style: 'sectionLabel', margin: [0, 0, 0, 8] },
                 {
-                    columns: [
-                        {
-                            width: '*',
-                            stack: [
-                                { text: 'myCoolApp', style: 'brand' },
-                                { text: 'Distribuição de Bebidas', style: 'brandSubtitle' },
-                            ],
-                        },
-                        {
-                            width: 'auto',
-                            stack: [
-                                { text: 'PEDIDO', style: 'docType', alignment: 'right' },
-                                { text: `#${orderNumber}`, style: 'orderNumber', alignment: 'right' },
-                                { text: orderDate, style: 'orderDate', alignment: 'right' },
-                            ],
-                        },
-                    ],
+                    stack: orderInfoRows.map((row: { label: string; value: string }) => ({
+                        text: [
+                            { text: `${row.label}: `, style: 'infoLabel' },
+                            { text: row.value, style: 'infoValue' },
+                        ],
+                        margin: [0, 0, 0, 6],
+                    })),
                     margin: [0, 0, 0, 24],
-                },
-                { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: TABLE_BORDER }] },
-                { text: '', margin: [0, 0, 0, 16] },
-                {
-                    columns: [
-                        {
-                            width: '*',
-                            stack: [
-                                { text: 'CLIENTE', style: 'sectionLabel' },
-                                { text: clientName, style: 'sectionValue' },
-                                { text: `CPF/CNPJ: ${clientDocument}`, style: 'sectionDetail' },
-                                { text: `Comprador: ${buyerName}`, style: 'sectionDetail', margin: [0, 4, 0, 0] },
-                            ],
-                        },
-                        {
-                            width: '*',
-                            stack: [
-                                { text: 'PAGAMENTO', style: 'sectionLabel' },
-                                { text: paymentMethodName, style: 'sectionValue' },
-                                { text: `Status: ${statusLabel}`, style: 'sectionDetail' },
-                            ],
-                        },
-                    ],
-                    margin: [0, 0, 0, 20],
                 },
                 { text: 'ITENS DO PEDIDO', style: 'sectionLabel', margin: [0, 0, 0, 8] },
                 {
                     table: {
                         headerRows: 1,
-                        widths: ['*', 36, 36, 72, 72],
+                        widths: ['*', 40, 40, 72, 72],
                         body: [
                             [
                                 { text: 'Produto', style: 'tableHeader' },
-                                { text: 'Qtd', style: 'tableHeaderCenter' },
-                                { text: 'Un', style: 'tableHeaderCenter' },
-                                { text: 'Preço', style: 'tableHeaderRight' },
-                                { text: 'Total', style: 'tableHeaderRight' },
+                                { text: 'Qtd', style: 'tableHeader' },
+                                { text: 'Un', style: 'tableHeader' },
+                                { text: 'Preço', style: 'tableHeader' },
+                                { text: 'Total', style: 'tableHeader' },
                             ],
                             ...itemRows,
                         ],
@@ -123,63 +110,50 @@ export class PdfCoreTemplateService {
                         paddingTop: () => 6,
                         paddingBottom: () => 6,
                     },
-                },
-                {
-                    columns: [
-                        { width: '*', text: '' },
-                        {
-                            width: 200,
-                            table: {
-                                widths: ['*', 'auto'],
-                                body: [
-                                    [{ text: 'Subtotal', style: 'totalLabel' }, { text: Format.formatCurrencyBR(subtotal), style: 'totalValue' }],
-                                    [{ text: 'Total', style: 'totalLabelBold' }, { text: Format.formatCurrencyBR(subtotal), style: 'totalValueBold' }],
-                                ],
-                            },
-                            layout: 'noBorders',
-                            margin: [0, 16, 0, 0],
-                        },
-                    ],
+                    margin: [0, 0, 0, 16],
                 },
                 {
                     stack: [
-                        { text: 'OBSERVAÇÕES', style: 'sectionLabel', margin: [0, 20, 0, 4] },
+                        {
+                            text: [
+                                { text: 'Subtotal: ', style: 'totalLabel' },
+                                { text: Format.formatCurrencyBR(subtotal), style: 'totalValue' },
+                            ],
+                            margin: [0, 0, 0, 4],
+                        },
+                        {
+                            text: [
+                                { text: 'Total: ', style: 'totalLabelBold' },
+                                { text: Format.formatCurrencyBR(subtotal), style: 'totalValueBold' },
+                            ],
+                        },
+                    ],
+                    margin: [0, 0, 0, 20],
+                },
+                {
+                    stack: [
+                        { text: 'OBSERVAÇÕES', style: 'sectionLabel', margin: [0, 0, 0, 4] },
                         { text: observation, style: 'observation' },
                     ],
                 },
             ],
             styles: {
-                brand: { fontSize: 20, bold: true, color: '#0f172a' },
-                brandSubtitle: { fontSize: 9, color: '#64748b', margin: [0, 2, 0, 0] },
-                docType: { fontSize: 9, color: '#64748b' },
-                orderNumber: { fontSize: 16, bold: true, color: '#0f172a', margin: [0, 2, 0, 0] },
-                orderDate: { fontSize: 10, color: '#64748b', margin: [0, 2, 0, 0] },
-                sectionLabel: { fontSize: 8, bold: true, color: '#64748b', margin: [0, 0, 0, 4] },
-                sectionValue: { fontSize: 11, bold: true, color: '#0f172a' },
-                sectionDetail: { fontSize: 9, color: '#64748b' },
+                distributorTitle: { fontSize: 20, bold: true, color: '#0f172a' },
+                orderTitle: { fontSize: 14, bold: true, color: '#334155' },
+                sectionLabel: { fontSize: 8, bold: true, color: '#64748b' },
+                infoLabel: { fontSize: 9, bold: true, color: '#475569' },
+                infoValue: { fontSize: 9, color: '#0f172a' },
                 tableHeader: { bold: true, fontSize: 9, color: TABLE_HEADER_TEXT, fillColor: TABLE_HEADER_FILL },
-                tableHeaderCenter: { bold: true, fontSize: 9, color: TABLE_HEADER_TEXT, fillColor: TABLE_HEADER_FILL, alignment: 'center' },
-                tableHeaderRight: { bold: true, fontSize: 9, color: TABLE_HEADER_TEXT, fillColor: TABLE_HEADER_FILL, alignment: 'right' },
                 tableCell: { fontSize: 9 },
                 tableCellAlt: { fontSize: 9, fillColor: TABLE_ROW_ALT_FILL },
-                tableCellCenter: { fontSize: 9, alignment: 'center' },
-                tableCellRight: { fontSize: 9, alignment: 'right' },
-                tableCellRightBold: { fontSize: 9, alignment: 'right', bold: true },
+                tableCellBold: { fontSize: 9, bold: true },
                 totalLabel: { fontSize: 9, color: '#64748b' },
-                totalLabelBold: { fontSize: 10, bold: true, color: '#0f172a', margin: [0, 4, 0, 0] },
-                totalValue: { fontSize: 9, alignment: 'right' },
-                totalValueBold: { fontSize: 11, bold: true, alignment: 'right', color: '#0f172a', margin: [0, 4, 0, 0] },
+                totalLabelBold: { fontSize: 10, bold: true, color: '#0f172a' },
+                totalValue: { fontSize: 9, color: '#0f172a' },
+                totalValueBold: { fontSize: 11, bold: true, color: '#0f172a' },
                 observation: { fontSize: 9, color: '#475569', italics: true },
             },
         };
-    }
-
-    private static resolveClientName(order: Order): string {
-        const client = order.client;
-        if (client == null) {
-            return '—';
-        }
-        return client.fantasy_name?.trim() || client.corporate_name?.trim() || '—';
     }
 }
 

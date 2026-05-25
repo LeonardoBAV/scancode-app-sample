@@ -12,9 +12,9 @@ export class PdfCoreService {
         return PdfCoreService._instance;
     }
 
-    public generateOrder(order: Order, paymentMethodName: string): Promise<Uint8Array> {
+    public generateOrder(order: Order, paymentMethodName: string, distributorName: string): Promise<Uint8Array> {
         console.log('[PdfCoreService] generateOrder', order.id);
-        const docDefinition = pdfCoreTemplateService.buildOrder(order, paymentMethodName);
+        const docDefinition = pdfCoreTemplateService.buildOrder(order, paymentMethodName, distributorName);
         return pdfCoreMakeService.generateBuffer(docDefinition);
     }
 }

@@ -90,8 +90,9 @@
                         row="0"
                         col="1"
                         horizontalAlignment="stretch"
-                        :text="Icons.lucide('file-text')"
-                        class="lucide btn-secondary"
+                        :text="printButtonIcon"
+                        :class="printButtonClass"
+                        :isEnabled="!isPrinting"
                         @tap="onPrint"
                     />
                 </GridLayout>
@@ -127,6 +128,7 @@ const { navigateTo } = useNavigation();
 const { t }: { t: (key: string) => string } = useTranslation();
 
 const observation: Ref<string> = ref('');
+const isPrinting: Ref<boolean> = ref(false);
 
 const currentOrderRef = useCurrentOrder.getOrder();
 
@@ -193,6 +195,14 @@ const buyerName: ComputedRef<string> = computed(() => {
     return typeof raw === 'string' ? raw.trim() : '';
 });
 
+const printButtonIcon: ComputedRef<string> = computed(() =>
+    isPrinting.value ? Icons.lucide('loader-2') : Icons.lucide('clipboard-list'),
+);
+
+const printButtonClass: ComputedRef<string> = computed(() =>
+    isPrinting.value ? 'lucide btn-secondary lucide-spin opacity-50' : 'lucide btn-secondary',
+);
+
 watch(
     () => currentOrderRef.value?.notes,
     (notes) => {
@@ -212,12 +222,17 @@ function goToClientShow(): void {
 }
 
 async function onPrint(): Promise<void> {
+    if (isPrinting.value) {
+        return;
+    }
+
     const orderId: number | null | undefined = currentOrderRef.value?.id;
     if (typeof orderId !== 'number') {
         showToast({ message: t('pages.orderShow.printError'), variant: 'error' });
         return;
     }
 
+    isPrinting.value = true;
     try {
         const filePath = await pdfService.generateOrder(orderId);
         const opened = isAndroid
@@ -230,6 +245,8 @@ async function onPrint(): Promise<void> {
     } catch (err: unknown) {
         console.error(err);
         showToast({ message: t('pages.orderShow.printError'), variant: 'error' });
+    } finally {
+        isPrinting.value = false;
     }
 }
 

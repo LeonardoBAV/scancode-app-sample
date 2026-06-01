@@ -57,6 +57,7 @@ export interface EventDTO {
     name: string;
     start: string;
     end: string;
+    has_stock_limit: boolean;
     created_at: string;
     updated_at: string;
     orders?: OrderDTO[];

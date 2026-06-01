@@ -47,6 +47,7 @@ export class ScancodeAdapter {
                 name: dto.name,
                 start: dto.start,
                 end: dto.end,
+                has_stock_limit: dto.has_stock_limit,
                 created_at: dto.created_at,
                 updated_at: dto.updated_at,
                 orders: (dto.orders ?? []).map((orderDto): Order => ScancodeAdapter.mapOrderDtoToDomain(orderDto)),

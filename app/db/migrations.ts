@@ -2,13 +2,13 @@ import type { SQLiteDatabase } from '@nativescript-community/sqlite/sqlite.commo
 
 /**
  * Schema revision for `SQLiteDatabase.setVersion`.
- * Single squashed DDL (`migrateToV1`); pre-production — incremental migrations v2–v9 were removed.
+ * Squashed base DDL (`migrateToV1`) plus forward-only deltas for installed databases.
  *
- * **Legacy:** If a device still has `user_version` from an older incremental series (2–9) but a
- * *partial* schema (e.g. abandoned mid-chain), `startVersion >= 1` skips this file. Clear app data
- * or delete the SQLite file before relying on a clean install with this revision.
+ * **Legacy:** If a device still has `user_version` above the current schema from an older
+ * incremental series, this file is skipped. Clear app data or delete the SQLite file before
+ * relying on a clean install with this revision.
  */
-const SCHEMA_VERSION: number = 1;
+const SCHEMA_VERSION: number = 2;
 
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
     const startVersion: number = db.getVersion();
@@ -17,7 +17,13 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
         return;
     }
 
-    await migrateToV1(db);
+    if (startVersion < 1) {
+        await migrateToV1(db);
+    }
+
+    if (startVersion >= 1 && startVersion < 2) {
+        await migrateToV2(db);
+    }
 
     await db.setVersion(SCHEMA_VERSION);
 }
@@ -94,6 +100,7 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
             name        TEXT    NOT NULL,
             start       TEXT    NOT NULL,
             end         TEXT    NOT NULL,
+            has_stock_limit  INTEGER NOT NULL DEFAULT 0,
             created_at  TEXT    NOT NULL,
             updated_at  TEXT    NOT NULL
         );
@@ -162,4 +169,9 @@ async function migrateToV1(db: SQLiteDatabase): Promise<void> {
         );
     `);
     await db.execute('CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);');
+}
+
+/** Adds stock-limit metadata for events synced from Scancode. */
+async function migrateToV2(db: SQLiteDatabase): Promise<void> {
+    await db.execute('ALTER TABLE events ADD COLUMN has_stock_limit INTEGER NOT NULL DEFAULT 0;');
 }

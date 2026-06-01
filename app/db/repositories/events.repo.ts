@@ -19,6 +19,7 @@ export class EventsRepository extends RepositoryBase {
         'name',
         'start',
         'end',
+        'has_stock_limit',
         'created_at',
         'updated_at',
     ];
@@ -33,6 +34,7 @@ export class EventsRepository extends RepositoryBase {
             (row: Event): Event => ({
                 ...row,
                 is_sync: EventsRepository.readSqliteBool(row.is_sync as unknown),
+                has_stock_limit: EventsRepository.readSqliteBool(row.has_stock_limit as unknown),
             }),
         );
 
@@ -83,6 +85,7 @@ export class EventsRepository extends RepositoryBase {
         return {
             ...row,
             is_sync: EventsRepository.readSqliteBool(row.is_sync as unknown),
+            has_stock_limit: EventsRepository.readSqliteBool(row.has_stock_limit as unknown),
         };
     }
 

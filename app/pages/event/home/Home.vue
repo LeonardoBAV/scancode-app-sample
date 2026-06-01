@@ -30,6 +30,15 @@
 
                         <StackLayout class="bg-border mx-4" style="height: 1" />
 
+                        <!-- Stock Limit -->
+                        <GridLayout columns="auto, *, auto" class="p-4">
+                            <Label col="0" :text="Icons.lucide('package')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
+                            <Label col="1" :text="$t('pages.eventHome.stockLimit')" class="text-base text-card-foreground" verticalAlignment="center" />
+                            <Label col="2" :text="stockLimitLabel(eventDisplay.hasStockLimit)" :class="stockLimitBadgeClass(eventDisplay.hasStockLimit)" verticalAlignment="center" />
+                        </GridLayout>
+
+                        <StackLayout class="bg-border mx-4" style="height: 1" />
+
                         <!-- Total -->
                         <GridLayout columns="auto, *, auto" class="p-4">
                             <Label col="0" :text="Icons.lucide('wallet')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
@@ -84,12 +93,15 @@ import { computed, type ComputedRef } from 'vue';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
-import type { Event } from '../../../types/schema/event';
 import type { EventItem } from '../../../types/event-item';
 import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import EventsPage from '../../EventsPage.vue';
+
+type HomeEventDisplay = EventItem & {
+    hasStockLimit: boolean;
+};
 
 const { t } = useTranslation();
 const { navigateTo } = useNavigation();
@@ -97,8 +109,8 @@ const { navigateTo } = useNavigation();
 const currentEvent = useCurrentEvent.getEvent();
 const loading = useCurrentEvent.getIsLoading();
 
-const eventDisplay: ComputedRef<EventItem | null> = computed(() => {
-    const row: Event | null = currentEvent.value;
+const eventDisplay: ComputedRef<HomeEventDisplay | null> = computed(() => {
+    const row = currentEvent.value;
     if (!row) {
         return null;
     }
@@ -115,6 +127,7 @@ const eventDisplay: ComputedRef<EventItem | null> = computed(() => {
         id: row.id,
         name: row.name,
         status: deriveEventStatus(row.start, row.end),
+        hasStockLimit: row.has_stock_limit,
         totalValue,
         startDate: Format.formatIsoDateToBR(row.start),
         endDate: Format.formatIsoDateToBR(row.end),
@@ -170,5 +183,15 @@ function statusBadgeClass(status: string): string {
         case 'ended': return 'badge-outline';
         default: return 'badge-outline';
     }
+}
+
+function stockLimitLabel(hasStockLimit: boolean): string {
+    return hasStockLimit
+        ? t('pages.eventHome.stockLimitEnabled')
+        : t('pages.eventHome.stockLimitDisabled');
+}
+
+function stockLimitBadgeClass(hasStockLimit: boolean): string {
+    return hasStockLimit ? 'badge-success' : 'badge-secondary';
 }
 </script>

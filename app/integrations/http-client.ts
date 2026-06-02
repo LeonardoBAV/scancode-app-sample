@@ -64,7 +64,7 @@ export class HttpClient {
         for (const interceptor of this.interceptors) {
             headers = interceptor(headers);
         }
-
+        console.log(`${this.baseURL}${path}`);
         const response: HttpResponse = await Http.request({
             url: `${this.baseURL}${path}`,
             method,

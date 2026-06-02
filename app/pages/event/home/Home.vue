@@ -81,6 +81,12 @@
                     </StackLayout>
                     <!-- Back to events -->
                     <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary mt-4" @tap="goToEvents" />
+                    <Button
+                        v-if="hasToUseScancodeDesktop"
+                        :text="Icons.lucide('scan-barcode')"
+                        class="lucide btn-primary mt-3"
+                        @tap="onScancodeDesktopTap"
+                    />
 
                 </StackLayout>
             </ScrollView>
@@ -93,6 +99,7 @@ import { computed, type ComputedRef } from 'vue';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
+import { useScancodeDesktop } from '../../../composables/useScancodeDesktop';
 import type { EventItem } from '../../../types/event-item';
 import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
@@ -108,6 +115,7 @@ const { navigateTo } = useNavigation();
 
 const currentEvent = useCurrentEvent.getEvent();
 const loading = useCurrentEvent.getIsLoading();
+const hasToUseScancodeDesktop = useScancodeDesktop.getHasToUseScancodeDesktop();
 
 const eventDisplay: ComputedRef<HomeEventDisplay | null> = computed(() => {
     const row = currentEvent.value;
@@ -165,6 +173,9 @@ function deriveEventStatus(start: string, end: string): 'scheduled' | 'in_progre
 
 function goToEvents(): void {
     navigateTo(EventsPage, { frame: 'root-frame', clearHistory: true });
+}
+
+function onScancodeDesktopTap(): void {
 }
 
 function statusLabel(status: string): string {

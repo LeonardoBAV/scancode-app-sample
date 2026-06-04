@@ -81,12 +81,21 @@
                     </StackLayout>
                     <!-- Back to events -->
                     <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary mt-4" @tap="goToEvents" />
-                    <Button
-                        v-if="isScancodeDesktopIntegrationRequired"
-                        :text="Icons.lucide('scan-barcode')"
-                        class="lucide btn-primary mt-3"
-                        @tap="onScancodeDesktopTap"
-                    />
+                    <StackLayout v-if="isScancodeDesktopIntegrationRequired" class="mt-3">
+                        <Button
+                            v-if="!scancodeDesktopUrl"
+                            :text="Icons.lucide('scan-barcode')"
+                            class="lucide btn-primary"
+                            @tap="onScancodeDesktopTap"
+                        />
+                        <GridLayout v-else columns="auto, *" class="card p-4">
+                            <Label col="0" :text="Icons.lucide('circle-check')" class="lucide text-success mr-4" verticalAlignment="center" />
+                            <StackLayout col="1">
+                                <Label :text="$t('pages.eventHome.scancodeDesktopConnected')" class="text-base font-semibold text-card-foreground" />
+                                <Label :text="scancodeDesktopUrl" class="text-sm text-muted-foreground mt-1" textWrap="true" />
+                            </StackLayout>
+                        </GridLayout>
+                    </StackLayout>
 
                 </StackLayout>
             </ScrollView>
@@ -116,6 +125,7 @@ const { navigateTo } = useNavigation();
 const currentEvent = useCurrentEvent.getEvent();
 const loading = useCurrentEvent.getIsLoading();
 const isScancodeDesktopIntegrationRequired = useScancodeDesktop.isScancodeDesktopIntegrationRequired();
+const scancodeDesktopUrl = useScancodeDesktop.getUrl();
 
 const eventDisplay: ComputedRef<HomeEventDisplay | null> = computed(() => {
     const row = currentEvent.value;

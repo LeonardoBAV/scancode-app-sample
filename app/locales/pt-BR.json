@@ -284,6 +284,7 @@
       "orders": "Total de pedidos",
       "synced": "Sincronizados",
       "unsynced": "Não sincronizados",
+      "scancodeDesktopConnected": "Conexão com scancode-desktop ativa",
       "backToEvents": "Lista de Eventos"
     }
   }

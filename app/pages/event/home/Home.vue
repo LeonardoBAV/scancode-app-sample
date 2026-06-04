@@ -82,7 +82,7 @@
                     <!-- Back to events -->
                     <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary mt-4" @tap="goToEvents" />
                     <Button
-                        v-if="hasToUseScancodeDesktop"
+                        v-if="isScancodeDesktopIntegrationRequired"
                         :text="Icons.lucide('scan-barcode')"
                         class="lucide btn-primary mt-3"
                         @tap="onScancodeDesktopTap"
@@ -115,7 +115,7 @@ const { navigateTo } = useNavigation();
 
 const currentEvent = useCurrentEvent.getEvent();
 const loading = useCurrentEvent.getIsLoading();
-const hasToUseScancodeDesktop = useScancodeDesktop.getHasToUseScancodeDesktop();
+const isScancodeDesktopIntegrationRequired = useScancodeDesktop.isScancodeDesktopIntegrationRequired();
 
 const eventDisplay: ComputedRef<HomeEventDisplay | null> = computed(() => {
     const row = currentEvent.value;

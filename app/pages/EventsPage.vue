@@ -1,5 +1,5 @@
 <template>
-    <Page actionBarHidden="true">
+    <Page actionBarHidden="true" @navigatedTo="onNavigatedTo">
         <GridLayout rows="auto, *" class="bg-background">
 
             <!-- Header -->
@@ -51,11 +51,11 @@ import { Format } from '../utils/format';
 import { EventsComposable } from '../composables/event-composable';
 import { useCurrentEvent } from '../composables/repository/useCurrentEvent';
 import { useCurrentOrder } from '../composables/repository/useCurrentOrder';
+import { useScancodeDesktop } from '../composables/useScancodeDesktop';
 import { useTranslation } from '../composables/useTranslation';
 import { useNavigation } from '../composables/useNavigation';
 import HeaderComponent from '../components/HeaderComponent.vue';
 import DefaultLayout from '../layouts/Default.vue';
-import type { Event } from '../types/schema/event';
 import type { EventItem } from '../types/event-item';
 
 
@@ -64,8 +64,12 @@ const { navigateTo } = useNavigation();
 const events = EventsComposable.getList();
 const isLoading = EventsComposable.getIsLoading();
 
+function onNavigatedTo(): void {
+    useScancodeDesktop.clearUrl();
+}
+
 const items: ComputedRef<EventItem[]> = computed(() =>
-    events.value.map((row: Event): EventItem => {
+    events.value.map((row): EventItem => {
         const orders = row.orders ?? [];
         const totalValue = orders.reduce((sum, order) => {
             const orderTotal = (order.order_items ?? []).reduce(

@@ -1,8 +1,11 @@
 import { i18n } from '../../configs/i18n';
-import type { ScancodeDesktopHealthyResponseDTO } from '../../types/dtos/scancode-desktop-response';
+import type { ScancodeDesktopHealthyResponseDTO } from '../../types/dtos/scancode-desktop/healthy-response';
+import type { MovementRequestDTO } from '../../types/dtos/scancode-desktop/movement-request';
+import type { MovementResponseDTO } from '../../types/dtos/scancode-desktop/movement-response';
 import { ApiException } from '../../types/exceptions/api-exception';
 import { HttpError } from '../../types/http/http-types';
-import type { ScancodeDesktopHealthy } from '../../types/schema/scancode-desktop-healthy';
+import type { ScancodeDesktopHealthy } from '../../types/schema/scancode-desktop/healthy';
+import type { Movement } from '../../types/schema/scancode-desktop/movement';
 import { ScancodeDesktopApi } from '../apis/scancode-desktop-api';
 
 
@@ -13,6 +16,17 @@ export class ScancodeDesktopAdapter {
             const response: ScancodeDesktopHealthyResponseDTO = await new ScancodeDesktopApi(normalizedUrl).healthy();
 
             return ScancodeDesktopAdapter.mapHealthyResponse(response);
+        } catch (err: unknown) {
+            ScancodeDesktopAdapter.handleApiError(err);
+        }
+    }
+
+    public static async createMovement(baseUrl: string, payload: MovementRequestDTO): Promise<Movement> {
+        try {
+            const normalizedUrl: string = ScancodeDesktopAdapter.normalizeAndValidateUrl(baseUrl);
+            const response = await new ScancodeDesktopApi(normalizedUrl).postMovement(payload);
+
+            return ScancodeDesktopAdapter.mapMovementResponse(response.data);
         } catch (err: unknown) {
             ScancodeDesktopAdapter.handleApiError(err);
         }
@@ -48,6 +62,17 @@ export class ScancodeDesktopAdapter {
             port: dto.port,
             status: 'ok',
             url: dto.url.trim().replace(/\/+$/, ''),
+        };
+    }
+
+    private static mapMovementResponse(dto: MovementResponseDTO): Movement {
+        return {
+            id: dto.id,
+            sku: dto.sku,
+            movement_uuid: dto.movement_uuid,
+            qty: dto.qty,
+            created_at: dto.created_at,
+            updated_at: dto.updated_at,
         };
     }
 

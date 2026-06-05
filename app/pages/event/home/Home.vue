@@ -110,7 +110,7 @@ import type { EventItem } from '../../../types/event-item';
 import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
 import { Haptics } from '../../../utils/haptics';
-import type { ScancodeDesktopHealthy } from '../../../types/schema/scancode-desktop-healthy';
+import type { ScancodeDesktopHealthy } from '../../../types/schema/scancode-desktop/healthy';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import EventsPage from '../../EventsPage.vue';
 

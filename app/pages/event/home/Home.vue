@@ -1,6 +1,6 @@
 <template>
     <Page actionBarHidden="true">
-        <GridLayout rows="auto, *" class="bg-background">
+        <GridLayout rows="auto, *, auto" class="bg-background">
             <HeaderComponent row="0" :title="headerTitle" />
             <StackLayout v-if="loading" row="1" class="p-8" verticalAlignment="center" horizontalAlignment="center">
                 <Label :text="$t('common.loading')" class="text-base text-muted-foreground text-center" textWrap="true" />
@@ -26,15 +26,6 @@
                                 <Label :text="$t('pages.eventHome.date')" class="text-xs text-muted-foreground mb-1 text-right" />
                                 <Label :text="eventDisplay.startDate + ' — ' + eventDisplay.endDate" class="text-sm text-card-foreground text-right" />
                             </StackLayout>
-                        </GridLayout>
-
-                        <StackLayout class="bg-border mx-4" style="height: 1" />
-
-                        <!-- Stock Limit -->
-                        <GridLayout columns="auto, *, auto" class="p-4">
-                            <Label col="0" :text="Icons.lucide('package')" class="lucide text-muted-foreground mr-4" verticalAlignment="center" />
-                            <Label col="1" :text="$t('pages.eventHome.stockLimit')" class="text-base text-card-foreground" verticalAlignment="center" />
-                            <Label col="2" :text="stockLimitLabel(eventDisplay.hasStockLimit)" :class="stockLimitBadgeClass(eventDisplay.hasStockLimit)" verticalAlignment="center" />
                         </GridLayout>
 
                         <StackLayout class="bg-border mx-4" style="height: 1" />
@@ -79,8 +70,6 @@
                         </GridLayout>
 
                     </StackLayout>
-                    <!-- Back to events -->
-                    <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary mt-4" @tap="goToEvents" />
                     <StackLayout v-if="isScancodeDesktopIntegrationRequired" class="mt-3">
                         <Button
                             v-if="!scancodeDesktopUrl"
@@ -100,6 +89,9 @@
 
                 </StackLayout>
             </ScrollView>
+            <StackLayout v-if="eventDisplay" row="2" class="footer-bar">
+                <Button :text="$t('pages.eventHome.backToEvents')" class="btn-primary" @tap="goToEvents" />
+            </StackLayout>
         </GridLayout>
     </Page>
 </template>
@@ -122,9 +114,7 @@ import type { ScancodeDesktopHealthy } from '../../../types/schema/scancode-desk
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import EventsPage from '../../EventsPage.vue';
 
-type HomeEventDisplay = EventItem & {
-    hasStockLimit: boolean;
-};
+type HomeEventDisplay = EventItem;
 
 const { t } = useTranslation();
 const { navigateTo } = useNavigation();
@@ -154,7 +144,6 @@ const eventDisplay: ComputedRef<HomeEventDisplay | null> = computed(() => {
         id: row.id,
         name: row.name,
         status: deriveEventStatus(row.start, row.end),
-        hasStockLimit: row.has_stock_limit,
         totalValue,
         startDate: Format.formatIsoDateToBR(row.start),
         endDate: Format.formatIsoDateToBR(row.end),
@@ -288,13 +277,4 @@ function statusBadgeClass(status: string): string {
     }
 }
 
-function stockLimitLabel(hasStockLimit: boolean): string {
-    return hasStockLimit
-        ? t('pages.eventHome.stockLimitEnabled')
-        : t('pages.eventHome.stockLimitDisabled');
-}
-
-function stockLimitBadgeClass(hasStockLimit: boolean): string {
-    return hasStockLimit ? 'badge-success' : 'badge-secondary';
-}
 </script>

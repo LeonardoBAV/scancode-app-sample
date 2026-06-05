@@ -7,7 +7,7 @@ export class ScancodeDesktopComposable {
     private static readonly _instance: ScancodeDesktopComposable = new ScancodeDesktopComposable();
 
     private readonly url: Ref<string | null> = ref<string | null>(null);
-    private readonly scancodeDesktopIntegrationRequired: ComputedRef<boolean> = computed(() => {
+    private readonly requiredToHandleWithStockLimit: ComputedRef<boolean> = computed(() => {
         return useCurrentEvent.getEvent().value?.has_stock_limit ?? false;
     });
 
@@ -22,7 +22,11 @@ export class ScancodeDesktopComposable {
     }
 
     public isScancodeDesktopIntegrationRequired(): ComputedRef<boolean> {
-        return this.scancodeDesktopIntegrationRequired;
+        return this.isRequiredToHandleWithStockLimit();
+    }
+
+    public isRequiredToHandleWithStockLimit(): ComputedRef<boolean> {
+        return this.requiredToHandleWithStockLimit;
     }
 
     public setUrl(url: string | null): void {

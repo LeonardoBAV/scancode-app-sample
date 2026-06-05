@@ -86,6 +86,7 @@
                             v-if="!scancodeDesktopUrl"
                             :text="Icons.lucide('scan-barcode')"
                             class="lucide btn-primary"
+                            :isEnabled="!isConnectingScancodeDesktop"
                             @tap="onScancodeDesktopTap"
                         />
                         <GridLayout v-else columns="auto, *" class="card p-4">
@@ -104,14 +105,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, type ComputedRef } from 'vue';
+import { computed, ref, type ComputedRef, type Ref } from 'vue';
+import { BarcodeScanner } from 'nativescript-barcodescanner';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
 import { useScancodeDesktop } from '../../../composables/useScancodeDesktop';
+import { showToast } from '../../../composables/toast-state';
+import { ScancodeDesktopAdapter } from '../../../integrations/adapters/scancode-desktop-adapter';
+import { ApiException } from '../../../types/exceptions/api-exception';
 import type { EventItem } from '../../../types/event-item';
 import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
+import { Haptics } from '../../../utils/haptics';
+import type { ScancodeDesktopHealthy } from '../../../types/schema/scancode-desktop-healthy';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import EventsPage from '../../EventsPage.vue';
 
@@ -121,6 +128,8 @@ type HomeEventDisplay = EventItem & {
 
 const { t } = useTranslation();
 const { navigateTo } = useNavigation();
+
+const isConnectingScancodeDesktop: Ref<boolean> = ref<boolean>(false);
 
 const currentEvent = useCurrentEvent.getEvent();
 const loading = useCurrentEvent.getIsLoading();
@@ -185,7 +194,80 @@ function goToEvents(): void {
     navigateTo(EventsPage, { frame: 'root-frame', clearHistory: true });
 }
 
-function onScancodeDesktopTap(): void {
+function isScanCancelled(error: unknown): boolean {
+    const message: string = error instanceof Error ? error.message : String(error);
+    return message.includes('Scan aborted') || message.includes('abort');
+}
+
+async function ensureCameraPermission(scanner: BarcodeScanner): Promise<boolean> {
+    const hasPermission: boolean = await scanner.hasCameraPermission();
+    if (hasPermission) {
+        return true;
+    }
+    try {
+        await scanner.requestCameraPermission();
+    } catch {
+        showToast({ message: t('pages.eventHome.scancodeDesktopPermissionDenied'), variant: 'error' });
+        return false;
+    }
+    const granted: boolean = await scanner.hasCameraPermission();
+    if (!granted) {
+        showToast({ message: t('pages.eventHome.scancodeDesktopPermissionDenied'), variant: 'error' });
+    }
+    return granted;
+}
+
+async function readScancodeDesktopBaseUrl(): Promise<string | null> {
+    const scanner: BarcodeScanner = new BarcodeScanner();
+    const cameraAvailable: boolean = await scanner.available();
+    if (!cameraAvailable) {
+        showToast({ message: t('pages.eventHome.scancodeDesktopCameraUnavailable'), variant: 'error' });
+        return null;
+    }
+    const hasPermission: boolean = await ensureCameraPermission(scanner);
+    if (!hasPermission) {
+        return null;
+    }
+    const result: { text: string } = await scanner.scan({
+        formats: 'QR_CODE',
+        cancelLabel: t('pages.eventHome.scancodeDesktopScanCancel'),
+        message: t('pages.eventHome.scancodeDesktopScanMessage'),
+        preferFrontCamera: false,
+        showFlipCameraButton: false,
+        showTorchButton: true,
+        torchOn: false,
+        resultDisplayDuration: 0,
+        openSettingsIfPermissionWasPreviouslyDenied: true,
+    });
+    const baseUrl: string = result.text.trim();
+    return baseUrl.length > 0 ? baseUrl : null;
+}
+
+async function onScancodeDesktopTap(): Promise<void> {
+    if (isConnectingScancodeDesktop.value) {
+        return;
+    }
+    isConnectingScancodeDesktop.value = true;
+    try {
+        const baseUrl: string | null = await readScancodeDesktopBaseUrl();
+        if (baseUrl == null) {
+            return;
+        }
+        const health: ScancodeDesktopHealthy = await ScancodeDesktopAdapter.testConnection(baseUrl);
+        useScancodeDesktop.setUrl(health.url);
+        Haptics.vibrateSuccess();
+        showToast({ message: t('pages.eventHome.scancodeDesktopConnectionSuccess'), variant: 'success' });
+    } catch (error: unknown) {
+        if (isScanCancelled(error)) {
+            return;
+        }
+        const message: string = error instanceof ApiException
+            ? error.message
+            : t('pages.eventHome.scancodeDesktopConnectionError');
+        showToast({ message, variant: 'error' });
+    } finally {
+        isConnectingScancodeDesktop.value = false;
+    }
 }
 
 function statusLabel(status: string): string {

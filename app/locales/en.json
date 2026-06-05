@@ -286,6 +286,13 @@
       "synced": "Synced",
       "unsynced": "Unsynced",
       "scancodeDesktopConnected": "scancode-desktop connection active",
+      "scancodeDesktopScanMessage": "Point at the scancode-desktop QR Code",
+      "scancodeDesktopScanCancel": "Cancel",
+      "scancodeDesktopPermissionDenied": "Allow camera access to read the QR Code.",
+      "scancodeDesktopCameraUnavailable": "Camera unavailable on this device.",
+      "scancodeDesktopConnectionSuccess": "scancode-desktop connection activated.",
+      "scancodeDesktopConnectionError": "Could not connect to scancode-desktop.",
+      "scancodeDesktopInvalidQrCode": "Invalid QR Code for scancode-desktop connection.",
       "backToEvents": "Event list"
     }
   }

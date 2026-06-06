@@ -12,10 +12,6 @@ class SelectedOrderComposable {
         return readonly(this.order);
     }
 
-    public clearOrder(): void {
-        this.order.value = null;
-    }
-
     public async setOrder(orderId: number): Promise<void> {
         try {
             this.order.value = await OrdersRepository.findByIdWithRelations(orderId);
@@ -24,6 +20,10 @@ class SelectedOrderComposable {
             console.error('[SelectedOrderComposable] setOrder failed:', error);
             this.order.value = null;
         }
+    }
+
+    public clearOrder(): void {
+        this.order.value = null;
     }
 
     public async refresh(): Promise<void> {

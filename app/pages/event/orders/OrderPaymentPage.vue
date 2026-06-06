@@ -31,7 +31,7 @@ import { PaymentMethodsComposable } from '../../../composables/payment-methods-c
 import { useNavigation } from '../../../composables/useNavigation';
 import PaymentMethodListComponent from '../../../components/PaymentMethodListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
-import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
+import { useSelectedOrder } from '../../../composables/repository/SelectedOrderComposable';
 import type { OrderStatus } from '../../../types/schema/order';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 

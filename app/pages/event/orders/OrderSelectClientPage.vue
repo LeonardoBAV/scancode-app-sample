@@ -19,7 +19,7 @@ import type { Client } from '../../../types/schema/client';
 import { ClientsComposable } from '../../../composables/clients-composable';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
-import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
+import { useSelectedOrder } from '../../../composables/repository/SelectedOrderComposable';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import ClientListComponent from '../../../components/ClientListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';

@@ -88,7 +88,7 @@ import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
 import { showToast } from '../../../composables/toast-state';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
-import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
+import { useSelectedOrder } from '../../../composables/repository/SelectedOrderComposable';
 import type { OrderStatus } from '../../../types/schema/order';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import HeaderComponent from '../../../components/HeaderComponent.vue';

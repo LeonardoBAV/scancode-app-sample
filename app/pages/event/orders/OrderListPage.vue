@@ -85,7 +85,7 @@ import { computed, ref, type DeepReadonly } from 'vue';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
-import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
+import { useSelectedOrder } from '../../../composables/repository/SelectedOrderComposable';
 import { syncService } from '../../../sync/sync-service';
 import type { Order as SchemaOrder, OrderStatus } from '../../../types/schema/order';
 import { Icons } from '../../../utils/icons';

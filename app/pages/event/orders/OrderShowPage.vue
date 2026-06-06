@@ -108,7 +108,7 @@ import { useTranslation } from '../../../composables/useTranslation';
 import { Format } from '../../../utils/format';
 import { Icons } from '../../../utils/icons';
 import { useNavigation } from '../../../composables/useNavigation';
-import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
+import { useSelectedOrder } from '../../../composables/repository/SelectedOrderComposable';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import { PaymentMethodsComposable } from '../../../composables/payment-methods-composable';

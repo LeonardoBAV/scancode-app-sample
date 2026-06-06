@@ -78,7 +78,7 @@ import { ref, computed, type Ref, type ComputedRef } from 'vue';
 import { Dialogs, type TextField } from '@nativescript/core';
 import { BarcodeScanner } from 'nativescript-barcodescanner';
 import { useTranslation } from '../../../composables/useTranslation';
-import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
+import { useSelectedOrder } from '../../../composables/repository/SelectedOrderComposable';
 import { ProductsComposable } from '../../../composables/products-composable';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import { Haptics } from '../../../utils/haptics';

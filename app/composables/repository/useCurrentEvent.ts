@@ -16,7 +16,13 @@ class CurrentEventComposable {
         return readonly(this.isLoading);
     }
 
-    public async setEvent(eventId: number): Promise<void> {
+    public async setEvent(eventId: number | null): Promise<void> {
+        if (eventId == null) {
+            this.event.value = null;
+            this.isLoading.value = false;
+            return;
+        }
+
         this.isLoading.value = true;
         try {
             this.event.value = await EventsRepository.findByIdWithRelations(eventId);

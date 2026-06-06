@@ -12,7 +12,12 @@ class SelectedOrderComposable {
         return readonly(this.order);
     }
 
-    public async setOrder(orderId: number): Promise<void> {
+    public async setOrder(orderId: number | null): Promise<void> {
+        if (orderId == null) {
+            this.order.value = null;
+            return;
+        }
+
         try {
             this.order.value = await OrdersRepository.findByIdWithRelations(orderId);
             await useCurrentEvent.setEvent(this.order.value?.event_id as number);

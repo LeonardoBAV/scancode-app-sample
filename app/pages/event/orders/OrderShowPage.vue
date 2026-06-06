@@ -108,7 +108,7 @@ import { useTranslation } from '../../../composables/useTranslation';
 import { Format } from '../../../utils/format';
 import { Icons } from '../../../utils/icons';
 import { useNavigation } from '../../../composables/useNavigation';
-import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import { PaymentMethodsComposable } from '../../../composables/payment-methods-composable';
@@ -130,7 +130,7 @@ const { t }: { t: (key: string) => string } = useTranslation();
 const observation: Ref<string> = ref('');
 const isPrinting: Ref<boolean> = ref(false);
 
-const currentOrderRef = useCurrentOrder.getOrder();
+const currentOrderRef = useSelectedOrder.getOrder();
 
 const headerTitle: ComputedRef<string> = computed(() => {
     const id = currentOrderRef.value?.id;
@@ -270,7 +270,7 @@ async function onFinish(): Promise<void> {
     }
 
     await OrdersRepository.updateStatus(id, 'completed');
-    await useCurrentOrder.refresh();
+    await useSelectedOrder.refresh();
     navigateTo(OrderListPage, { clearHistory: true });
 }
 
@@ -279,7 +279,7 @@ async function onReopen(): Promise<void> {
         const order: Order = currentOrderRef.value as Order;
         const id = order.id as number;
         await OrdersRepository.updateStatus(id, 'pending');
-        await useCurrentOrder.refresh();
+        await useSelectedOrder.refresh();
         Haptics.vibrateSuccess();
         showToast({ message: t('pages.orderShow.reopenSuccess'), variant: 'success' });
     } catch (err: unknown) {

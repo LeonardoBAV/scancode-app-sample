@@ -19,7 +19,7 @@ import type { Client } from '../../../types/schema/client';
 import { ClientsComposable } from '../../../composables/clients-composable';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
-import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import ClientListComponent from '../../../components/ClientListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
@@ -67,13 +67,13 @@ async function onConfirm(): Promise<void> {
             notes: null,
         });
 
-        await useCurrentOrder.setOrder(created.id as number);
+        await useSelectedOrder.setOrder(created.id as number);
         navigateTo(OrderShowPage);
     } else {
-        const orderId: number = (useCurrentOrder.getOrder()).value?.id as number;
+        const orderId: number = (useSelectedOrder.getOrder()).value?.id as number;
 
         await OrdersRepository.updateClientId(orderId, selectedClient.value?.id as number);
-        await useCurrentOrder.setOrder(orderId);
+        await useSelectedOrder.setOrder(orderId);
         navigateBack();
     }
 

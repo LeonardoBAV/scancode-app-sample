@@ -5,16 +5,16 @@ import type { Order } from '../../types/schema/order';
 import { useCurrentEvent } from './useCurrentEvent';
 
 
-export class CurrentOrderComposable {
-    private static readonly _instance: CurrentOrderComposable = new CurrentOrderComposable();
+export class SelectedOrderComposable {
+    private static readonly _instance: SelectedOrderComposable = new SelectedOrderComposable();
 
     private readonly order: Ref<Order | null> = ref<Order | null>(null);
     private readonly isLoading: Ref<boolean> = ref<boolean>(false);
 
     private constructor() { }
 
-    public static getInstance(): CurrentOrderComposable {
-        return CurrentOrderComposable._instance;
+    public static getInstance(): SelectedOrderComposable {
+        return SelectedOrderComposable._instance;
     }
 
     public getOrder(): DeepReadonly<Ref<Order | null>> {
@@ -36,7 +36,7 @@ export class CurrentOrderComposable {
             this.order.value = await OrdersRepository.findByIdWithRelations(orderId);
             await useCurrentEvent.setEvent(this.order.value?.event_id as number);
         } catch (error: unknown) {
-            console.error('[CurrentOrderComposable] setOrder failed:', error);
+            console.error('[SelectedOrderComposable] setOrder failed:', error);
             this.order.value = null;
         } finally {
             this.isLoading.value = false;
@@ -52,4 +52,4 @@ export class CurrentOrderComposable {
     }
 }
 
-export const useCurrentOrder: CurrentOrderComposable = CurrentOrderComposable.getInstance();
+export const useSelectedOrder: SelectedOrderComposable = SelectedOrderComposable.getInstance();

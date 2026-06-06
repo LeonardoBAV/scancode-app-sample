@@ -85,7 +85,7 @@ import { computed, ref, type DeepReadonly } from 'vue';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
-import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
 import { syncService } from '../../../sync/sync-service';
 import type { Order as SchemaOrder, OrderStatus } from '../../../types/schema/order';
 import { Icons } from '../../../utils/icons';
@@ -178,7 +178,7 @@ const filteredOrders = computed(() => {
 });
 
 function onNavigatedTo(): void {
-    useCurrentOrder.clearOrder();
+    useSelectedOrder.clearOrder();
 }
 
 function goToEvents(): void {
@@ -186,7 +186,7 @@ function goToEvents(): void {
 }
 
 async function onOrderTap(order: OrderListRow): Promise<void> {
-    await useCurrentOrder.setOrder(order.id);
+    await useSelectedOrder.setOrder(order.id);
     navigateTo(OrderShowPage);
 }
 

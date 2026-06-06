@@ -88,7 +88,7 @@ import { computed, ref, watch, type ComputedRef, type Ref } from 'vue';
 import { showToast } from '../../../composables/toast-state';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
-import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
 import type { OrderStatus } from '../../../types/schema/order';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
@@ -100,7 +100,7 @@ import OrderShowPage from './OrderShowPage.vue';
 const { navigateTo, navigateBack } = useNavigation();
 const { t } = useTranslation();
 
-const currentOrderRef = useCurrentOrder.getOrder();
+const currentOrderRef = useSelectedOrder.getOrder();
 const client = computed(() => currentOrderRef.value?.client ?? null);
 
 const orderStatus = computed((): OrderStatus => {
@@ -150,7 +150,7 @@ async function onSaveBuyerFields(): Promise<void> {
         nextBuyerPhone === '' ? null : nextBuyerPhone,
     );
 
-    await useCurrentOrder.refresh();
+    await useSelectedOrder.refresh();
     showToast({ message: t('pages.orderClientShow.saveBuyerSuccess'), variant: 'success' });
     navigateBack();
 }

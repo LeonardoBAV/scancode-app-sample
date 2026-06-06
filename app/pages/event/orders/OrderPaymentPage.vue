@@ -31,7 +31,7 @@ import { PaymentMethodsComposable } from '../../../composables/payment-methods-c
 import { useNavigation } from '../../../composables/useNavigation';
 import PaymentMethodListComponent from '../../../components/PaymentMethodListComponent.vue';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
-import { useCurrentOrder } from '../../../composables/repository/useCurrentOrder';
+import { useSelectedOrder } from '../../../composables/repository/useSelectedOrder';
 import type { OrderStatus } from '../../../types/schema/order';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 
@@ -40,7 +40,7 @@ import { OrdersRepository } from '../../../db/repositories/orders.repo';
 const { navigateBack } = useNavigation();
 
 const paymentMethodsFromStore = PaymentMethodsComposable.getList();
-const currentOrder = useCurrentOrder.getOrder();
+const currentOrder = useSelectedOrder.getOrder();
 
 const orderStatus = computed((): OrderStatus => {
     const raw = currentOrder.value?.status;
@@ -88,7 +88,7 @@ async function onSelectPaymentMethod(paymentMethod: PaymentMethod): Promise<void
     isSaving.value = true;
     try {
         await OrdersRepository.updatePaymentMethodId(orderId, nextSelected?.id ?? null);
-        await useCurrentOrder.refresh();
+        await useSelectedOrder.refresh();
     } finally {
         isSaving.value = false;
     }

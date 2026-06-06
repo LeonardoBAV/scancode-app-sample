@@ -5,17 +5,9 @@ import type { Order } from '../../types/schema/order';
 import { useCurrentEvent } from './useCurrentEvent';
 
 
-export class SelectedOrderComposable {
-    private static readonly _instance: SelectedOrderComposable = new SelectedOrderComposable();
-
+class SelectedOrderComposable {
     private readonly order: Ref<Order | null> = ref<Order | null>(null);
     private readonly isLoading: Ref<boolean> = ref<boolean>(false);
-
-    private constructor() { }
-
-    public static getInstance(): SelectedOrderComposable {
-        return SelectedOrderComposable._instance;
-    }
 
     public getOrder(): DeepReadonly<Ref<Order | null>> {
         return readonly(this.order);
@@ -52,4 +44,4 @@ export class SelectedOrderComposable {
     }
 }
 
-export const useSelectedOrder: SelectedOrderComposable = SelectedOrderComposable.getInstance();
+export const useSelectedOrder: SelectedOrderComposable = new SelectedOrderComposable();

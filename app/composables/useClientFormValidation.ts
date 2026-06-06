@@ -9,17 +9,8 @@ import type { core } from 'zod';
 
 
 class UseClientFormValidation {
-    private static readonly _instance: UseClientFormValidation = new UseClientFormValidation();
-
-    public readonly fieldErrors: Ref<Partial<Record<ClientFormFieldKey, string>>>;
-
-    private constructor() {
-        this.fieldErrors = ref<Partial<Record<ClientFormFieldKey, string>>>({});
-    }
-
-    public static getInstance(): UseClientFormValidation {
-        return UseClientFormValidation._instance;
-    }
+    public readonly fieldErrors: Ref<Partial<Record<ClientFormFieldKey, string>>> =
+        ref<Partial<Record<ClientFormFieldKey, string>>>({});
 
     public clearFieldErrors(): void {
         this.fieldErrors.value = {};
@@ -113,4 +104,4 @@ class UseClientFormValidation {
 }
 
 
-export const useClientFormValidation: UseClientFormValidation = UseClientFormValidation.getInstance();
+export const useClientFormValidation: UseClientFormValidation = new UseClientFormValidation();

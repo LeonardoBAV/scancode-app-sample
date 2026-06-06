@@ -3,19 +3,11 @@ import { computed, readonly, ref, type ComputedRef, type DeepReadonly, type Ref 
 import { useCurrentEvent } from './repository/useCurrentEvent';
 
 
-export class ScancodeDesktopComposable {
-    private static readonly _instance: ScancodeDesktopComposable = new ScancodeDesktopComposable();
-
+class ScancodeDesktopComposable {
     private readonly url: Ref<string | null> = ref<string | null>(null);
     private readonly requiredToHandleWithStockLimit: ComputedRef<boolean> = computed(() => {
         return useCurrentEvent.getEvent().value?.has_stock_limit ?? false;
     });
-
-    private constructor() { }
-
-    public static getInstance(): ScancodeDesktopComposable {
-        return ScancodeDesktopComposable._instance;
-    }
 
     public getUrl(): DeepReadonly<Ref<string | null>> {
         return readonly(this.url);
@@ -39,4 +31,4 @@ export class ScancodeDesktopComposable {
     }
 }
 
-export const useScancodeDesktop: ScancodeDesktopComposable = ScancodeDesktopComposable.getInstance();
+export const useScancodeDesktop: ScancodeDesktopComposable = new ScancodeDesktopComposable();

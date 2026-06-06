@@ -4,17 +4,9 @@ import { EventsRepository } from '../../db/repositories/events.repo';
 import type { Event } from '../../types/schema/event';
 
 
-export class CurrentEventComposable {
-    private static readonly _instance: CurrentEventComposable = new CurrentEventComposable();
-
+class CurrentEventComposable {
     private readonly event: Ref<Event | null> = ref<Event | null>(null);
     private readonly isLoading: Ref<boolean> = ref<boolean>(false);
-
-    private constructor() { }
-
-    public static getInstance(): CurrentEventComposable {
-        return CurrentEventComposable._instance;
-    }
 
     public getEvent(): DeepReadonly<Ref<Event | null>> {
         return readonly(this.event);
@@ -37,4 +29,4 @@ export class CurrentEventComposable {
     }
 }
 
-export const useCurrentEvent: CurrentEventComposable = CurrentEventComposable.getInstance();
+export const useCurrentEvent: CurrentEventComposable = new CurrentEventComposable();

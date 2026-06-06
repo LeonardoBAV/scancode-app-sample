@@ -9,17 +9,8 @@ import type { core } from 'zod';
 
 
 class UsePaymentMethodFormValidation {
-    private static readonly _instance: UsePaymentMethodFormValidation = new UsePaymentMethodFormValidation();
-
-    public readonly fieldErrors: Ref<Partial<Record<PaymentMethodFormFieldKey, string>>>;
-
-    private constructor() {
-        this.fieldErrors = ref<Partial<Record<PaymentMethodFormFieldKey, string>>>({});
-    }
-
-    public static getInstance(): UsePaymentMethodFormValidation {
-        return UsePaymentMethodFormValidation._instance;
-    }
+    public readonly fieldErrors: Ref<Partial<Record<PaymentMethodFormFieldKey, string>>> =
+        ref<Partial<Record<PaymentMethodFormFieldKey, string>>>({});
 
     public clearFieldErrors(): void {
         this.fieldErrors.value = {};
@@ -81,4 +72,4 @@ class UsePaymentMethodFormValidation {
 }
 
 
-export const usePaymentMethodFormValidation: UsePaymentMethodFormValidation = UsePaymentMethodFormValidation.getInstance();
+export const usePaymentMethodFormValidation: UsePaymentMethodFormValidation = new UsePaymentMethodFormValidation();

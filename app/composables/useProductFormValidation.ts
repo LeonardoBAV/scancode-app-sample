@@ -8,17 +8,8 @@ import type { core } from 'zod';
 
 
 class UseProductFormValidation {
-    private static readonly _instance: UseProductFormValidation = new UseProductFormValidation();
-
-    public readonly fieldErrors: Ref<Partial<Record<ProductFormFieldKey, string>>>;
-
-    private constructor() {
-        this.fieldErrors = ref<Partial<Record<ProductFormFieldKey, string>>>({});
-    }
-
-    public static getInstance(): UseProductFormValidation {
-        return UseProductFormValidation._instance;
-    }
+    public readonly fieldErrors: Ref<Partial<Record<ProductFormFieldKey, string>>> =
+        ref<Partial<Record<ProductFormFieldKey, string>>>({});
 
     public clearFieldErrors(): void {
         this.fieldErrors.value = {};
@@ -136,4 +127,4 @@ class UseProductFormValidation {
 }
 
 
-export const useProductFormValidation: UseProductFormValidation = UseProductFormValidation.getInstance();
+export const useProductFormValidation: UseProductFormValidation = new UseProductFormValidation();

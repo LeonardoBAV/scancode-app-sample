@@ -2,7 +2,7 @@
 import { ref, readonly, type DeepReadonly, type Ref } from 'vue';
 import { OrdersRepository } from '../../db/repositories/orders.repo';
 import type { Order } from '../../types/schema/order';
-import { useCurrentEvent } from './useCurrentEvent';
+import { useCurrentEvent } from '../repository/useCurrentEvent';
 
 
 class SelectedOrderComposable {

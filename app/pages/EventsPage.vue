@@ -50,7 +50,7 @@ import { computed, type ComputedRef } from 'vue';
 import { Format } from '../utils/format';
 import { EventsComposable } from '../composables/event-composable';
 import { useCurrentEvent } from '../composables/repository/useCurrentEvent';
-import { useSelectedOrder } from '../composables/repository/SelectedOrderComposable';
+import { useSelectedOrder } from '../composables/shared-state/SelectedOrderComposable';
 import { useScancodeDesktop } from '../composables/useScancodeDesktop';
 import { useTranslation } from '../composables/useTranslation';
 import { useNavigation } from '../composables/useNavigation';

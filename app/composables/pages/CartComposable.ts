@@ -7,16 +7,11 @@ import { PageComposable } from './PageComposable';
 
 
 class CartComposable extends PageComposable {
-    private readonly canEditCartComputed: ComputedRef<boolean> = computed((): boolean => {
+    public readonly canEditCart: ComputedRef<boolean> = computed((): boolean => {
         return useSelectedOrder.getOrder().value?.status === 'pending';
     });
 
-    public canEditCart(): ComputedRef<boolean> {
-        return this.canEditCartComputed;
-    }
-
     public async increaseQty(item: OrderItem): Promise<void> {
-
         this.isProcessing.value = true;
         try {
             await OrderItemsRepository.setQtyById(item.id as number, item.qty + 1);
@@ -24,7 +19,6 @@ class CartComposable extends PageComposable {
         } finally {
             this.isProcessing.value = false;
         }
-
     }
 }
 

@@ -313,7 +313,7 @@ async function decreaseQty(item: OrderItem): Promise<void> {
 
 const orderRef = useSelectedOrder.getOrder();
 const hasSelectedOrder: ComputedRef<boolean> = computed((): boolean => orderRef.value != null);
-const canEditCart: ComputedRef<boolean> = useCart.canEditCart();
+const canEditCart: ComputedRef<boolean> = useCart.canEditCart;
 
 const cartItems: ComputedRef<readonly OrderItem[]> = computed((): readonly OrderItem[] => orderRef.value?.order_items ?? []);
 </script>

@@ -278,10 +278,6 @@ function selecctedProduct(product: Product): void {
 }
 
 async function increaseQty(item: OrderItem): Promise<void> {
-    if (!canEditCart.value) {
-        return;
-    }
-
     await useCart.increaseQty(item);
 }
 

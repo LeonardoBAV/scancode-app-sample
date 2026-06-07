@@ -15,7 +15,7 @@ class CartComposable extends PageComposable {
         return !this.canEditCart.value;
     });
 
-    public async increaseQty(item: OrderItem): Promise<void> {
+    public async increaseQty(orderItem: OrderItem): Promise<void> {
 
         if(this.canNotEditCart.value) {
             return;
@@ -23,7 +23,7 @@ class CartComposable extends PageComposable {
 
         this.isProcessing.value = true;
         try {
-            await useSelectedOrder.updateQty(item, item.qty + 1);
+            await useSelectedOrder.updateQty(orderItem, orderItem.qty + 1);
         } finally {
             this.isProcessing.value = false;
         }

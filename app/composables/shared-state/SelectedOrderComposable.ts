@@ -15,15 +15,8 @@ class SelectedOrderComposable {
     public async setOrder(orderId: number | null): Promise<void> {
         if (orderId == null) {
             this.order.value = null;
-            return;
-        }
-
-        try {
+        } else {
             this.order.value = await OrdersRepository.findByIdWithRelations(orderId);
-            await useCurrentEvent.setEvent(this.order.value?.event_id as number);
-        } catch (error: unknown) {
-            console.error('[SelectedOrderComposable] setOrder failed:', error);
-            this.order.value = null;
         }
     }
 

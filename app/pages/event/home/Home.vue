@@ -123,7 +123,7 @@ const isConnectingScancodeDesktop: Ref<boolean> = ref<boolean>(false);
 
 const currentEvent = useCurrentEvent.getEvent();
 const loading = useCurrentEvent.getIsLoading();
-const isScancodeDesktopIntegrationRequired = useScancodeDesktop.isScancodeDesktopIntegrationRequired();
+const isScancodeDesktopIntegrationRequired = useScancodeDesktop.isScancodeDesktopIntegrationRequired;
 const scancodeDesktopUrl = useScancodeDesktop.getUrl();
 
 const eventDisplay: ComputedRef<HomeEventDisplay | null> = computed(() => {

@@ -5,20 +5,13 @@ import { useCurrentEvent } from './repository/useCurrentEvent';
 
 class ScancodeDesktopComposable {
     private readonly url: Ref<string | null> = ref<string | null>(null);
-    private readonly requiredToHandleWithStockLimit: ComputedRef<boolean> = computed(() => {
+
+    public readonly isScancodeDesktopIntegrationRequired: ComputedRef<boolean> = computed(() => {
         return useCurrentEvent.getEvent().value?.has_stock_limit ?? false;
     });
 
     public getUrl(): DeepReadonly<Ref<string | null>> {
         return readonly(this.url);
-    }
-
-    public isScancodeDesktopIntegrationRequired(): ComputedRef<boolean> {
-        return this.isRequiredToHandleWithStockLimit();
-    }
-
-    public isRequiredToHandleWithStockLimit(): ComputedRef<boolean> {
-        return this.requiredToHandleWithStockLimit;
     }
 
     public setUrl(url: string | null): void {

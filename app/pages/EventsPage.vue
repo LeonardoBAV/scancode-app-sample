@@ -132,7 +132,7 @@ function deriveEventStatus(start: string, end: string): 'scheduled' | 'in_progre
 
 async function openEvent(event: EventItem): Promise<void> {
     await useCurrentEvent.setEvent(event.id);
-    useSelectedOrder.clearOrder();
+    useSelectedOrder.clear();
     navigateTo(DefaultLayout, { frame: 'root-frame', clearHistory: true });
 }
 </script>

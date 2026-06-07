@@ -2,7 +2,6 @@
 import { ref, readonly, type DeepReadonly, type Ref } from 'vue';
 import { OrdersRepository } from '../../db/repositories/orders.repo';
 import type { Order } from '../../types/schema/order';
-import { useCurrentEvent } from '../repository/useCurrentEvent';
 
 
 class SelectedOrderComposable {
@@ -12,15 +11,11 @@ class SelectedOrderComposable {
         return readonly(this.order);
     }
 
-    public async setOrder(orderId: number | null): Promise<void> {
-        if (orderId == null) {
-            this.order.value = null;
-        } else {
-            this.order.value = await OrdersRepository.findByIdWithRelations(orderId);
-        }
+    public async setOrder(orderId: number): Promise<void> {
+        this.order.value = await OrdersRepository.findByIdWithRelations(orderId);
     }
 
-    public clearOrder(): void {
+    public clear(): void {
         this.order.value = null;
     }
 

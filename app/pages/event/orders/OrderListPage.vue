@@ -178,7 +178,7 @@ const filteredOrders = computed(() => {
 });
 
 function onNavigatedTo(): void {
-    useSelectedOrder.clearOrder();
+    useSelectedOrder.clear();
 }
 
 function goToEvents(): void {

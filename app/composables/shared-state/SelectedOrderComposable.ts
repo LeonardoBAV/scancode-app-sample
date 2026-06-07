@@ -1,7 +1,9 @@
 // --- Imports ---
 import { ref, readonly, type DeepReadonly, type Ref } from 'vue';
 import { OrdersRepository } from '../../db/repositories/orders.repo';
+import { OrderItemsRepository } from '../../db/repositories/order-items.repo';
 import type { Order } from '../../types/schema/order';
+import type { OrderItem } from '../../types/schema/order-item';
 
 
 class SelectedOrderComposable {
@@ -25,6 +27,11 @@ class SelectedOrderComposable {
         }
 
         await this.setOrder(this.order.value.id);
+    }
+
+    public async updateQty(item: OrderItem, qty: number): Promise<void> {
+        await OrderItemsRepository.setQtyById(item.id as number, qty);
+        await this.refresh();
     }
 }
 

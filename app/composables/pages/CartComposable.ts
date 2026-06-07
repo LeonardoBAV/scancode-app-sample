@@ -1,7 +1,6 @@
 // --- Imports ---
 import { computed, type ComputedRef } from 'vue';
 import type { OrderItem } from '../../types/schema/order-item';
-import { OrderItemsRepository } from '../../db/repositories/order-items.repo';
 import { useSelectedOrder } from '../shared-state/SelectedOrderComposable';
 import { PageComposable } from './PageComposable';
 
@@ -24,8 +23,7 @@ class CartComposable extends PageComposable {
 
         this.isProcessing.value = true;
         try {
-            await OrderItemsRepository.setQtyById(item.id as number, item.qty + 1);
-            await useSelectedOrder.refresh();
+            await useSelectedOrder.updateQty(item, item.qty + 1);
         } finally {
             this.isProcessing.value = false;
         }

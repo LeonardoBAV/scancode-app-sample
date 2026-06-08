@@ -10,6 +10,10 @@ class ScancodeDesktopComposable {
         return useCurrentEvent.getEvent().value?.has_stock_limit ?? false;
     });
 
+    public readonly isRequiredForStockLimit: ComputedRef<boolean> = computed(() => {
+        return useCurrentEvent.getEvent().value?.has_stock_limit ?? false;
+    });
+
     public getUrl(): DeepReadonly<Ref<string | null>> {
         return readonly(this.url);
     }

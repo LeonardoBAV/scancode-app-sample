@@ -75,7 +75,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { ref, computed, type Ref, type ComputedRef } from 'vue';
-import { Dialogs, type TextField } from '@nativescript/core';
+import { type TextField } from '@nativescript/core';
 import { BarcodeScanner } from 'nativescript-barcodescanner';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useSelectedOrder } from '../../../composables/shared-state/SelectedOrderComposable';
@@ -227,23 +227,6 @@ function getSelectedOrderId(): number {
     return orderId;
 }
 
-async function removeProductFromCart(product: Product): Promise<void> {
-    if (!canEditCart.value) {
-        return;
-    }
-    if (product.id == null) {
-        return;
-    }
-    const productId: number = product.id;
-    const existing: OrderItem | undefined = cartItems.value.find((c: OrderItem): boolean => c.product_id === productId);
-    if (existing == null || existing.id == null) {
-        return;
-    }
-    const orderItemId: number = existing.id;
-    await OrderItemsRepository.deleteById(orderItemId);
-    await refreshOrder();
-}
-
 async function addProduct(product: Product): Promise<void> {
     if (!canEditCart.value) {
         return;
@@ -282,29 +265,7 @@ async function increaseQty(item: OrderItem): Promise<void> {
 }
 
 async function decreaseQty(item: OrderItem): Promise<void> {
-    if (!canEditCart.value) {
-        return;
-    }
-    if (item.id == null) {
-        return;
-    }
-    if (item.qty > 1) {
-        await OrderItemsRepository.setQtyById(item.id, item.qty - 1);
-        await refreshOrder();
-        return;
-    }
-    const confirmed: boolean = await Dialogs.confirm({
-        title: t('pages.cart.removeConfirmTitle'),
-        message: t('pages.cart.removeConfirmMessage'),
-        okButtonText: t('pages.cart.removeConfirmOk'),
-        cancelButtonText: t('pages.cart.removeConfirmCancel'),
-    });
-    if (confirmed) {
-        const product: Product | null | undefined = item.product;
-        if (product != null) {
-            await removeProductFromCart(product);
-        }
-    }
+    await useCart.decreaseQty(item);
 }
 
 const orderRef = useSelectedOrder.getOrder();

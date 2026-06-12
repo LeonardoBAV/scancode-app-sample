@@ -1,6 +1,7 @@
 // --- Imports ---
 import { computed, type ComputedRef } from 'vue';
 import type { OrderItem } from '../../types/schema/order-item';
+import { showToast } from '../toast-state';
 import { useSelectedOrder } from '../shared-state/SelectedOrderComposable';
 import { PageComposable } from './PageComposable';
 
@@ -24,8 +25,10 @@ class CartComposable extends PageComposable {
         this.isProcessing.value = true;
         try {
             await useSelectedOrder.updateQty(orderItem, orderItem.qty + 1);
-        } catch (error) {
+        } catch (error: unknown) {
             console.error(error);
+            const message: string = error instanceof Error ? error.message : String(error);
+            showToast({ message, variant: 'error' });
         } finally {
             this.isProcessing.value = false;
         }

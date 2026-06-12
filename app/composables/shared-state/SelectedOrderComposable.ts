@@ -45,7 +45,7 @@ class SelectedOrderComposable {
             return null;
         }
 
-        const qty: number = newQty - item.qty;
+        const qty: number = newQty;
         const sku: string = item.product?.sku as string;
         const uuid: string = item.movement ?? Uuid.generateMovementUuid();
 

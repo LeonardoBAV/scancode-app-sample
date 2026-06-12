@@ -65,6 +65,7 @@ export class HttpClient {
             headers = interceptor(headers);
         }
         console.log(`${this.baseURL}${path}`);
+        console.log(body);
         const response: HttpResponse = await Http.request({
             url: `${this.baseURL}${path}`,
             method,

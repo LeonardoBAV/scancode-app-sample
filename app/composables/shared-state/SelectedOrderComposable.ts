@@ -1,9 +1,14 @@
 // --- Imports ---
 import { ref, readonly, type DeepReadonly, type Ref } from 'vue';
+import { Uuid } from '../../utils/uuid';
 import { OrdersRepository } from '../../db/repositories/orders.repo';
 import { OrderItemsRepository } from '../../db/repositories/order-items.repo';
+import { ScancodeDesktopAdapter } from '../../integrations/adapters/scancode-desktop-adapter';
+import { i18n } from '../../configs/i18n';
+import { ApiException } from '../../types/exceptions/api-exception';
 import type { Order } from '../../types/schema/order';
 import type { OrderItem } from '../../types/schema/order-item';
+import { useScancodeDesktop } from '../useScancodeDesktop';
 
 
 class SelectedOrderComposable {
@@ -30,9 +35,25 @@ class SelectedOrderComposable {
     }
 
     public async updateQty(item: OrderItem, qty: number): Promise<void> {
-        await OrderItemsRepository.setQtyById(item.id as number, qty);
+        const uuid: string | null = await this.ensureScancodeDesktopMovement(item, qty);
+        await OrderItemsRepository.setQtyById(item.id as number, qty, uuid);
         await this.refresh();
     }
+
+    private async ensureScancodeDesktopMovement(item: OrderItem, newQty: number): Promise<string | null> {
+        if (!useScancodeDesktop.isRequiredForStockLimit.value) {
+            return null;
+        }
+
+        const qty: number = newQty - item.qty;
+        const sku: string = item.product?.sku as string;
+        const uuid: string = item.movement ?? Uuid.generateMovementUuid();
+
+        await ScancodeDesktopAdapter.createMovement(sku, uuid, qty);
+
+        return uuid;
+    }
+
 }
 
 export const useSelectedOrder: SelectedOrderComposable = new SelectedOrderComposable();

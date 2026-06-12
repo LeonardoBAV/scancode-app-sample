@@ -242,7 +242,8 @@ async function onScancodeDesktopTap(): Promise<void> {
         if (baseUrl == null) {
             return;
         }
-        const health: ScancodeDesktopHealthy = await ScancodeDesktopAdapter.testConnection(baseUrl);
+        useScancodeDesktop.setUrl(baseUrl);
+        const health: ScancodeDesktopHealthy = await ScancodeDesktopAdapter.testConnection();
         useScancodeDesktop.setUrl(health.url);
         Haptics.vibrateSuccess();
         showToast({ message: t('pages.eventHome.scancodeDesktopConnectionSuccess'), variant: 'success' });

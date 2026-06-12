@@ -8,6 +8,7 @@ import { RepositoryBase } from '../repository-base';
 interface OrderItemProductJoinRow {
     // order_items
     id: number | null;
+    movement: string | null;
     order_id: number;
     product_id: number;
     price: number;
@@ -83,6 +84,7 @@ export class OrdersRepository extends RepositoryBase {
         const sql: string = `
             SELECT
                 oi.id AS id,
+                oi.movement AS movement,
                 oi.order_id AS order_id,
                 oi.product_id AS product_id,
                 oi.price AS price,
@@ -135,6 +137,7 @@ export class OrdersRepository extends RepositoryBase {
             };
             return {
                 id: r.id,
+                movement: r.movement,
                 order_id: r.order_id,
                 product_id: r.product_id,
                 price: r.price,

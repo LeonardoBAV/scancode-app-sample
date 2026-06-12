@@ -20,6 +20,7 @@ export interface LoginResponseDTO {
 
 export interface OrderItemDTO {
     id: number;
+    movement: string | null;
     distributor_id: number;
     order_id: number;
     product_id: number;

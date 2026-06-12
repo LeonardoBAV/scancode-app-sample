@@ -9,6 +9,7 @@ export class OrderItemsRepository extends RepositoryBase {
 
     private static readonly ORDER_ITEM_COLUMNS: readonly (keyof OrderItem)[] = [
         'id',
+        'movement',
         'order_id',
         'product_id',
         'price',
@@ -42,10 +43,10 @@ export class OrderItemsRepository extends RepositoryBase {
         const localId: number = await OrderItemsRepository.allocateNextLocalNegativeId('order_items');
         await OrderItemsRepository.execute(
             `
-                INSERT INTO order_items (id, order_id, product_id, price, qty, notes)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO order_items (id, movement, order_id, product_id, price, qty, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             `,
-            [localId, input.order_id, input.product_id, input.price, qty, input.notes ?? null],
+            [localId, null, input.order_id, input.product_id, input.price, qty, input.notes ?? null],
         );
         await OrderItemsRepository.touchOrder(input.order_id);
     }
@@ -54,7 +55,7 @@ export class OrderItemsRepository extends RepositoryBase {
         await OrderItemsRepository.execute('DELETE FROM order_items WHERE order_id = ?', [orderId]);
     }
 
-    public static async setQtyById(orderItemId: number, qty: number): Promise<void> {
+    public static async setQtyById(orderItemId: number, qty: number, movement?: string | null): Promise<void> {
         const normalizedQty: number = Math.max(0, Math.floor(qty));
         const row: { order_id: number } | null = await OrderItemsRepository.queryOne<{ order_id: number }>(
             'SELECT order_id FROM order_items WHERE id = ?',
@@ -70,10 +71,11 @@ export class OrderItemsRepository extends RepositoryBase {
         await OrderItemsRepository.execute(
             `
                 UPDATE order_items
-                SET qty = ?
+                SET qty = ?,
+                    movement = COALESCE(?, movement)
                 WHERE id = ?
             `,
-            [normalizedQty, orderItemId],
+            [normalizedQty, movement ?? null, orderItemId],
         );
         await OrderItemsRepository.touchOrder(row.order_id);
     }

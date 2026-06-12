@@ -391,6 +391,7 @@ export class ScancodeAdapter {
             updated_at: orderDto.updated_at,
             order_items: orderDto.order_items.map((itemDto): OrderItem => ({
                 id: itemDto.id,
+                movement: itemDto.movement,
                 order_id: itemDto.order_id,
                 product_id: itemDto.product_id,
                 price: Number.parseFloat(itemDto.price),

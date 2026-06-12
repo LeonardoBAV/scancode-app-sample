@@ -24,6 +24,8 @@ class CartComposable extends PageComposable {
         this.isProcessing.value = true;
         try {
             await useSelectedOrder.updateQty(orderItem, orderItem.qty + 1);
+        } catch (error) {
+            console.error(error);
         } finally {
             this.isProcessing.value = false;
         }

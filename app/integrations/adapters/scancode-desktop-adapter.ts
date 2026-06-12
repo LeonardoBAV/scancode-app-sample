@@ -10,10 +10,9 @@ import { ScancodeDesktopApi } from '../apis/scancode-desktop-api';
 
 
 export class ScancodeDesktopAdapter {
-    public static async testConnection(baseUrl: string): Promise<ScancodeDesktopHealthy> {
+    public static async testConnection(): Promise<ScancodeDesktopHealthy> {
         try {
-            const normalizedUrl: string = ScancodeDesktopAdapter.normalizeAndValidateUrl(baseUrl);
-            const response: ScancodeDesktopHealthyResponseDTO = await new ScancodeDesktopApi(normalizedUrl).healthy();
+            const response: ScancodeDesktopHealthyResponseDTO = await new ScancodeDesktopApi().healthy();
 
             return ScancodeDesktopAdapter.mapHealthyResponse(response);
         } catch (err: unknown) {
@@ -21,31 +20,14 @@ export class ScancodeDesktopAdapter {
         }
     }
 
-    public static async createMovement(baseUrl: string, payload: MovementRequestDTO): Promise<Movement> {
+    public static async createMovement(sku: string, movementUuid: string, qty: number): Promise<Movement> {
         try {
-            const normalizedUrl: string = ScancodeDesktopAdapter.normalizeAndValidateUrl(baseUrl);
-            const response = await new ScancodeDesktopApi(normalizedUrl).postMovement(payload);
+            const payload: MovementRequestDTO = ScancodeDesktopAdapter.mapMovementRequest(sku, movementUuid, qty);
+            const response = await new ScancodeDesktopApi().postMovement(payload);
 
             return ScancodeDesktopAdapter.mapMovementResponse(response.data);
         } catch (err: unknown) {
             ScancodeDesktopAdapter.handleApiError(err);
-        }
-    }
-
-    private static normalizeAndValidateUrl(baseUrl: string): string {
-        const normalizedUrl: string = baseUrl.trim().replace(/\/+$/, '');
-
-        try {
-            const url: URL = new URL(normalizedUrl);
-            if (url.protocol !== 'http:' && url.protocol !== 'https:') {
-                throw new Error('Invalid protocol');
-            }
-
-            return normalizedUrl;
-        } catch {
-            throw new ApiException({
-                message: String(i18n.global.t('pages.eventHome.scancodeDesktopInvalidQrCode')),
-            });
         }
     }
 
@@ -62,6 +44,14 @@ export class ScancodeDesktopAdapter {
             port: dto.port,
             status: 'ok',
             url: dto.url.trim().replace(/\/+$/, ''),
+        };
+    }
+
+    private static mapMovementRequest(sku: string, movementUuid: string, qty: number): MovementRequestDTO {
+        return {
+            sku,
+            movement_uuid: movementUuid,
+            qty,
         };
     }
 
@@ -88,14 +78,33 @@ export class ScancodeDesktopAdapter {
         }
 
         const status: number | undefined = err instanceof HttpError ? err.statusCode : undefined;
+        const message: string = err instanceof HttpError
+            ? ScancodeDesktopAdapter.getHttpErrorMessage(err)
+            : String(i18n.global.t('pages.eventHome.scancodeDesktopConnectionError'));
 
         throw new ApiException({
-            message: String(i18n.global.t('pages.eventHome.scancodeDesktopConnectionError')),
+            message,
             statusCode: status,
         });
     }
 
     private static isNetworkError(err: unknown): boolean {
         return err instanceof HttpError && err.statusCode === 0;
+    }
+
+    private static getHttpErrorMessage(err: HttpError): string {
+        if (ScancodeDesktopAdapter.hasMessage(err.body)) {
+            return err.body.message;
+        }
+
+        return String(i18n.global.t('pages.eventHome.scancodeDesktopConnectionError'));
+    }
+
+    private static hasMessage(body: unknown): body is { message: string } {
+        return typeof body === 'object'
+            && body !== null
+            && 'message' in body
+            && typeof body.message === 'string'
+            && body.message.trim().length > 0;
     }
 }

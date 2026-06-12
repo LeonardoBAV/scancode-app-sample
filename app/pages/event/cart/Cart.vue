@@ -40,12 +40,11 @@
                             <Label row="0" col="1" :text="Format.formatCurrencyBR(item.price * item.qty)" class="text-base font-bold text-success" verticalAlignment="top" />
                             <Label row="1" col="0" :text="(item.product?.sku ?? '') + ' · ' + (item.product?.product_category?.name ?? '')" class="text-xs text-muted-foreground mt-1" />
                             <Label row="1" col="1" :text="Format.formatCurrencyBR(item.price) + ' ' + perUnitLabel" class="text-xs text-muted-foreground" verticalAlignment="center" />
-                            <GridLayout v-if="canEditCart" row="2" col="0" colSpan="2" rows="auto" columns="auto, auto, auto" class="mt-3">
-                                <Button col="0" text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" @tap="decreaseQty(item)" />
-                                <Label col="1" :text="String(item.qty)" class="text-base font-semibold text-foreground text-center min-w-8 mx-2" verticalAlignment="center" />
-                                <Button col="2" text="+" class="btn-icon-sm bg-primary text-primary-foreground" @tap="increaseQty(item)" />
+                            <GridLayout row="2" col="0" colSpan="2" rows="auto" :columns="canEditCart ? 'auto, auto, auto' : '*'" class="mt-3">
+                                <Button v-if="canEditCart" col="0" text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" @tap="decreaseQty(item)" />
+                                <Label :col="canEditCart ? 1 : 0" :text="String(item.qty)" class="text-base font-semibold text-foreground text-center min-w-8 mx-2" verticalAlignment="center" />
+                                <Button v-if="canEditCart" col="2" text="+" class="btn-icon-sm bg-primary text-primary-foreground" @tap="increaseQty(item)" />
                             </GridLayout>
-                            <Label v-else row="2" col="0" colSpan="2" :text="String(item.qty)" class="text-base font-semibold text-foreground mt-3" />
                         </GridLayout>
                     </template>
                 </ListView>
@@ -75,7 +74,7 @@
 <script setup lang="ts">
 // --- Imports ---
 import { ref, computed, type Ref, type ComputedRef } from 'vue';
-import { type TextField } from '@nativescript/core';
+import { Dialogs, type TextField } from '@nativescript/core';
 import { BarcodeScanner } from 'nativescript-barcodescanner';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useSelectedOrder } from '../../../composables/shared-state/SelectedOrderComposable';
@@ -265,7 +264,23 @@ async function increaseQty(item: OrderItem): Promise<void> {
 }
 
 async function decreaseQty(item: OrderItem): Promise<void> {
+    if (await checkNewQuantityIsZero(item)) {
+        return;
+    }
     await useCart.decreaseQty(item);
+}
+
+async function checkNewQuantityIsZero(item: OrderItem): Promise<boolean> {
+    if (item.qty - 1 != 0) {
+        return false;
+    }
+    const confirmed: boolean = await Dialogs.confirm({
+        title: t('pages.cart.removeConfirmTitle'),
+        message: t('pages.cart.removeConfirmMessage'),
+        okButtonText: t('pages.cart.removeConfirmOk'),
+        cancelButtonText: t('pages.cart.removeConfirmCancel'),
+    });
+    return !confirmed;
 }
 
 const orderRef = useSelectedOrder.getOrder();

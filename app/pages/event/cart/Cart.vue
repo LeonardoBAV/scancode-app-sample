@@ -85,6 +85,7 @@ import { Format } from '../../../utils/format';
 import type { Product } from '../../../types/schema/product';
 import type { OrderItem } from '../../../types/schema/order-item';
 import { Icons } from '../../../utils/icons';
+import { Device } from '../../../utils/device';
 import { showToast } from '../../../composables/toast-state';
 import { useCart } from '../../../composables/pages/CartComposable';
 
@@ -125,24 +126,6 @@ function isScanCancelled(error: unknown): boolean {
     return message.includes('Scan aborted') || message.includes('abort');
 }
 
-async function ensureCameraPermission(scanner: BarcodeScanner): Promise<boolean> {
-    const hasPermission: boolean = await scanner.hasCameraPermission();
-    if (hasPermission) {
-        return true;
-    }
-    try {
-        await scanner.requestCameraPermission();
-    } catch {
-        showToast({ message: t('pages.cart.scanPermissionDenied'), variant: 'error' });
-        return false;
-    }
-    const granted: boolean = await scanner.hasCameraPermission();
-    if (!granted) {
-        showToast({ message: t('pages.cart.scanPermissionDenied'), variant: 'error' });
-    }
-    return granted;
-}
-
 async function onCameraTap(): Promise<void> {
     console.log('onCameraTap');
     if (!canEditCart.value) {
@@ -155,7 +138,7 @@ async function onCameraTap(): Promise<void> {
         showToast({ message: t('pages.cart.scanCameraUnavailable'), variant: 'error' });
         return;
     }
-    const hasPermission: boolean = await ensureCameraPermission(scanner);
+    const hasPermission: boolean = await Device.ensureCameraPermission(scanner, t('pages.cart.scanPermissionDenied'));
     if (!hasPermission) {
         return;
     }
@@ -204,32 +187,26 @@ async function onCameraTap(): Promise<void> {
     }
 }
 
-function closeKeyboard(): void {
-    setTimeout((): void => {
-        searchFieldRef.value?.nativeView?.dismissSoftInput();
-    }, 50);
-}
-
 function selecctedProduct(product: Product): void {
-    Haptics.vibrateSuccess();
-    closeKeyboard();
-    searchQuery.value = '';
-
     void useCart.runProcessing(async (): Promise<void> => {
+        Haptics.vibrateSuccess();
+        closeKeyboard();
+        searchQuery.value = '';
+        
         await useCart.addProduct(product);
     });
 }
 
 async function increaseQty(item: OrderItem): Promise<void> {
-    Haptics.vibrateSuccess();
     await useCart.runProcessing(async (): Promise<void> => {
+        Haptics.vibrateSuccess();
         await useCart.increaseQty(item);
     });
 }
 
 async function decreaseQty(item: OrderItem): Promise<void> {
     Haptics.vibrateSuccess();
-    if (await checkNewQuantityIsZero(item)) {
+    if (await checkIfWillRemoveItem(item.qty - 1)) {
         return;
     }
     await useCart.runProcessing(async (): Promise<void> => {
@@ -237,8 +214,8 @@ async function decreaseQty(item: OrderItem): Promise<void> {
     });
 }
 
-async function checkNewQuantityIsZero(item: OrderItem): Promise<boolean> {
-    if (item.qty - 1 != 0) {
+async function checkIfWillRemoveItem(qty: number): Promise<boolean> {
+    if (qty > 0) {
         return false;
     }
     const confirmed: boolean = await Dialogs.confirm({
@@ -248,6 +225,12 @@ async function checkNewQuantityIsZero(item: OrderItem): Promise<boolean> {
         cancelButtonText: t('pages.cart.removeConfirmCancel'),
     });
     return !confirmed;
+}
+
+function closeKeyboard(): void {
+    setTimeout((): void => {
+        searchFieldRef.value?.nativeView?.dismissSoftInput();
+    }, 50);
 }
 
 const orderRef = useSelectedOrder.getOrder();

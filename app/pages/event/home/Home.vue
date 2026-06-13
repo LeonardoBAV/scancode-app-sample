@@ -110,6 +110,7 @@ import type { EventItem } from '../../../types/event-item';
 import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
 import { Haptics } from '../../../utils/haptics';
+import { Device } from '../../../utils/device';
 import type { ScancodeDesktopHealthy } from '../../../types/schema/scancode-desktop/healthy';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import EventsPage from '../../EventsPage.vue';
@@ -188,24 +189,6 @@ function isScanCancelled(error: unknown): boolean {
     return message.includes('Scan aborted') || message.includes('abort');
 }
 
-async function ensureCameraPermission(scanner: BarcodeScanner): Promise<boolean> {
-    const hasPermission: boolean = await scanner.hasCameraPermission();
-    if (hasPermission) {
-        return true;
-    }
-    try {
-        await scanner.requestCameraPermission();
-    } catch {
-        showToast({ message: t('pages.eventHome.scancodeDesktopPermissionDenied'), variant: 'error' });
-        return false;
-    }
-    const granted: boolean = await scanner.hasCameraPermission();
-    if (!granted) {
-        showToast({ message: t('pages.eventHome.scancodeDesktopPermissionDenied'), variant: 'error' });
-    }
-    return granted;
-}
-
 async function readScancodeDesktopBaseUrl(): Promise<string | null> {
     const scanner: BarcodeScanner = new BarcodeScanner();
     const cameraAvailable: boolean = await scanner.available();
@@ -213,7 +196,7 @@ async function readScancodeDesktopBaseUrl(): Promise<string | null> {
         showToast({ message: t('pages.eventHome.scancodeDesktopCameraUnavailable'), variant: 'error' });
         return null;
     }
-    const hasPermission: boolean = await ensureCameraPermission(scanner);
+    const hasPermission: boolean = await Device.ensureCameraPermission(scanner, t('pages.eventHome.scancodeDesktopPermissionDenied'));
     if (!hasPermission) {
         return null;
     }

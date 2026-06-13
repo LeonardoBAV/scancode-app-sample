@@ -4,12 +4,10 @@ import { Uuid } from '../../utils/uuid';
 import { OrdersRepository } from '../../db/repositories/orders.repo';
 import { OrderItemsRepository } from '../../db/repositories/order-items.repo';
 import { ScancodeDesktopAdapter } from '../../integrations/adapters/scancode-desktop-adapter';
-import { i18n } from '../../configs/i18n';
-import { ApiException } from '../../types/exceptions/api-exception';
 import type { Order } from '../../types/schema/order';
 import type { OrderItem } from '../../types/schema/order-item';
+import type { Product } from '../../types/schema/product';
 import { useScancodeDesktop } from '../useScancodeDesktop';
-
 
 class SelectedOrderComposable {
     private readonly order: Ref<Order | null> = ref<Order | null>(null);
@@ -34,20 +32,33 @@ class SelectedOrderComposable {
         await this.setOrder(this.order.value.id);
     }
 
+    public async createOrderItem(product: Product, qty: number): Promise<void> {
+        const movement: string | null = await this.ensureScancodeDesktopMovement(product.sku, null, qty);
+
+        await OrderItemsRepository.createOne({
+            id: null,
+            movement,
+            order_id: this.order.value?.id as number,
+            product_id: product.id as number,
+            price: product.price,
+            qty,
+            notes: null,
+        });
+        await this.refresh();
+    }
+
     public async updateQty(item: OrderItem, qty: number): Promise<void> {
-        const uuid: string | null = await this.ensureScancodeDesktopMovement(item, qty);
+        const uuid: string | null = await this.ensureScancodeDesktopMovement(item.product?.sku as string, item.movement, qty);
         await OrderItemsRepository.setQtyById(item.id as number, qty, uuid);
         await this.refresh();
     }
 
-    private async ensureScancodeDesktopMovement(item: OrderItem, newQty: number): Promise<string | null> {
+    private async ensureScancodeDesktopMovement(sku: string, movement: string | null, qty: number): Promise<string | null> {
         if (!useScancodeDesktop.isRequiredForStockLimit.value) {
             return null;
         }
 
-        const qty: number = newQty;
-        const sku: string = item.product?.sku as string;
-        const uuid: string = item.movement ?? Uuid.generateMovementUuid();
+        const uuid: string = movement ?? Uuid.generateMovementUuid();
 
         await ScancodeDesktopAdapter.createMovement(sku, uuid, qty);
 

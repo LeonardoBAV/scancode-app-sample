@@ -29,14 +29,8 @@ export class OrderItemsRepository extends RepositoryBase {
         );
     }
 
-    public static async createOne(input: {
-        order_id: number;
-        product_id: number;
-        price: number;
-        qty?: number;
-        notes?: string | null;
-    }): Promise<void> {
-        const qty: number = Math.max(0, Math.floor(input.qty ?? 1));
+    public static async createOne(input: OrderItem): Promise<void> {
+        const qty: number = Math.max(0, Math.floor(input.qty));
         if (qty <= 0) {
             return;
         }
@@ -46,7 +40,7 @@ export class OrderItemsRepository extends RepositoryBase {
                 INSERT INTO order_items (id, movement, order_id, product_id, price, qty, notes)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             `,
-            [localId, null, input.order_id, input.product_id, input.price, qty, input.notes ?? null],
+            [localId, input.movement, input.order_id, input.product_id, input.price, qty, input.notes ?? null],
         );
         await OrderItemsRepository.touchOrder(input.order_id);
     }

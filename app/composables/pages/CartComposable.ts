@@ -3,7 +3,6 @@ import { computed, type ComputedRef } from 'vue';
 import type { OrderItem } from '../../types/schema/order-item';
 import type { Product } from '../../types/schema/product';
 import { i18n } from '../../configs/i18n';
-import { OrderItemsRepository } from '../../db/repositories/order-items.repo';
 import { showToast } from '../toast-state';
 import { useSelectedOrder } from '../shared-state/SelectedOrderComposable';
 import { PageComposable } from './PageComposable';
@@ -30,14 +29,7 @@ class CartComposable extends PageComposable {
             return;
         }
 
-        await OrderItemsRepository.createOne({
-            order_id: useSelectedOrder.getOrder().value?.id as number,
-            product_id: product.id as number,
-            price: product.price,
-            qty: 1,
-            notes: null,
-        });
-        await useSelectedOrder.refresh();
+        await useSelectedOrder.createOrderItem(product, 1);
     }
 
     public async increaseQty(orderItem: OrderItem): Promise<void> {

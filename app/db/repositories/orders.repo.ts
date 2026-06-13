@@ -283,6 +283,7 @@ export class OrdersRepository extends RepositoryBase {
 
     public static async updateNotes(orderId: number, notes: string | null): Promise<void> {
         const now: string = new Date().toISOString();
+        const normalizedNotes: string | null = notes?.trim() === '' ? null : notes?.trim() ?? null;
         await OrdersRepository.execute(
             `
                 UPDATE orders

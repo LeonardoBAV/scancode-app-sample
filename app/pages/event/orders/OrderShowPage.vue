@@ -130,6 +130,7 @@ import { Icons } from '../../../utils/icons';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useSelectedOrder } from '../../../composables/shared-state/SelectedOrderComposable';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
+import { useOrderShow } from '../../../composables/pages/OrderShowComposable';
 import { OrdersRepository } from '../../../db/repositories/orders.repo';
 import { PaymentMethodsComposable } from '../../../composables/payment-methods-composable';
 import { showToast } from '../../../composables/toast-state';
@@ -287,19 +288,10 @@ async function onFinish(): Promise<void> {
 }
 
 async function onCancel(): Promise<void> {
-    try {
+    await useOrderShow.runProcessing(async (): Promise<void> => {
         Haptics.vibrateSuccess();
-        const order: Order = currentOrderRef.value as Order;
-        const id = order.id as number;
-
-        await persistObservationDraft(order);
-        await OrdersRepository.updateStatus(id, 'cancelled');
-        await useSelectedOrder.refresh();
-        showToast({ message: t('pages.orderShow.cancelSuccess'), variant: 'success' });
-    } catch (err: unknown) {
-        console.error(err);
-        showToast({ message: t('pages.orderShow.cancelError'), variant: 'error' });
-    }
+        await useOrderShow.cancel(observation.value);
+    });
 }
 
 async function persistObservationDraft(order: Order): Promise<void> {

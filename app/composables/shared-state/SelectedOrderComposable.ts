@@ -32,6 +32,12 @@ class SelectedOrderComposable {
         await this.setOrder(this.order.value.id);
     }
 
+    public async toCancel(note: string | null): Promise<void> {
+        await OrdersRepository.updateNotes(this.order.value?.id as number, note);
+        await OrdersRepository.updateStatus(this.order.value?.id as number, 'cancelled');
+        await this.refresh();
+    }
+
     public async createOrderItem(product: Product, qty: number): Promise<void> {
         const movement: string | null = await this.ensureScancodeDesktopMovement(product.sku, null, qty);
 

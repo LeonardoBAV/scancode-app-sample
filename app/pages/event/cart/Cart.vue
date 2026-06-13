@@ -85,7 +85,6 @@ import { Format } from '../../../utils/format';
 import type { Product } from '../../../types/schema/product';
 import type { OrderItem } from '../../../types/schema/order-item';
 import { Icons } from '../../../utils/icons';
-import { OrderItemsRepository } from '../../../db/repositories/order-items.repo';
 import { showToast } from '../../../composables/toast-state';
 import { useCart } from '../../../composables/pages/CartComposable';
 
@@ -188,7 +187,7 @@ async function onCameraTap(): Promise<void> {
             return;
         }
 
-        await addProduct(found);
+        await useCart.addProduct(found);
         Haptics.vibrateSuccess();
     } catch (error: unknown) {
         if (isScanCancelled(error)) {
@@ -209,61 +208,21 @@ function closeKeyboard(): void {
     }, 50);
 }
 
-function isProductInCart(product: Product): boolean {
-    if (product.id == null) {
-        return false;
-    }
-    const productId: number = product.id;
-    return cartItems.value.some((c: OrderItem): boolean => c.product_id === productId);
-}
-
-async function refreshOrder(): Promise<void> {
-    await useSelectedOrder.refresh();
-}
-
-function getSelectedOrderId(): number {
-    const orderId: number = (orderRef.value?.id) as number;
-    return orderId;
-}
-
-async function addProduct(product: Product): Promise<void> {
-    if (!canEditCart.value) {
-        return;
-    }
-    const orderId: number = getSelectedOrderId();
-    if (product.id == null) {
-        return;
-    }
-    const productId: number = product.id;
-    const existing: OrderItem | undefined = cartItems.value.find((c: OrderItem): boolean => c.product_id === productId);
-    if (existing?.id != null) {
-        await OrderItemsRepository.setQtyById(existing.id, existing.qty + 1);
-        await refreshOrder();
-        return;
-    }
-    await OrderItemsRepository.createOne({
-        order_id: orderId,
-        product_id: productId,
-        price: product.price,
-        qty: 1,
-        notes: null,
-    });
-    await refreshOrder();
-}
-
 function selecctedProduct(product: Product): void {
-    void addProduct(product);
-
-    closeKeyboard();
     Haptics.vibrateSuccess();
+    closeKeyboard();
     searchQuery.value = '';
+
+    void useCart.addProduct(product);
 }
 
 async function increaseQty(item: OrderItem): Promise<void> {
+    Haptics.vibrateSuccess();
     await useCart.increaseQty(item);
 }
 
 async function decreaseQty(item: OrderItem): Promise<void> {
+    Haptics.vibrateSuccess();
     if (await checkNewQuantityIsZero(item)) {
         return;
     }
@@ -286,6 +245,5 @@ async function checkNewQuantityIsZero(item: OrderItem): Promise<boolean> {
 const orderRef = useSelectedOrder.getOrder();
 const hasSelectedOrder: ComputedRef<boolean> = computed((): boolean => orderRef.value != null);
 const canEditCart: ComputedRef<boolean> = useCart.canEditCart;
-
-const cartItems: ComputedRef<readonly OrderItem[]> = computed((): readonly OrderItem[] => orderRef.value?.order_items ?? []);
+const cartItems: ComputedRef<readonly OrderItem[]> = useCart.cartItems;
 </script>

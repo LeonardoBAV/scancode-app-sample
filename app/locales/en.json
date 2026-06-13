@@ -221,6 +221,7 @@
       "scanPermissionDenied": "Allow camera access to scan barcodes",
       "scanCameraUnavailable": "Camera unavailable on this device",
       "scanError": "Could not open the barcode scanner",
+      "alreadyInCart": "Product is already in the cart",
       "removeConfirmTitle": "Remove product",
       "removeConfirmMessage": "Remove this product from the cart?",
       "removeConfirmOk": "Remove",

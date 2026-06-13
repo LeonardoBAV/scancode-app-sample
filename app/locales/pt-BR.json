@@ -221,6 +221,7 @@
       "scanPermissionDenied": "Permita o acesso à câmera para escanear códigos de barras",
       "scanCameraUnavailable": "Câmera indisponível neste dispositivo",
       "scanError": "Não foi possível abrir o leitor de código de barras",
+      "alreadyInCart": "Produto já está na sacola",
       "removeConfirmTitle": "Remover produto",
       "removeConfirmMessage": "Deseja remover este produto da sacola?",
       "removeConfirmOk": "Remover",

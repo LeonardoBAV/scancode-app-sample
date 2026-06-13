@@ -31,9 +31,9 @@ export class ScancodeDesktopAdapter {
         }
     }
 
-    public static async deleteMovements(movements: Movement[]): Promise<number> {
+    public static async deleteMovements(movementUuids: string[]): Promise<number> {
         try {
-            const payload: MovementDeleteRequestDTO = ScancodeDesktopAdapter.mapMovementDeleteRequest(movements);
+            const payload: MovementDeleteRequestDTO = ScancodeDesktopAdapter.mapMovementDeleteRequest(movementUuids);
             const response = await new ScancodeDesktopApi().deleteMovements(payload);
 
             return response.deleted_count;
@@ -66,9 +66,9 @@ export class ScancodeDesktopAdapter {
         };
     }
 
-    private static mapMovementDeleteRequest(movements: Movement[]): MovementDeleteRequestDTO {
+    private static mapMovementDeleteRequest(movementUuids: string[]): MovementDeleteRequestDTO {
         return {
-            movements: movements.map((movement): string => movement.movement_uuid),
+            movements: movementUuids,
         };
     }
 

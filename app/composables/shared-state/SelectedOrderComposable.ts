@@ -33,17 +33,25 @@ class SelectedOrderComposable {
     }
 
     public async toCancel(note: string | null): Promise<void> {
+        if (this.isDesktopMovementRequired()) {
+            await this.deleteManyMovements();
+        }
+
         await OrdersRepository.updateNotes(this.order.value?.id as number, note);
         await OrdersRepository.updateStatus(this.order.value?.id as number, 'cancelled');
         await this.refresh();
     }
 
     public async createOrderItem(product: Product, qty: number): Promise<void> {
-        const movement: string | null = await this.ensureScancodeDesktopMovement(product.sku, null, qty);
+        let uuid: string | null = null;
+        if (this.isDesktopMovementRequired()) {
+            const uuid: string = Uuid.generateMovementUuid();
+            this.createMovement(product.sku, uuid, qty);
+        }
 
         await OrderItemsRepository.createOne({
             id: null,
-            movement,
+            movement: uuid,
             order_id: this.order.value?.id as number,
             product_id: product.id as number,
             price: product.price,
@@ -54,22 +62,32 @@ class SelectedOrderComposable {
     }
 
     public async updateQty(item: OrderItem, qty: number): Promise<void> {
-        const uuid: string | null = await this.ensureScancodeDesktopMovement(item.product?.sku as string, item.movement, qty);
-        await OrderItemsRepository.setQtyById(item.id as number, qty, uuid);
+        if (this.isDesktopMovementRequired()) {
+            item.movement = item.movement ?? Uuid.generateMovementUuid();
+            this.createMovement(item.product?.sku as string, item.movement as string, qty);
+        }
+
+        await OrderItemsRepository.setQtyById(item.id as number, qty, item.movement);
         await this.refresh();
     }
 
-    private async ensureScancodeDesktopMovement(sku: string, movement: string | null, qty: number): Promise<string | null> {
-        if (!useScancodeDesktop.isRequiredForStockLimit.value) {
-            return null;
-        }
+    /** BEGIN movements considerando arrastar isso para um service */
+    private async deleteManyMovements(): Promise<void> {
+        const uuids: string[] = this.order.value?.order_items
+            ?.map((item: OrderItem): string | null => item.movement)
+            .filter((movement: string | null): movement is string => movement !== null) ?? [];
 
-        const uuid: string = movement ?? Uuid.generateMovementUuid();
-
-        await ScancodeDesktopAdapter.createMovement(sku, uuid, qty);
-
-        return uuid;
+        await ScancodeDesktopAdapter.deleteMovements(uuids);
     }
+
+    private async createMovement(sku: string, uuid: string, qty: number): Promise<void> {
+        await ScancodeDesktopAdapter.createMovement(sku, uuid, qty);
+    }
+
+    private isDesktopMovementRequired(): boolean {
+        return useScancodeDesktop.isRequiredForStockLimit.value;
+    }
+    /** END movements considerando arrastar isso para um service */
 
 }
 

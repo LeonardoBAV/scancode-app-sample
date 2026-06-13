@@ -187,7 +187,9 @@ async function onCameraTap(): Promise<void> {
             return;
         }
 
-        await useCart.addProduct(found);
+        await useCart.runProcessing(async (): Promise<void> => {
+            await useCart.addProduct(found);
+        });
         Haptics.vibrateSuccess();
     } catch (error: unknown) {
         if (isScanCancelled(error)) {
@@ -213,12 +215,16 @@ function selecctedProduct(product: Product): void {
     closeKeyboard();
     searchQuery.value = '';
 
-    void useCart.addProduct(product);
+    void useCart.runProcessing(async (): Promise<void> => {
+        await useCart.addProduct(product);
+    });
 }
 
 async function increaseQty(item: OrderItem): Promise<void> {
     Haptics.vibrateSuccess();
-    await useCart.increaseQty(item);
+    await useCart.runProcessing(async (): Promise<void> => {
+        await useCart.increaseQty(item);
+    });
 }
 
 async function decreaseQty(item: OrderItem): Promise<void> {
@@ -226,7 +232,9 @@ async function decreaseQty(item: OrderItem): Promise<void> {
     if (await checkNewQuantityIsZero(item)) {
         return;
     }
-    await useCart.decreaseQty(item);
+    await useCart.runProcessing(async (): Promise<void> => {
+        await useCart.decreaseQty(item);
+    });
 }
 
 async function checkNewQuantityIsZero(item: OrderItem): Promise<boolean> {

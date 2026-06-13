@@ -29,38 +29,38 @@ class CartComposable extends PageComposable {
             return;
         }
 
-        await useSelectedOrder.createOrderItem(product, 1);
+        try {
+            await useSelectedOrder.createOrderItem(product, 1);
+        } catch (error: unknown) {
+            this.handleProcessingError(error);
+        }
     }
 
     public async increaseQty(orderItem: OrderItem): Promise<void> {
-        this.isProcessing.value = true;
         try {
             await useSelectedOrder.updateQty(orderItem, orderItem.qty + 1);
         } catch (error: unknown) {
-            console.error(error);
-            const message: string = error instanceof Error ? error.message : String(error);
-            showToast({ message, variant: 'error' });
-        } finally {
-            this.isProcessing.value = false;
+            this.handleProcessingError(error);
         }
     }
 
     public async decreaseQty(orderItem: OrderItem): Promise<void> {
-        this.isProcessing.value = true;
         try {
             await useSelectedOrder.updateQty(orderItem, Math.max(0, orderItem.qty - 1));
         } catch (error: unknown) {
-            console.error(error);
-            const message: string = error instanceof Error ? error.message : String(error);
-            showToast({ message, variant: 'error' });
-        } finally {
-            this.isProcessing.value = false;
+            this.handleProcessingError(error);
         }
     }
 
     private isProductInCart(product: Product): boolean {
         const productId: number = product.id as number;
         return this.cartItems.value.some((c: OrderItem): boolean => c.product_id === productId);
+    }
+
+    private handleProcessingError(error: unknown): void {
+        console.error(error);
+        const message: string = error instanceof Error ? error.message : String(error);
+        showToast({ message, variant: 'error' });
     }
 }
 

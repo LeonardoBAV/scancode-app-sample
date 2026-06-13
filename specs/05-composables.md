@@ -15,6 +15,36 @@
 
 ---
 
+## Padrão Page.vue + PageComposable + Core Composable
+
+Referência atual: `app/pages/event/cart/Cart.vue`, `app/composables/pages/CartComposable.ts` e `app/composables/pages/PageComposable.ts`.
+
+### Responsabilidades
+
+| Camada | Responsabilidade | Exemplo |
+| --- | --- | --- |
+| Página `.vue` | UI NativeScript, bindings do template, refs nativas, haptics, dialogs, teclado, decisão de mostrar loading global | `Cart.vue` mantém `searchFieldRef`, `closeKeyboard()`, `Dialogs.confirm`, `Haptics`, e envolve ações com `useCart.runProcessing(...)` |
+| `app/composables/pages/*Composable.ts` | Estado e ações de domínio da página; `ref`/`computed` reutilizáveis no template | `CartComposable` expõe `hasSelectedOrder`, `canEditCart`, `cartItems`, `cartTotal`, `searchQuery`, `searchResults`, `footerStatsLabel`, `addProduct`, `increaseQty`, `decreaseQty` |
+| `PageComposable` | Mecânicas comuns de página | `isProcessing`, `getIsProcessing()`, `runProcessing(...)` |
+| Core data/state composable | Dono da mutação persistida e acesso ao repositório | `useSelectedOrder.createOrderItem(...)` chama `OrderItemsRepository.createOne(...)` e `refresh()` |
+| `app/services/` | Fluxos de plataforma/integração sem estado Vue de página e sem SQL | `ScannerService` cria scanner, garante permissão e centraliza configurações de barcode/QR |
+
+### Regra de acesso a repositórios
+
+- Páginas (`app/pages/**/*.vue`) **não importam repositórios**.
+- Page composables (`app/composables/pages/*Composable.ts`) devem preferir delegar persistência para composables core de dados/estado.
+- Repositórios ficam atrás de composables core como `app/composables/shared-state/*`, `app/composables/repository/*` ou composables de catálogo (`ProductsComposable`, `EventsComposable`, etc.).
+- Exemplo-alvo: `CartComposable` não chama `OrderItemsRepository`; ele chama `useSelectedOrder.createOrderItem(product, qty)`. O `useSelectedOrder` conhece o pedido atual, chama o repositório e atualiza o estado selecionado.
+
+### Como decidir onde colocar código novo
+
+1. **Detalhe visual, componente NativeScript, dialog, haptic, foco/teclado:** página `.vue`.
+2. **Estado reativo da página, busca, totais, labels derivados, actions de domínio:** `app/composables/pages/*Composable.ts`.
+3. **Mutação SQLite ou sincronização com estado selecionado:** composable core de dados/estado.
+4. **Scanner, PDF, storage ou workflow de plataforma:** `app/services/`.
+
+---
+
 ## Analogia com Laravel (referência)
 
 | Laravel | Composable equivalente |

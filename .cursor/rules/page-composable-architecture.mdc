@@ -1,0 +1,22 @@
+---
+description: page/composable boundaries, PageComposable, repository access, cart page pattern
+alwaysApply: true
+---
+
+# Page + Composable Architecture
+
+Use the cart refactor as the reference pattern:
+
+- `app/pages/**/**/*.vue` is the UI/orchestration layer. It owns NativeScript view refs, template-only state, haptics, dialogs, keyboard focus, and calls `useX.runProcessing(...)` when a page action should show global loading.
+- `app/composables/pages/*Composable.ts` owns page/domain state and derived values used by that page: `cartItems`, `cartTotal`, `searchQuery`, `searchResults`, labels, and page actions like `addProduct`, `increaseQty`, `decreaseQty`.
+- `PageComposable` is the base for page composables. Keep shared page mechanics there, such as `isProcessing` and `runProcessing`; do not put feature-specific behavior in it.
+- Pages should not import repositories. Page composables should also avoid direct repository imports unless they are the core data owner for that entity.
+- Repository access belongs behind core state/data composables such as `app/composables/shared-state/*`, `app/composables/repository/*`, or catalog composables. Example: `CartComposable` delegates item persistence to `useSelectedOrder`, and `useSelectedOrder` talks to `OrderItemsRepository`.
+- Services in `app/services/` encapsulate platform/service workflows that are not UI and not SQLite state, e.g. scanner setup and scan options in `scanner-service.ts`.
+
+When adding a page feature, first decide the boundary:
+
+1. NativeScript UI detail or UX event? Keep in `.vue`.
+2. Reactive page/domain state or derived cart/order data? Move to `app/composables/pages/*Composable.ts`.
+3. SQLite persistence or selected entity mutation? Delegate to a core data/state composable, which may use repositories.
+4. External/platform workflow? Put it in `app/services/`.

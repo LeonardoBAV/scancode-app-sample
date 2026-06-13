@@ -1,6 +1,6 @@
 import { i18n } from '../../configs/i18n';
 import type { ScancodeDesktopHealthyResponseDTO } from '../../types/dtos/scancode-desktop/healthy-response';
-import type { MovementRequestDTO } from '../../types/dtos/scancode-desktop/movement-request';
+import type { MovementDeleteRequestDTO, MovementRequestDTO } from '../../types/dtos/scancode-desktop/movement-request';
 import type { MovementResponseDTO } from '../../types/dtos/scancode-desktop/movement-response';
 import { ApiException } from '../../types/exceptions/api-exception';
 import { HttpError } from '../../types/http/http-types';
@@ -31,6 +31,17 @@ export class ScancodeDesktopAdapter {
         }
     }
 
+    public static async deleteMovements(movements: Movement[]): Promise<number> {
+        try {
+            const payload: MovementDeleteRequestDTO = ScancodeDesktopAdapter.mapMovementDeleteRequest(movements);
+            const response = await new ScancodeDesktopApi().deleteMovements(payload);
+
+            return response.deleted_count;
+        } catch (err: unknown) {
+            ScancodeDesktopAdapter.handleApiError(err);
+        }
+    }
+
     private static mapHealthyResponse(dto: ScancodeDesktopHealthyResponseDTO): ScancodeDesktopHealthy {
         if (dto.status !== 'ok' || !dto.url?.trim()) {
             throw new ApiException({
@@ -52,6 +63,12 @@ export class ScancodeDesktopAdapter {
             sku,
             movement_uuid: movementUuid,
             qty,
+        };
+    }
+
+    private static mapMovementDeleteRequest(movements: Movement[]): MovementDeleteRequestDTO {
+        return {
+            movements: movements.map((movement): string => movement.movement_uuid),
         };
     }
 

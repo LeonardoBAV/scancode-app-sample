@@ -3,3 +3,7 @@ export interface MovementRequestDTO {
     movement_uuid: string;
     qty: number;
 }
+
+export interface MovementDeleteRequestDTO {
+    movements: string[];
+}

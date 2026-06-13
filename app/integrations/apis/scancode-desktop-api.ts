@@ -1,6 +1,6 @@
 import type { ScancodeDesktopHealthyResponseDTO } from '../../types/dtos/scancode-desktop/healthy-response';
-import type { MovementCreateResponseDTO } from '../../types/dtos/scancode-desktop/movement-response';
-import type { MovementRequestDTO } from '../../types/dtos/scancode-desktop/movement-request';
+import type { MovementCreateResponseDTO, MovementDeleteResponseDTO } from '../../types/dtos/scancode-desktop/movement-response';
+import type { MovementDeleteRequestDTO, MovementRequestDTO } from '../../types/dtos/scancode-desktop/movement-request';
 import { i18n } from '../../configs/i18n';
 import { useScancodeDesktop } from '../../composables/useScancodeDesktop';
 import { ApiException } from '../../types/exceptions/api-exception';
@@ -22,6 +22,11 @@ export class ScancodeDesktopApi extends HttpClient {
 
     public async postMovement(payload: MovementRequestDTO): Promise<MovementCreateResponseDTO> {
         const { data } = await this.post<MovementCreateResponseDTO>('/api/movements', payload);
+        return data;
+    }
+
+    public async deleteMovements(payload: MovementDeleteRequestDTO): Promise<MovementDeleteResponseDTO> {
+        const { data } = await this.delete<MovementDeleteResponseDTO>('/api/movements', payload);
         return data;
     }
 

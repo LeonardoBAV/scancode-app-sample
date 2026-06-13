@@ -1,6 +1,6 @@
 import { i18n } from '../../configs/i18n';
 import type { ScancodeDesktopHealthyResponseDTO } from '../../types/dtos/scancode-desktop/healthy-response';
-import type { MovementDeleteRequestDTO, MovementRequestDTO } from '../../types/dtos/scancode-desktop/movement-request';
+import type { MovementCreateManyRequestDTO, MovementDeleteRequestDTO, MovementRequestDTO } from '../../types/dtos/scancode-desktop/movement-request';
 import type { MovementResponseDTO } from '../../types/dtos/scancode-desktop/movement-response';
 import { ApiException } from '../../types/exceptions/api-exception';
 import { HttpError } from '../../types/http/http-types';
@@ -26,6 +26,17 @@ export class ScancodeDesktopAdapter {
             const response = await new ScancodeDesktopApi().postMovement(payload);
 
             return ScancodeDesktopAdapter.mapMovementResponse(response.data);
+        } catch (err: unknown) {
+            ScancodeDesktopAdapter.handleApiError(err);
+        }
+    }
+
+    public static async createMovements(movements: MovementRequestDTO[]): Promise<Movement[]> {
+        try {
+            const payload: MovementCreateManyRequestDTO = ScancodeDesktopAdapter.mapMovementCreateManyRequest(movements);
+            const response = await new ScancodeDesktopApi().postMovements(payload);
+
+            return response.data.map((movement: MovementResponseDTO): Movement => ScancodeDesktopAdapter.mapMovementResponse(movement));
         } catch (err: unknown) {
             ScancodeDesktopAdapter.handleApiError(err);
         }
@@ -63,6 +74,12 @@ export class ScancodeDesktopAdapter {
             sku,
             movement_uuid: movementUuid,
             qty,
+        };
+    }
+
+    private static mapMovementCreateManyRequest(movements: MovementRequestDTO[]): MovementCreateManyRequestDTO {
+        return {
+            movements,
         };
     }
 

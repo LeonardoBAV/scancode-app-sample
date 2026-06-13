@@ -11,6 +11,10 @@ export interface MovementCreateResponseDTO {
     data: MovementResponseDTO;
 }
 
+export interface MovementCreateManyResponseDTO {
+    data: MovementResponseDTO[];
+}
+
 export interface MovementDeleteResponseDTO {
     deleted_count: number;
 }

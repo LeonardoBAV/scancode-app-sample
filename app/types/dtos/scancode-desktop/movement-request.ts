@@ -4,6 +4,10 @@ export interface MovementRequestDTO {
     qty: number;
 }
 
+export interface MovementCreateManyRequestDTO {
+    movements: MovementRequestDTO[];
+}
+
 export interface MovementDeleteRequestDTO {
     movements: string[];
 }

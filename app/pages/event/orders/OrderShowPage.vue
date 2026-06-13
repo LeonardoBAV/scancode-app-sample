@@ -138,7 +138,6 @@ import HeaderComponent from '../../../components/HeaderComponent.vue';
 import OrderClientShowPage from './OrderClientShowPage.vue';
 import OrderPaymentPage from './OrderPaymentPage.vue';
 import type { Order, OrderStatus } from '../../../types/schema/order';
-import OrderListPage from './OrderListPage.vue';
 import { isAndroid, Utils } from '@nativescript/core';
 import { pdfService } from '../../../services/pdf/pdf-service';
 
@@ -216,7 +215,7 @@ const buyerName: ComputedRef<string> = computed(() => {
 });
 
 const printButtonIcon: ComputedRef<string> = computed(() =>
-    isPrinting.value ? Icons.lucide('loader-2') : Icons.lucide('clipboard-list'),
+    isPrinting.value ? Icons.lucide('loader-2') : Icons.lucide('share'),
 );
 
 const printButtonClass: ComputedRef<string> = computed(() =>
@@ -285,7 +284,6 @@ async function onFinish(): Promise<void> {
     await persistObservationDraft(order);
     await OrdersRepository.updateStatus(id, 'completed');
     await useSelectedOrder.refresh();
-    navigateTo(OrderListPage, { clearHistory: true });
 }
 
 async function onCancel(): Promise<void> {

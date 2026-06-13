@@ -76,7 +76,17 @@
                         <Label col="1" :text="synced ? $t('pages.orderList.synced') : $t('pages.orderList.notSynced')" class="text-sm" :class="synced ? 'text-success' : 'text-warning'" verticalAlignment="center" />
                     </GridLayout>
                 </GridLayout>
-                <GridLayout rows="auto" columns="*, *" columnSpacing="12">
+                <GridLayout v-if="orderStatus === 'cancelled'" rows="auto" columns="*">
+                    <Button
+                        row="0"
+                        col="0"
+                        horizontalAlignment="stretch"
+                        :text="$t('pages.orderShow.reopen')"
+                        class="btn-primary"
+                        @tap="onReopen"
+                    />
+                </GridLayout>
+                <GridLayout v-else rows="auto" columns="*, *" columnSpacing="12">
                     <Button
                         row="0"
                         col="0"
@@ -87,6 +97,16 @@
                         @tap="onPrimaryFooterTap"
                     />
                     <Button
+                        v-if="orderStatus === 'pending'"
+                        row="0"
+                        col="1"
+                        horizontalAlignment="stretch"
+                        :text="$t('common.cancel')"
+                        class="btn-secondary"
+                        @tap="onCancel"
+                    />
+                    <Button
+                        v-else
                         row="0"
                         col="1"
                         horizontalAlignment="stretch"
@@ -262,16 +282,36 @@ async function onFinish(): Promise<void> {
     const order: Order = currentOrderRef.value as Order;
     const id = order.id as number;
 
-    const storedNotes: string = (order.notes ?? '').trim();
-    const draftNotes: string = observation.value.trim();
-    
-    if (storedNotes !== draftNotes) {
-        await OrdersRepository.updateNotes(id, draftNotes === '' ? null : draftNotes);
-    }
-
+    await persistObservationDraft(order);
     await OrdersRepository.updateStatus(id, 'completed');
     await useSelectedOrder.refresh();
     navigateTo(OrderListPage, { clearHistory: true });
+}
+
+async function onCancel(): Promise<void> {
+    try {
+        Haptics.vibrateSuccess();
+        const order: Order = currentOrderRef.value as Order;
+        const id = order.id as number;
+
+        await persistObservationDraft(order);
+        await OrdersRepository.updateStatus(id, 'cancelled');
+        await useSelectedOrder.refresh();
+        showToast({ message: t('pages.orderShow.cancelSuccess'), variant: 'success' });
+    } catch (err: unknown) {
+        console.error(err);
+        showToast({ message: t('pages.orderShow.cancelError'), variant: 'error' });
+    }
+}
+
+async function persistObservationDraft(order: Order): Promise<void> {
+    const id = order.id as number;
+    const storedNotes: string = (order.notes ?? '').trim();
+    const draftNotes: string = observation.value.trim();
+
+    if (storedNotes !== draftNotes) {
+        await OrdersRepository.updateNotes(id, draftNotes === '' ? null : draftNotes);
+    }
 }
 
 async function onReopen(): Promise<void> {

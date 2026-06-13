@@ -261,6 +261,8 @@
       "observationHint": "Toque para adicionar observação...",
       "finish": "Finalizar",
       "reopen": "Reabrir",
+      "cancelSuccess": "Pedido cancelado com sucesso.",
+      "cancelError": "Não foi possível cancelar o pedido. Tente novamente.",
       "reopenSuccess": "Pedido reaberto com sucesso.",
       "reopenError": "Não foi possível reabrir o pedido. Tente novamente.",
       "printError": "Não foi possível gerar o PDF. Tente novamente.",

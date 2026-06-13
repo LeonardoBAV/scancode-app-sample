@@ -261,6 +261,8 @@
       "observationHint": "Tap to add observation...",
       "finish": "Finish",
       "reopen": "Reopen",
+      "cancelSuccess": "Order cancelled successfully.",
+      "cancelError": "Could not cancel the order. Please try again.",
       "reopenSuccess": "Order reopened successfully.",
       "reopenError": "Could not reopen the order. Please try again.",
       "printError": "Could not generate the PDF. Please try again.",

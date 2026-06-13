@@ -31,7 +31,7 @@ export class ScancodeDesktopAdapter {
         }
     }
 
-    public static async createMovements(movements: MovementRequestDTO[]): Promise<Movement[]> {
+    public static async createMovements(movements: object[]): Promise<Movement[]> {
         try {
             const payload: MovementCreateManyRequestDTO = ScancodeDesktopAdapter.mapMovementCreateManyRequest(movements);
             const response = await new ScancodeDesktopApi().postMovements(payload);
@@ -77,9 +77,17 @@ export class ScancodeDesktopAdapter {
         };
     }
 
-    private static mapMovementCreateManyRequest(movements: MovementRequestDTO[]): MovementCreateManyRequestDTO {
+    private static mapMovementCreateManyRequest(movements: object[]): MovementCreateManyRequestDTO {
         return {
-            movements,
+            movements: movements.map((movement: object): MovementRequestDTO => {
+                const dto: MovementRequestDTO = movement as MovementRequestDTO;
+
+                return {
+                    sku: dto.sku,
+                    movement_uuid: dto.movement_uuid,
+                    qty: dto.qty,
+                };
+            }),
         };
     }
 

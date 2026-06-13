@@ -294,6 +294,13 @@ async function onCancel(): Promise<void> {
     });
 }
 
+async function onReopen(): Promise<void> {
+    await useOrderShow.runProcessing(async (): Promise<void> => {
+        Haptics.vibrateSuccess();
+        await useOrderShow.reopen();
+    });
+}
+
 async function persistObservationDraft(order: Order): Promise<void> {
     const id = order.id as number;
     const storedNotes: string = (order.notes ?? '').trim();
@@ -304,17 +311,4 @@ async function persistObservationDraft(order: Order): Promise<void> {
     }
 }
 
-async function onReopen(): Promise<void> {
-    try {
-        const order: Order = currentOrderRef.value as Order;
-        const id = order.id as number;
-        await OrdersRepository.updateStatus(id, 'pending');
-        await useSelectedOrder.refresh();
-        Haptics.vibrateSuccess();
-        showToast({ message: t('pages.orderShow.reopenSuccess'), variant: 'success' });
-    } catch (err: unknown) {
-        console.error(err);
-        showToast({ message: t('pages.orderShow.reopenError'), variant: 'error' });
-    }
-}
 </script>

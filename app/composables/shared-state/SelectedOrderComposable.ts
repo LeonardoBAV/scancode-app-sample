@@ -9,6 +9,7 @@ import type { OrderItem } from '../../types/schema/order-item';
 import type { Product } from '../../types/schema/product';
 import { useScancodeDesktop } from '../useScancodeDesktop';
 
+
 class SelectedOrderComposable {
     private readonly order: Ref<Order | null> = ref<Order | null>(null);
 
@@ -39,6 +40,16 @@ class SelectedOrderComposable {
 
         await OrdersRepository.updateNotes(this.order.value?.id as number, note);
         await OrdersRepository.updateStatus(this.order.value?.id as number, 'cancelled');
+        await this.refresh();
+    }
+
+    public async toReopen(): Promise<void> {
+
+        if (this.isDesktopMovementRequired() && this.order.value?.status === 'cancelled') {
+            await this.createManyMovements();
+        }
+
+        await OrdersRepository.updateStatus(this.order.value?.id as number, 'pending');
         await this.refresh();
     }
 
@@ -74,16 +85,27 @@ class SelectedOrderComposable {
     }
 
     /** BEGIN movements considerando arrastar isso para um service */
+    private async createMovement(sku: string, uuid: string, qty: number): Promise<void> {
+        await ScancodeDesktopAdapter.createMovement(sku, uuid, qty);
+    }
+
+
+    private async createManyMovements(): Promise<void> {
+        const movements: object[] = this.order.value?.order_items?.map((item: OrderItem): object => ({
+            sku: item.product?.sku as string,
+                movement_uuid: item.movement as string,
+                qty: item.qty as number,
+            })) ?? [];
+
+        await ScancodeDesktopAdapter.createMovements(movements);
+    }
+
     private async deleteManyMovements(): Promise<void> {
         const uuids: string[] = this.order.value?.order_items
             ?.map((item: OrderItem): string | null => item.movement)
             .filter((movement: string | null): movement is string => movement !== null) ?? [];
 
         await ScancodeDesktopAdapter.deleteMovements(uuids);
-    }
-
-    private async createMovement(sku: string, uuid: string, qty: number): Promise<void> {
-        await ScancodeDesktopAdapter.createMovement(sku, uuid, qty);
     }
 
     private isDesktopMovementRequired(): boolean {

@@ -1,8 +1,9 @@
 // --- Imports ---
-import { computed, type ComputedRef } from 'vue';
+import { computed, ref, type ComputedRef, type Ref } from 'vue';
 import type { OrderItem } from '../../types/schema/order-item';
 import type { Product } from '../../types/schema/product';
 import { i18n } from '../../configs/i18n';
+import { ProductsComposable } from '../products-composable';
 import { showToast } from '../toast-state';
 import { useSelectedOrder } from '../shared-state/SelectedOrderComposable';
 import { PageComposable } from './PageComposable';
@@ -10,6 +11,10 @@ import { PageComposable } from './PageComposable';
 const t = i18n.global.t;
 
 class CartComposable extends PageComposable {
+
+    public readonly hasSelectedOrder: ComputedRef<boolean> = computed((): boolean => {
+        return useSelectedOrder.getOrder().value != null;
+    });
 
     public readonly canEditCart: ComputedRef<boolean> = computed((): boolean => {
         return useSelectedOrder.getOrder().value?.status === 'pending';
@@ -22,6 +27,40 @@ class CartComposable extends PageComposable {
     public readonly cartItems: ComputedRef<readonly OrderItem[]> = computed((): readonly OrderItem[] => {
         return useSelectedOrder.getOrder().value?.order_items ?? [];
     });
+
+    public readonly cartTotal: ComputedRef<number> = computed((): number =>
+        this.cartItems.value.reduce((sum: number, item: OrderItem): number => sum + item.price * item.qty, 0)
+    );
+
+    public readonly productCountLabel: ComputedRef<string> = computed((): string => {
+        const count: number = this.cartItems.value.length;
+        return count === 1 ? `1 ${t('pages.cart.product')}` : `${count} ${t('pages.cart.products')}`;
+    });
+
+    public readonly totalQuantityLabel: ComputedRef<string> = computed((): string => {
+        const count: number = this.cartItems.value.reduce((sum: number, item: OrderItem): number => sum + item.qty, 0);
+        return count === 1 ? `1 ${t('pages.cart.item')}` : `${count} ${t('pages.cart.items')}`;
+    });
+
+    public readonly footerStatsLabel: ComputedRef<string> = computed((): string =>
+        `${this.productCountLabel.value} · ${this.totalQuantityLabel.value}`
+    );
+
+    public readonly searchQuery: Ref<string> = ref('');
+
+    public readonly searchResults: ComputedRef<Product[]> = computed((): Product[] => {
+        const term: string = this.searchQuery.value.trim().toLowerCase();
+        if (!term) {
+            return [];
+        }
+        return ProductsComposable.getList().value.filter(
+            (product: Product): boolean => product.name.toLowerCase().includes(term) || product.sku.toLowerCase().includes(term),
+        );
+    });
+
+    public clearSearch(): void {
+        this.searchQuery.value = '';
+    }
 
     public async addProduct(product: Product): Promise<void> {
         if (this.isProductInCart(product)) {

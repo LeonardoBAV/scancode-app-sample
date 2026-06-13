@@ -12,6 +12,8 @@
     "error": "Erro",
     "free": "Grátis",
     "orders": "pedidos",
+    "cameraUnavailable": "Câmera indisponível neste dispositivo",
+    "cameraPermissionDenied": "Permita o acesso à câmera para escanear códigos",
     "syncBadgeSynced": "Sincronizado",
     "syncBadgePending": "Pendente"
   },

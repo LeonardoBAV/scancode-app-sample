@@ -98,7 +98,6 @@
 
 <script setup lang="ts">
 import { computed, ref, type ComputedRef, type Ref } from 'vue';
-import { BarcodeScanner } from 'nativescript-barcodescanner';
 import { useTranslation } from '../../../composables/useTranslation';
 import { useNavigation } from '../../../composables/useNavigation';
 import { useCurrentEvent } from '../../../composables/repository/useCurrentEvent';
@@ -110,8 +109,8 @@ import type { EventItem } from '../../../types/event-item';
 import { Icons } from '../../../utils/icons';
 import { Format } from '../../../utils/format';
 import { Haptics } from '../../../utils/haptics';
-import { Device } from '../../../utils/device';
 import type { ScancodeDesktopHealthy } from '../../../types/schema/scancode-desktop/healthy';
+import { ScannerService } from '../../../services/scanner-service';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import EventsPage from '../../EventsPage.vue';
 
@@ -184,34 +183,8 @@ function goToEvents(): void {
     navigateTo(EventsPage, { frame: 'root-frame', clearHistory: true });
 }
 
-function isScanCancelled(error: unknown): boolean {
-    const message: string = error instanceof Error ? error.message : String(error);
-    return message.includes('Scan aborted') || message.includes('abort');
-}
-
 async function readScancodeDesktopBaseUrl(): Promise<string | null> {
-    const scanner: BarcodeScanner = new BarcodeScanner();
-    const cameraAvailable: boolean = await scanner.available();
-    if (!cameraAvailable) {
-        showToast({ message: t('pages.eventHome.scancodeDesktopCameraUnavailable'), variant: 'error' });
-        return null;
-    }
-    const hasPermission: boolean = await Device.ensureCameraPermission(scanner, t('pages.eventHome.scancodeDesktopPermissionDenied'));
-    if (!hasPermission) {
-        return null;
-    }
-    const result: { text: string } = await scanner.scan({
-        formats: 'QR_CODE',
-        cancelLabel: t('pages.eventHome.scancodeDesktopScanCancel'),
-        message: t('pages.eventHome.scancodeDesktopScanMessage'),
-        preferFrontCamera: false,
-        showFlipCameraButton: false,
-        showTorchButton: true,
-        torchOn: false,
-        resultDisplayDuration: 0,
-        openSettingsIfPermissionWasPreviouslyDenied: true,
-    });
-    const baseUrl: string = result.text.trim();
+    const baseUrl: string = await ScannerService.scanQrCode();
     return baseUrl.length > 0 ? baseUrl : null;
 }
 
@@ -231,12 +204,12 @@ async function onScancodeDesktopTap(): Promise<void> {
         Haptics.vibrateSuccess();
         showToast({ message: t('pages.eventHome.scancodeDesktopConnectionSuccess'), variant: 'success' });
     } catch (error: unknown) {
-        if (isScanCancelled(error)) {
+        if (ScannerService.isScanCancelled(error)) {
             return;
         }
         const message: string = error instanceof ApiException
             ? error.message
-            : t('pages.eventHome.scancodeDesktopConnectionError');
+            : ScannerService.getScanErrorMessage(error, 'scancodeDesktop');
         showToast({ message, variant: 'error' });
     } finally {
         isConnectingScancodeDesktop.value = false;

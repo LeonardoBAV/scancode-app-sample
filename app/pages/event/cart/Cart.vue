@@ -12,7 +12,7 @@
                 </GridLayout>
                 <ListView v-if="searchQuery.length > 0 && searchResults.length > 0" :items="searchResults" separatorColor="transparent" class="mt-2 rounded-xl border border-border bg-card" height="180">
                     <template #default="{ item }">
-                        <GridLayout rows="auto, auto" columns="*, auto" class="p-4 border-b border-border" @tap="selecctedProduct(item)">
+                        <GridLayout rows="auto, auto" columns="*, auto" class="p-4 border-b border-border" @tap="selectedProduct(item)">
                             <Label row="0" col="0" :text="item.name" class="text-base font-semibold text-card-foreground" textWrap="true" />
                             <Label row="1" col="0" :text="item.sku + ' · ' + item.product_category.name" class="text-xs text-muted-foreground mt-1" />
                             <Label row="0" col="1" rowSpan="2" :text="Format.formatCurrencyBR(item.price)" class="text-base font-bold text-success" verticalAlignment="center" />
@@ -39,7 +39,7 @@
                             <Label row="0" col="0" :text="item.product?.name ?? ''" class="text-base font-semibold text-card-foreground" textWrap="true" />
                             <Label row="0" col="1" :text="Format.formatCurrencyBR(item.price * item.qty)" class="text-base font-bold text-success" verticalAlignment="top" />
                             <Label row="1" col="0" :text="(item.product?.sku ?? '') + ' · ' + (item.product?.product_category?.name ?? '')" class="text-xs text-muted-foreground mt-1" />
-                            <Label row="1" col="1" :text="Format.formatCurrencyBR(item.price) + ' ' + perUnitLabel" class="text-xs text-muted-foreground" verticalAlignment="center" />
+                            <Label row="1" col="1" :text="Format.formatCurrencyBR(item.price) + ' ' + $t('pages.cart.perUnit')" class="text-xs text-muted-foreground" verticalAlignment="center" />
                             <GridLayout row="2" col="0" colSpan="2" rows="auto" :columns="canEditCart ? 'auto, auto, auto' : '*'" class="mt-3">
                                 <Button v-if="canEditCart" col="0" text="−" class="btn-icon-sm bg-secondary text-secondary-foreground" @tap="decreaseQty(item)" />
                                 <Label :col="canEditCart ? 1 : 0" :text="String(item.qty)" class="text-base font-semibold text-foreground text-center min-w-8 mx-2" verticalAlignment="center" />
@@ -75,9 +75,7 @@
 // --- Imports ---
 import { ref, computed, type Ref, type ComputedRef } from 'vue';
 import { Dialogs, type TextField } from '@nativescript/core';
-import { BarcodeScanner } from 'nativescript-barcodescanner';
 import { useTranslation } from '../../../composables/useTranslation';
-import { useSelectedOrder } from '../../../composables/shared-state/SelectedOrderComposable';
 import { ProductsComposable } from '../../../composables/products-composable';
 import HeaderComponent from '../../../components/HeaderComponent.vue';
 import { Haptics } from '../../../utils/haptics';
@@ -85,81 +83,25 @@ import { Format } from '../../../utils/format';
 import type { Product } from '../../../types/schema/product';
 import type { OrderItem } from '../../../types/schema/order-item';
 import { Icons } from '../../../utils/icons';
-import { Device } from '../../../utils/device';
 import { showToast } from '../../../composables/toast-state';
 import { useCart } from '../../../composables/pages/CartComposable';
+import { ScannerService } from '../../../services/scanner-service';
 
 
-// --- Component logic ---
 const { t }: { t: (key: string) => string } = useTranslation();
-const perUnitLabel: string = t('pages.cart.perUnit');
-
-const searchQuery: Ref<string> = ref('');
 const searchFieldRef: Ref<{ nativeView?: TextField } | null> = ref(null);
+const searchQuery: Ref<string> = useCart.searchQuery;
 
-const searchResults: ComputedRef<Product[]> = computed((): Product[] => {
-    const term: string = searchQuery.value.trim().toLowerCase();
-    if (!term) return [];
-    return ProductsComposable.getList().value.filter(
-        (p: Product): boolean => p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term)
-    );
-});
-
-const cartTotal: ComputedRef<number> = computed((): number =>
-    cartItems.value.reduce((sum: number, item: OrderItem): number => sum + item.price * item.qty, 0)
-);
-
-const productCountLabel: ComputedRef<string> = computed((): string => {
-    const count: number = cartItems.value.length;
-    return count === 1 ? `1 ${t('pages.cart.product')}` : `${count} ${t('pages.cart.products')}`;
-});
-
-const totalQuantityLabel: ComputedRef<string> = computed((): string => {
-    const count: number = cartItems.value.reduce((sum: number, item: OrderItem): number => sum + item.qty, 0);
-    return count === 1 ? `1 ${t('pages.cart.item')}` : `${count} ${t('pages.cart.items')}`;
-});
-
-const footerStatsLabel: ComputedRef<string> = computed((): string => `${productCountLabel.value} · ${totalQuantityLabel.value}`);
-
-function isScanCancelled(error: unknown): boolean {
-    const message: string = error instanceof Error ? error.message : String(error);
-    return message.includes('Scan aborted') || message.includes('abort');
-}
+const hasSelectedOrder: ComputedRef<boolean> = useCart.hasSelectedOrder;
+const canEditCart: ComputedRef<boolean> = useCart.canEditCart;
+const cartItems: ComputedRef<readonly OrderItem[]> = useCart.cartItems;
+const cartTotal: ComputedRef<number> = useCart.cartTotal;
+const footerStatsLabel: ComputedRef<string> = useCart.footerStatsLabel;
+const searchResults: ComputedRef<Product[]> = useCart.searchResults;
 
 async function onCameraTap(): Promise<void> {
-    console.log('onCameraTap');
-    if (!canEditCart.value) {
-        return;
-    }
-    const scanner: BarcodeScanner = new BarcodeScanner();
-    const cameraAvailable: boolean = await scanner.available();
-    console.log('cameraAvailable', cameraAvailable);
-    if (!cameraAvailable) {
-        showToast({ message: t('pages.cart.scanCameraUnavailable'), variant: 'error' });
-        return;
-    }
-    const hasPermission: boolean = await Device.ensureCameraPermission(scanner, t('pages.cart.scanPermissionDenied'));
-    if (!hasPermission) {
-        return;
-    }
     try {
-        const result = await scanner.scan({
-            formats: 'EAN_13, EAN_8, UPC_A, UPC_E, CODE_128, CODE_39, ITF',
-            cancelLabel: t('pages.cart.scanCancel'),
-            message: t('pages.cart.scanMessage'),
-            preferFrontCamera: false,
-            showFlipCameraButton: false,
-            showTorchButton: true,
-            torchOn: false,
-            resultDisplayDuration: 0,
-            openSettingsIfPermissionWasPreviouslyDenied: true,
-        });
-        console.log('result', result);
-
-        const scannedCode: string = result.text.trim();
-        if (!scannedCode) {
-            return;
-        }
+        const scannedCode: string = await ScannerService.scanProductBarcode();
 
         const found: Product | undefined = ProductsComposable.getList().value.find(
             (p: Product): boolean => !!p.barcode && p.barcode.trim() === scannedCode
@@ -170,31 +112,28 @@ async function onCameraTap(): Promise<void> {
             return;
         }
 
-        await useCart.runProcessing(async (): Promise<void> => {
-            await useCart.addProduct(found);
-        });
+        addProduct(found);
         Haptics.vibrateSuccess();
     } catch (error: unknown) {
-        if (isScanCancelled(error)) {
+        if (ScannerService.isScanCancelled(error)) {
             return;
         }
-        const message: string = error instanceof Error ? error.message : String(error);
-        if (message.toLowerCase().includes('camera') || message.toLowerCase().includes('permission')) {
-            showToast({ message: t('pages.cart.scanPermissionDenied'), variant: 'error' });
-            return;
-        }
-        showToast({ message: t('pages.cart.scanError'), variant: 'error' });
+        showToast({ message: ScannerService.getScanErrorMessage(error, 'cart'), variant: 'error' });
     }
 }
 
-function selecctedProduct(product: Product): void {
-    void useCart.runProcessing(async (): Promise<void> => {
-        Haptics.vibrateSuccess();
-        closeKeyboard();
-        searchQuery.value = '';
-        
+function selectedProduct(product: Product): void {
+    Haptics.vibrateSuccess();
+    closeKeyboard();
+    useCart.clearSearch();
+    addProduct(product);
+}
+
+function addProduct(product: Product): void {
+    void useCart.runProcessing(async (): Promise<void> => {    
         await useCart.addProduct(product);
     });
+
 }
 
 async function increaseQty(item: OrderItem): Promise<void> {
@@ -233,8 +172,4 @@ function closeKeyboard(): void {
     }, 50);
 }
 
-const orderRef = useSelectedOrder.getOrder();
-const hasSelectedOrder: ComputedRef<boolean> = computed((): boolean => orderRef.value != null);
-const canEditCart: ComputedRef<boolean> = useCart.canEditCart;
-const cartItems: ComputedRef<readonly OrderItem[]> = useCart.cartItems;
 </script>

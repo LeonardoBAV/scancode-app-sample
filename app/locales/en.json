@@ -12,6 +12,8 @@
     "error": "Error",
     "free": "Free",
     "orders": "orders",
+    "cameraUnavailable": "Camera unavailable on this device",
+    "cameraPermissionDenied": "Allow camera access to scan codes",
     "syncBadgeSynced": "Synced",
     "syncBadgePending": "Pending"
   },

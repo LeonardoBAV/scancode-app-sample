@@ -62,12 +62,14 @@ class SelectedOrderComposable {
     }
 
     public async updateQty(item: OrderItem, qty: number): Promise<void> {
+        let uuid: string | null = item.movement;
         if (this.isDesktopMovementRequired()) {
-            item.movement = item.movement ?? Uuid.generateMovementUuid();
-            this.createMovement(item.product?.sku as string, item.movement as string, qty);
+
+            uuid = uuid ?? Uuid.generateMovementUuid();
+            await this.createMovement(item.product?.sku as string, uuid, qty);
         }
 
-        await OrderItemsRepository.setQtyById(item.id as number, qty, item.movement);
+        await OrderItemsRepository.setQtyById(item.id as number, qty, uuid);
         await this.refresh();
     }
 

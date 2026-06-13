@@ -73,6 +73,7 @@ export class HttpClient {
             content: body !== undefined ? JSON.stringify(body) : undefined,
             timeout: this.timeoutMs,
         });
+        console.log('response', response);
 
         if (response.content === undefined) {
             throw new HttpError(response.statusCode, undefined);
